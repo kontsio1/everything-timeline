@@ -18,7 +18,7 @@ const TimelinePeriodMarker: React.FC<TimelinePeriodMarkerProps> = ({ period, x, 
   // labelX is the horizontal center of the period rectangle
   const labelX = rectX + rectWidth / 2;
   // labelY is calculated to keep the label vertically centered relative to the timeline axis
-  const labelY = timelineHeight / 2 + (period.labelY - timelineHeight / 2); // keep label relative to center
+  const labelY = timelineHeight / 2 + rectHeight - 10 // keep label relative to center
     
   return (
     <>
@@ -41,6 +41,7 @@ const TimelinePeriodMarker: React.FC<TimelinePeriodMarkerProps> = ({ period, x, 
         x={labelX}
         y={labelY}
         id={period.label}
+        z={100}
         textAnchor="middle"
         fontSize={12}
         fill="black"

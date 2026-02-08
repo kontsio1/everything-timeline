@@ -77,7 +77,6 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                 const newX = event.transform.rescaleX(xScaleRef.current!);
                 updatePeriods(newX);
                 updateEvents(newX);
-                updateEvents(newX);
             });
         d3.select(svgRef.current).call(zoom);
     }, []);
@@ -174,8 +173,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                         renderInput={(params) => <TextField {...params} label="Search for an event"/>}
                         onChange={props.handleInputChange}
                     />
-                    <Button variant="contained" sx={{flex: "0 0 auto"}}
-                            onClick={(e) => handleZoom(e, new Date(1453, 0, 1))}>Search</Button>
+                    <Button variant="contained" sx={{flex: "0 0 auto"}} onClick={(e) => handleZoom(e, new Date(1453, 0, 1))}>Search</Button>
                 </div>
                 <svg ref={svgRef} width={timelineWidth + 50} height={timelineHeight} style={{background: "#f0f0f0"}}>
                     {/* Render markers/periods first, then axis to bring axis forward in z-order */}
@@ -196,7 +194,6 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                     <g ref={axisRef} transform={`translate(0,${timelineHeight / 2})`}/>
                 </svg>
                 <PeriodTooltip/>
-                {/*<EventTooltip/>*/}
             </div>
         </>
     );

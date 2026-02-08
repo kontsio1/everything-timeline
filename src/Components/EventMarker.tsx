@@ -10,6 +10,9 @@ interface EventMarkerProps {
 }
 
 const EventMarker: React.FC<EventMarkerProps> = ({ event, x }) => {
+  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<SVGSVGElement | null>(null);
+  
   const timelineX = x(event.date);
   const baseY = timelineHeight / 2;
 
@@ -29,11 +32,17 @@ const EventMarker: React.FC<EventMarkerProps> = ({ event, x }) => {
   event.boxWidth = rectWidth;
   event.boxHeight = rectHeight;
   event.boxX = rectX;
+  
+  const handleClick = (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+    console.log("EventMarker clicked", event)
+    setOpen(prev => !prev);
+    setAnchorEl(event.currentTarget);
+  }
 
   return (
     <>
       <svg
-        onClick={() => console.log("EventMarker clicked", event)}
+        onClick={handleClick}
         style={{ cursor: "pointer" }}
       >
         <circle
@@ -43,6 +52,7 @@ const EventMarker: React.FC<EventMarkerProps> = ({ event, x }) => {
           fill={event.colour}
           opacity={event.opacity}
           stroke="black"
+          z={100}
         />
         <line
           x1={timelineX}
@@ -74,6 +84,7 @@ const EventMarker: React.FC<EventMarkerProps> = ({ event, x }) => {
           {event.label}
         </text>
       </svg>
+      <EventTooltip event={event} open={open} anchorEl={anchorEl}/>
     </>
   );
 };
