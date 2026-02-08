@@ -1,0 +1,11 @@
+export const timelineInitialDomain = [new Date(-3200, 0, 1), new Date()]
+export const logScaleExponent = 6 // Exponent for logarithmic scale normalization
+// export const colourSeed = 12.9898
+export const colourSeed = 2.9898 //not used
+export const colourSeedStr = ["kontsio", "god", "programmer"] //heufhe
+export const timelineHeight = window.innerHeight * 0.4;
+export const timelineWidth = window.innerWidth * 0.9;
+export const ticksNo = 10;
+export const noOfVisiblePeriods = 7;
+export const priorityOverlapBonuses = [2, 0.3, 0, -0.25, -0.5] // [0, 0-100, 100-200, 200-200, >300]
+export const eventBoxMargin = 15; // min margin enforced between event boxes for overalap handling
