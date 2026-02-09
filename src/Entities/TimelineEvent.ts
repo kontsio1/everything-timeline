@@ -15,7 +15,8 @@ export class TimelineEvent extends BaseEvent {
     
     constructor(date: number[], label: string, info?: string, colour?: string) { 
         super(label, colour);
-        this.date = new Date(date[0], date[1]??0, date[2]??0);
+        this.date = new Date(0);
+        this.date.setFullYear(date[0], date[1] ?? 0, date[2] ?? 0);
         this.stemHeight = this.defaultHeight;
         this.colour = colour || "#" + Math.floor(stringToUnique01(this.label, 2) * 16777215).toString(16).padStart(6, "0");
         this.info = info || undefined;
