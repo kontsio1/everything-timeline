@@ -11,12 +11,14 @@ export class TimelineEvent extends BaseEvent {
     boxWidth: number = 0;
     boxHeight: number = 0;
     boxX: number = 0;
+    info?: string;
     
-    constructor(date: number[], label: string, colour?: string) {
+    constructor(date: number[], label: string, info?: string, colour?: string) { 
         super(label, colour);
         this.date = new Date(date[0], date[1]??0, date[2]??0);
         this.stemHeight = this.defaultHeight;
         this.colour = colour || "#" + Math.floor(stringToUnique01(this.label, 2) * 16777215).toString(16).padStart(6, "0");
+        this.info = info || undefined;
     }
     public resetStemHeight(): void {
         this.stemHeight = this.defaultHeight;

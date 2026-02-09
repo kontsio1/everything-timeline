@@ -35,8 +35,12 @@ const EventMarker: React.FC<EventMarkerProps> = ({ event, x }) => {
   
   const handleClick = (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
     console.log("EventMarker clicked", event)
-    setOpen(prev => !prev);
     setAnchorEl(event.currentTarget);
+    setOpen(prev => !prev);
+  }
+  
+  const handleClose = () => {
+    setOpen(false);
   }
 
   return (
@@ -84,7 +88,7 @@ const EventMarker: React.FC<EventMarkerProps> = ({ event, x }) => {
           {event.label}
         </text>
       </svg>
-      <EventTooltip event={event} open={open} anchorEl={anchorEl}/>
+      <EventTooltip event={event} open={open} anchorEl={anchorEl} onClose={handleClose}/>
     </>
   );
 };

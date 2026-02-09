@@ -23,7 +23,7 @@ export const seedEvents: TimelineEvent[] = [
     new TimelineEvent([-1274], "Battle of Kadesh"),
     new TimelineEvent([-1213], "Ramesses II death"),
     new TimelineEvent([-1200], "Bronze Age collapse"),
-    new TimelineEvent([-1184], "Fall of Troy"),
+    new TimelineEvent([-1184], "Fall of Troy", "Date is debated, but often placed around 12th century BCE based on archaeological evidence and ancient texts. The traditional date of 1184 BCE comes from the ancient Greek historian Eratosthenes, who calculated it based on the reigns of various kings and events in Greek mythology. However, modern archaeological findings suggest that the actual fall of Troy may have occurred around 1250-1190 BCE. The exact date remains uncertain due to the legendary nature of the event and the lack of definitive historical records."),
     new TimelineEvent([-1122], "Zhou conquest of Shang"),
     new TimelineEvent([-1000], "David conquers Jerusalem"),
     new TimelineEvent([-970], "Solomon's Temple"),

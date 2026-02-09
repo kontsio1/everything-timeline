@@ -33,7 +33,8 @@ const useStyles = makeStyles({
 });
 
 interface TimelineComponentProps {
-    handleInputChange: (event: SyntheticEvent, newValue: TimelineEvent[]) => void;
+    handleInputChange: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
+    inputValue?: TimelineEvent;
     handleSearch: () => void;
 }
 
@@ -128,7 +129,8 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         setVisiblePeriods(periodsByStartDate);
     };
 
-    const handleZoom = (_event: any, date?: Date) => {
+    const searchAndZoom = () => {
+        var date = props.inputValue?.date
         const xScale = xScaleRef.current;
         if (date && xScale && svgRef.current) {
             // Calculate the x position of the selected date
@@ -167,13 +169,13 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
             <div className={classes.timelineContainer}>
                 <div style={{display: "flex", gap: 10, marginBottom: 10}}>
                     <Autocomplete
-                        multiple={true}
+                        multiple={false}
                         sx={{flex: 1}}
                         options={events.map((e) => e)}
                         renderInput={(params) => <TextField {...params} label="Search for an event"/>}
                         onChange={props.handleInputChange}
                     />
-                    <Button variant="contained" sx={{flex: "0 0 auto"}} onClick={(e) => handleZoom(e, new Date(1453, 0, 1))}>Search</Button>
+                    <Button variant="contained" sx={{flex: "0 0 auto"}} onClick={searchAndZoom}>Search</Button>
                 </div>
                 <svg ref={svgRef} width={timelineWidth + 50} height={timelineHeight} style={{background: "#f0f0f0"}}>
                     {/* Render markers/periods first, then axis to bring axis forward in z-order */}
