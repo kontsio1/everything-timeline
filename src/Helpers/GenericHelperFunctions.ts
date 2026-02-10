@@ -1,8 +1,6 @@
 import * as d3 from "d3";
 import {TimelinePeriod} from "../Entities/TimelinePeriod";
 import {TimelineEvent} from "../Entities/TimelineEvent";
-import {count} from "d3";
-import {seedEvents} from "../Constants/SeedEvents";
 import {eventBoxMargin} from "../Constants/GlobalConfigConstants";
 
 export function moreYellow(colour: string) {
@@ -66,7 +64,7 @@ export function computeRelativePeriodOverlaps(periods: TimelinePeriod[]): Period
 }
 
 export function computeRelativePeriodForEvent(event: TimelineEvent) {
-    const events = seedEvents;
+    const events: TimelineEvent[] = [];
     let isOverlapping = false;
 
         let a = event;

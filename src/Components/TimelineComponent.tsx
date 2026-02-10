@@ -1,6 +1,5 @@
 import * as d3 from "d3";
 import React, {forwardRef, SyntheticEvent, useEffect, useImperativeHandle, useRef, useState} from "react";
-import {seedEvents, seedPeriods} from "../Constants/SeedEvents";
 import {
     ticksNo,
     timelineHeight,
@@ -36,6 +35,10 @@ interface TimelineComponentProps {
     handleInputChange: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
     inputValue?: TimelineEvent;
     handleSearch: () => void;
+    handleDatabaseChange: (event: SyntheticEvent, value: string | null) => void;
+    events: TimelineEvent[];
+    periods: TimelinePeriod[];
+    databaseOptions: string[];
 }
 
 export interface TimelineComponentHandle {
@@ -44,6 +47,7 @@ export interface TimelineComponentHandle {
 
 export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineComponentProps>((props, ref) => {
     const classes = useStyles();
+    const {events, periods} = props;
     const svgRef = useRef<SVGSVGElement>(null); // SVG ref for React-managed SVG
     const axisRef = useRef<SVGGElement>(null);
     const xScaleRef = useRef<d3.ScaleTime<number, number, never> | null>(null);
@@ -80,7 +84,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                 updateEvents(newX);
             });
         d3.select(svgRef.current).call(zoom);
-    }, []);
+    }, [events]);
 
     // Update axis ticks on transform/scale change
     useEffect(() => {
@@ -100,8 +104,6 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         return d3Transform.rescaleX(baseScale);
     };
 
-    const events: TimelineEvent[] = seedEvents;
-    const periods: TimelinePeriod[] = seedPeriods;
     computeRelativePeriodOverlaps(periods);
 
     const updateEvents = (newX: d3.ScaleTime<number, number, never>) => {
@@ -168,6 +170,13 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
             <h1>Timeline of Everything</h1>
             <div className={classes.timelineContainer}>
                 <div style={{display: "flex", gap: 10, marginBottom: 10}}>
+                    <Autocomplete
+                        multiple={false}
+                        sx={{flex: 0.5}}
+                        options={props.databaseOptions}
+                        renderInput={(params) => <TextField {...params} label="Select a database"/>}
+                        onChange={props.handleDatabaseChange}
+                    />
                     <Autocomplete
                         multiple={false}
                         sx={{flex: 1}}
