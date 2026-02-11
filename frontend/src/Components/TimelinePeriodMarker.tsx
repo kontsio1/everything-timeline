@@ -5,13 +5,10 @@ import { timelineHeight } from "../Constants/GlobalConfigConstants";
 interface TimelinePeriodMarkerProps {
   period: TimelinePeriod;
   x: (date: Date) => number;
-  onMouseOver?: (event: React.MouseEvent<SVGRectElement | SVGTextElement>, data: TimelinePeriod) => void;
-  onMouseMove?: (event: React.MouseEvent<SVGRectElement | SVGTextElement>, data: TimelinePeriod) => void;
-  onMouseOut?: (event: React.MouseEvent<SVGRectElement | SVGTextElement>, data: TimelinePeriod) => void;
   onClick?: (event: React.MouseEvent<SVGRectElement | SVGTextElement>, data: TimelinePeriod) => void;
 }
 
-const TimelinePeriodMarker: React.FC<TimelinePeriodMarkerProps> = ({ period, x, onMouseOver, onMouseMove, onMouseOut, onClick }) => {
+const TimelinePeriodMarker: React.FC<TimelinePeriodMarkerProps> = ({ period, x, onClick }) => {
   const rectX = x(period.startDate);
   const rectWidth = x(period.endDate) - x(period.startDate);
   const rectHeight = period.height;
@@ -31,9 +28,9 @@ const TimelinePeriodMarker: React.FC<TimelinePeriodMarkerProps> = ({ period, x, 
         fill={period.colour}
         opacity={period.opacity}
         id={period.label}
-        onMouseOver={e => onMouseOver?.(e, period)}
-        onMouseMove={e => onMouseMove?.(e, period)}
-        onMouseOut={e => onMouseOut?.(e, period)}
+        onMouseOver={e => console.log("over")}
+        onMouseMove={e =>  console.log("move")}
+        onMouseOut={e => console.log("out")}
         onClick={e => onClick?.(e, period)}
       />
       <text
@@ -46,9 +43,9 @@ const TimelinePeriodMarker: React.FC<TimelinePeriodMarkerProps> = ({ period, x, 
         fontSize={12}
         fill="black"
         style={{ cursor: "default" }}
-        onMouseOver={e => onMouseOver?.(e, period)}
-        onMouseMove={e => onMouseMove?.(e, period)}
-        onMouseOut={e => onMouseOut?.(e, period)}
+        // onMouseOver={e => onMouseOver?.(e, period)}
+        // onMouseMove={e => onMouseMove?.(e, period)}
+        // onMouseOut={e => onMouseOut?.(e, period)}
       >
         {period.label}
       </text>
