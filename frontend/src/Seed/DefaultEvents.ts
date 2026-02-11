@@ -73,6 +73,7 @@ export const DefaultEvents: SeedEventsData = {
             new TimelineEvent([1789], "French Revolution Begins"),
             new TimelineEvent([1969], "Moon Landing"),
             new TimelineEvent([2000], "Kostas Birthday"),
+            new TimelineEvent([2000], "Puppy Birthday"),
             new TimelineEvent([2003], "Anastasia Birthday")
         ]
 }
