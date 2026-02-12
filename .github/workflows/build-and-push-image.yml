@@ -1,5 +1,5 @@
 on: [push]
-name: Linux_Container_Workflow
+name: Deploy to ACI
 
 jobs:
   build-and-deploy:
