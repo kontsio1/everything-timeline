@@ -35,4 +35,4 @@ jobs:
           registry-password: ${{ secrets.REGISTRY_PASSWORD }}
           name: aci-everything-app
           location: 'west us'
-          ports: 3000
+          ports: 8080
