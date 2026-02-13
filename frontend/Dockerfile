@@ -36,9 +36,8 @@ COPY --chown=nginx:nginx --from=builder /app/build /usr/share/nginx/html
 # Use a built-in non-root user for security best practices
 USER nginx
 
-# Expose port 80 to allow HTTP traffic
-# Note: The default NGINX container now listens on port 8080 instead of 80
-EXPOSE 80
+# Expose port 8080 to allow HTTP traffic
+EXPOSE 8080
 
 # Start Nginx directly with custom config
 ENTRYPOINT ["nginx", "-c", "/etc/nginx/nginx.conf"]
