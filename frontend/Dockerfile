@@ -1,18 +1,46 @@
-# Use official Node.js image
-FROM node:23
+# =========================================
+# Stage 1: Build the React.js Application
+# =========================================
+ARG NGINX_VERSION=alpine3.22
 
-# Set working directory
+# Use a lightweight Node.js image for building (customizable via ARG)
+FROM node:23 AS builder
+
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy package-related files first to leverage Docker's caching mechanism
 COPY package.json package-lock.json* ./
-RUN npm ci
 
-# Copy the rest of the application source code
+# Install project dependencies using npm ci (ensures a clean, reproducible install)
+RUN --mount=type=cache,target=/root/.npm npm ci
+
+# Copy the rest of the application source code into the container
 COPY . .
 
-# Expose the React dev server port
-EXPOSE 3000
+# Build the React.js application (outputs to /app/dist)
+RUN npm run build
 
-# Start the React development server
-CMD ["npm", "start"]
+# =========================================
+# Stage 2: Prepare Nginx to Serve Static Files
+# =========================================
+
+FROM nginxinc/nginx-unprivileged:${NGINX_VERSION} AS runner
+
+# Copy custom Nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy the static build output from the build stage to Nginx's default HTML serving directory
+COPY --chown=nginx:nginx --from=builder /app/build /usr/share/nginx/html
+
+# Use a built-in non-root user for security best practices
+USER nginx
+
+# Expose port 8080 to allow HTTP traffic
+# Note: The default NGINX container now listens on port 8080 instead of 80
+EXPOSE 8080
+
+# Start Nginx directly with custom config
+ENTRYPOINT ["nginx", "-c", "/etc/nginx/nginx.conf"]
+CMD ["-g", "daemon off;"]
+
