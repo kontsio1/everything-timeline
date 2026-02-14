@@ -5,12 +5,12 @@ import {
     timelineHeight,
     timelineInitialDomain,
     timelineWidth,
-    noOfVisiblePeriods
+    noOfVisiblePeriods, timelineTopEventsMargin, horizontalPaddingOfTimeline
 } from "../Constants/GlobalConfigConstants";
 import {TimelinePeriod} from "../Entities/TimelinePeriod";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import {
-    computeEventsBBoxOverlaps,
+    computeEventPositionByLaneStrategy,
     computeRelativePeriodOverlaps,
     getYearLabel
 } from "../Helpers/GenericHelperFunctions";
@@ -56,8 +56,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     const [visibleEvents, setVisibleEvents] = useState<TimelineEvent[]>([]);
     const [visiblePeriods, setVisiblePeriods] = useState<TimelinePeriod[]>([]);
     const [transform, setTransform] = useState<{ x: number, k: number }>({x: 0, k: 1}); //x axis panning & scale/zoom state
-
-    const horizontalPaddingOfTimeline = timelineWidth*0.05; // horizontal distance between the left edge of the timeline rectangle (SVG) and the start of the timeline, also applied to the right edge
+    
     const formatTicks = (domainValue: any) => {
         const date = domainValue instanceof Date ? domainValue : new Date(Number(domainValue));
         const year = date.getUTCFullYear();
@@ -126,21 +125,11 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     };
 
     const updateEvents = (newX: d3.ScaleTime<number, number, never>) => {
-        // Always recalculate boxX/boxWidth for all events
         recalculateEventBoxes(events, newX);
         const [domainStart, domainEnd] = newX.domain();
-        events.forEach(p => p.resetStemHeight());
         const eventsInDomain = events.filter(p => p.date >= domainStart && p.date <= domainEnd);
-        let filteredEvents = [...eventsInDomain];
-        for (let i = 0; i < 2; i++) {
-            computeEventsBBoxOverlaps(filteredEvents);
-            computeEventsBBoxOverlaps(filteredEvents);
-            filteredEvents = eventsInDomain.filter(e => e.stemHeight < timelineHeight / 2 - timelineHeight*0.1);
-        }
-        // const eventsWithBoxInsideTimeline = filteredEvents.filter(e => {
-        //     // console.log(`Event: ${e.label}, boxX: ${e.boxX}, boxWidth: ${e.boxWidth}`);
-        //     return e.boxX >= 0 && (e.boxX + e.boxWidth) <= timelineWidth;
-        // });
+        computeEventPositionByLaneStrategy(eventsInDomain);
+        let filteredEvents = eventsInDomain.filter(e => e.stemHeight != -1);
         setVisibleEvents(filteredEvents);
     };
     const updatePeriods = (newX: d3.ScaleTime<number, number, never>) => {
