@@ -137,11 +137,11 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
             computeEventsBBoxOverlaps(filteredEvents);
             filteredEvents = eventsInDomain.filter(e => e.stemHeight < timelineHeight / 2 - timelineHeight*0.1);
         }
-        const eventsWithBoxInsideTimeline = filteredEvents.filter(e => {
-            // console.log(`Event: ${e.label}, boxX: ${e.boxX}, boxWidth: ${e.boxWidth}`);
-            return e.boxX >= 0 && (e.boxX + e.boxWidth) <= timelineWidth;
-        });
-        setVisibleEvents(eventsWithBoxInsideTimeline);
+        // const eventsWithBoxInsideTimeline = filteredEvents.filter(e => {
+        //     // console.log(`Event: ${e.label}, boxX: ${e.boxX}, boxWidth: ${e.boxWidth}`);
+        //     return e.boxX >= 0 && (e.boxX + e.boxWidth) <= timelineWidth;
+        // });
+        setVisibleEvents(filteredEvents);
     };
     const updatePeriods = (newX: d3.ScaleTime<number, number, never>) => {
         const [domainStart, domainEnd] = newX.domain();
