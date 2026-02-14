@@ -78,7 +78,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         if (!svgRef.current) return;
         const zoom = d3.zoom<SVGSVGElement, unknown>()
             .scaleExtent([1, 1000])
-            .translateExtent([[50, 0], [timelineWidth - 50, 0]])
+            .translateExtent([[horizontalPaddingOfTimeline, 0], [timelineWidth - horizontalPaddingOfTimeline, 0]])
             .extent([[50, 0], [timelineWidth - 50, timelineHeight]])
             .on("zoom", (event) => {
                 setTransform({x: event.transform.x, k: event.transform.k});
@@ -109,7 +109,25 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
 
     computeRelativePeriodOverlaps(periods);
 
+    // Helper to recalculate boxX/boxWidth for all events
+    const recalculateEventBoxes = (events: TimelineEvent[], xScale: d3.ScaleTime<number, number, never>) => {
+        const padding = 4;
+        const fontSize = 12;
+        events.forEach(event => {
+            const timelineX = xScale(event.date);
+            const textWidth = event.label.length * fontSize * 0.6;
+            const rectWidth = textWidth + padding * 2;
+            const rectHeight = fontSize + padding * 2;
+            const rectX = timelineX - textWidth / 2 - padding;
+            event.boxWidth = rectWidth;
+            event.boxHeight = rectHeight;
+            event.boxX = rectX;
+        });
+    };
+
     const updateEvents = (newX: d3.ScaleTime<number, number, never>) => {
+        // Always recalculate boxX/boxWidth for all events
+        recalculateEventBoxes(events, newX);
         const [domainStart, domainEnd] = newX.domain();
         events.forEach(p => p.resetStemHeight());
         const eventsInDomain = events.filter(p => p.date >= domainStart && p.date <= domainEnd);
@@ -119,11 +137,11 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
             computeEventsBBoxOverlaps(filteredEvents);
             filteredEvents = eventsInDomain.filter(e => e.stemHeight < timelineHeight / 2 - timelineHeight*0.1);
         }
-        // const eventsWithBoxInsideTimeline = filteredEvents.filter(e => {
-        //     console.log(`Event: ${e.label}, boxX: ${e.boxX}, boxWidth: ${e.boxWidth}`);
-        //     return e.boxX >= 0 && (e.boxX + e.boxWidth) <= timelineWidth;
-        // });
-        setVisibleEvents(filteredEvents);
+        const eventsWithBoxInsideTimeline = filteredEvents.filter(e => {
+            // console.log(`Event: ${e.label}, boxX: ${e.boxX}, boxWidth: ${e.boxWidth}`);
+            return e.boxX >= 0 && (e.boxX + e.boxWidth) <= timelineWidth;
+        });
+        setVisibleEvents(eventsWithBoxInsideTimeline);
     };
     const updatePeriods = (newX: d3.ScaleTime<number, number, never>) => {
         const [domainStart, domainEnd] = newX.domain();
