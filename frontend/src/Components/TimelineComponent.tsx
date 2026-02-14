@@ -56,7 +56,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     const [visibleEvents, setVisibleEvents] = useState<TimelineEvent[]>([]);
     const [visiblePeriods, setVisiblePeriods] = useState<TimelinePeriod[]>([]);
     const [transform, setTransform] = useState<{ x: number, k: number }>({x: 0, k: 1}); //x axis panning & scale/zoom state
-    
+
     const formatTicks = (domainValue: any) => {
         const date = domainValue instanceof Date ? domainValue : new Date(Number(domainValue));
         const year = date.getUTCFullYear();
@@ -145,37 +145,45 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         setVisiblePeriods(periodsByStartDate);
     };
 
-    const searchAndZoom = () => {
+    const searchAndZoom = async () => {
         var date = props.inputValue?.date
         const xScale = xScaleRef.current;
-        if (date && xScale && svgRef.current) {
-            // Calculate the x position of the selected date
-            const targetX = xScale(date);
-            // Center of the axis in the SVG
-            const centerX = (timelineWidth + 50) / 2;
-            // Choose a zoom level (can be made configurable)
-            const zoomLevel = 7;
-            // Calculate translation so the date is centered after zoom
-            const translateX = centerX - targetX * zoomLevel;
-            // Create the target zoom transform
-            const targetTransform = d3.zoomIdentity.translate(translateX, 0).scale(zoomLevel);
-            // Use the already-attached zoom behavior
-            const svgSelection = d3.select(svgRef.current);
-            const zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
-                .scaleExtent([1, 1000])
-                .translateExtent([[50, 0], [timelineWidth - 50, 0]])
-                .extent([[50, 0], [timelineWidth - 50, timelineHeight]])
-                .on("zoom", (event) => {
-                    setTransform({x: event.transform.x, k: event.transform.k});
-                    const newX = event.transform.rescaleX(xScaleRef.current!);
-                    updatePeriods(newX);
-                    updateEvents(newX);
-                });
-            svgSelection.call(zoomBehavior);
-            // Animate the zoom using d3's transition and zoomBehavior.transform
-            svgSelection.transition()
-                .duration(1200)
-                .call(zoomBehavior.transform, targetTransform);
+        if (props.inputValue != undefined) {
+            if (date && xScale && svgRef.current) {
+                let extraZoom = 0
+                let searchedEvent = events.find(p => p.label === props.inputValue?.label);
+                do {
+                    // Calculate the x position of the selected date
+                    const targetX = xScale(date);
+                    // Center of the axis in the SVG
+                    const centerX = (timelineWidth + 50) / 2;
+                    // Choose a zoom level (can be made configurable)
+                    const zoomLevel = 7 + extraZoom;
+                    // Calculate translation so the date is centered after zoom
+                    const translateX = centerX - targetX * zoomLevel;
+                    // Create the target zoom transform
+                    const targetTransform = d3.zoomIdentity.translate(translateX, 0).scale(zoomLevel);
+                    // Use the already-attached zoom behavior
+                    const svgSelection = d3.select(svgRef.current);
+                    const zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
+                        .scaleExtent([1, 1000])
+                        .translateExtent([[horizontalPaddingOfTimeline, 0], [timelineWidth - horizontalPaddingOfTimeline, 0]])
+                        .extent([[50, 0], [timelineWidth - 50, timelineHeight]])
+                        .on("zoom", (event) => {
+                            setTransform({x: event.transform.x, k: event.transform.k});
+                            const newX = event.transform.rescaleX(xScaleRef.current!);
+                            updatePeriods(newX);
+                            updateEvents(newX);
+                        });
+                    svgSelection.call(zoomBehavior);
+                    // Animate the zoom using d3's transition and zoomBehavior.transform
+                    svgSelection.transition()
+                        .duration(1200)
+                        .call(zoomBehavior.transform, targetTransform);
+                    await new Promise(resolve => setTimeout(resolve, 1200)); // Wait for transition
+                    extraZoom+=7;
+                } while (searchedEvent?.stemHeight == -1)
+            }
         }
     };
 

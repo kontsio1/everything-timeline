@@ -83,13 +83,11 @@ export function computeEventPositionByLaneStrategy(events: TimelineEvent[]): voi
     
     lanesHeights.forEach((laneH) => {
         let cursorX = 0;
-        var eventsInLane = events.filter(e => e.stemHeight == -1);
-        console.log( "laneH:", laneH,"eventsInLane", eventsInLane);
+        const eventsInLane = events.filter(e => e.stemHeight == -1);
         eventsInLane.forEach(e => {
             const boxStart = e.boxX;
             const boxEnd = e.boxX + e.boxWidth;
             if(boxStart > cursorX && boxEnd < timelineEnd) {
-                console.log(`Placing ${e.label} at lane height: ${lanesHeights[0]}`);
                 e.stemHeight = laneH;
                 cursorX = boxEnd + eventBoxMargin;
             }
