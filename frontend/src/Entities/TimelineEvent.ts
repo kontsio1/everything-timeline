@@ -10,6 +10,7 @@ export class TimelineEvent extends BaseEvent {
     defaultHeight: number = 50;
     boxWidth: number = 0;
     boxHeight: number = 0;
+    //left edge of the box, used for tooltip positioning
     boxX: number = 0;
     info?: string;
     

@@ -35,7 +35,7 @@ export class TimelinePeriod extends BaseEvent {
         return normalizeForDuration.logScale(this.duration);
     }
     private getHeight(): number {
-        const minHeight = 5, maxHeight = 350;
+        const minHeight = timelineHeight*0.08, maxHeight = timelineHeight*0.4;
         const normalizeForDuration = new LogarithmicScaleHelper(this.minDuration, this.maxDuration, minHeight, maxHeight)
         return normalizeForDuration.logScale(this.duration);
     }

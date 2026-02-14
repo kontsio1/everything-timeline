@@ -31,11 +31,12 @@ const EventMarker: React.FC<EventMarkerProps> = ({ event, x }) => {
   
   event.boxWidth = rectWidth;
   event.boxHeight = rectHeight;
+  //left edge of the box, used for tooltip positioning
   event.boxX = rectX;
   
-  const handleClick = (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-    console.log("EventMarker clicked", event)
-    setAnchorEl(event.currentTarget);
+  const handleClick = (clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+    console.log("EventMarker clicked", event.boxX)
+    setAnchorEl(clickEvent.currentTarget);
     setOpen(prev => !prev);
   }
   

@@ -21,6 +21,7 @@ import {Button, TextField} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import TimelinePeriodMarker from "./TimelinePeriodMarker";
 import EventMarker from "./EventMarker";
+import {svg} from "d3";
 
 const useStyles = makeStyles({
     timelineContainer: {
@@ -56,6 +57,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     const [visiblePeriods, setVisiblePeriods] = useState<TimelinePeriod[]>([]);
     const [transform, setTransform] = useState<{ x: number, k: number }>({x: 0, k: 1}); //x axis panning & scale/zoom state
 
+    const horizontalPaddingOfTimeline = timelineWidth*0.05; // horizontal distance between the left edge of the timeline rectangle (SVG) and the start of the timeline, also applied to the right edge
     const formatTicks = (domainValue: any) => {
         const date = domainValue instanceof Date ? domainValue : new Date(Number(domainValue));
         const year = date.getUTCFullYear();
@@ -66,7 +68,8 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     useEffect(() => {
         const x = d3.scaleTime()
             .domain(timelineInitialDomain)
-            .range([100, timelineWidth - 50])
+            //horizontal distance between the left edge of the timeline rectangle (SVG) and the start of the timeline
+            .range([horizontalPaddingOfTimeline, timelineWidth - horizontalPaddingOfTimeline])
             .clamp(true);
         xScaleRef.current = x;
         setTransform({x: 0, k: 1});
@@ -114,8 +117,12 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         for (let i = 0; i < 2; i++) {
             computeEventsBBoxOverlaps(filteredEvents);
             computeEventsBBoxOverlaps(filteredEvents);
-            filteredEvents = eventsInDomain.filter(e => e.stemHeight < timelineHeight / 2 - 70);
+            filteredEvents = eventsInDomain.filter(e => e.stemHeight < timelineHeight / 2 - timelineHeight*0.1);
         }
+        // const eventsWithBoxInsideTimeline = filteredEvents.filter(e => {
+        //     console.log(`Event: ${e.label}, boxX: ${e.boxX}, boxWidth: ${e.boxWidth}`);
+        //     return e.boxX >= 0 && (e.boxX + e.boxWidth) <= timelineWidth;
+        // });
         setVisibleEvents(filteredEvents);
     };
     const updatePeriods = (newX: d3.ScaleTime<number, number, never>) => {
@@ -186,7 +193,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                     />
                     <Button variant="contained" sx={{flex: "0 0 auto"}} onClick={searchAndZoom}>Search</Button>
                 </div>
-                <svg ref={svgRef} width={timelineWidth + 50} height={timelineHeight} style={{background: "#f0f0f0"}}>
+                <svg ref={svgRef} width="90vw" height="70vh" style={{background: "#f0f0f0"}}>
                     {/* Render markers/periods first, then axis to bring axis forward in z-order */}
                     {visiblePeriods.map(period => (
                         <TimelinePeriodMarker
