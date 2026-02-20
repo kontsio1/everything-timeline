@@ -156,7 +156,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                     // Calculate the x position of the selected date
                     const targetX = xScale(date);
                     // Center of the axis in the SVG
-                    const centerX = (timelineWidth + 50) / 2;
+                    const centerX = timelineWidth / 2;
                     // Choose a zoom level (can be made configurable)
                     const zoomLevel = 7 + extraZoom;
                     // Calculate translation so the date is centered after zoom
@@ -181,7 +181,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                         .duration(1200)
                         .call(zoomBehavior.transform, targetTransform);
                     await new Promise(resolve => setTimeout(resolve, 1200)); // Wait for transition
-                    extraZoom+=7;
+                    extraZoom+=14;
                 } while (searchedEvent?.stemHeight == -1)
             }
         }

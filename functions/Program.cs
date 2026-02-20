@@ -14,7 +14,7 @@ builder.ConfigureFunctionsWebApplication();
 builder.Services.AddDbContext<DbContext>(options =>
 {
     var connectionString = Environment.GetEnvironmentVariable("SqlConnectionString") ?? builder.Configuration.GetConnectionString("SqlConnectionString");
-    options.UseSqlServer(connectionString);
+    options.UseSqlServer(connectionString, sqlOptions => { sqlOptions.EnableRetryOnFailure(); });
 });
 
 // Services

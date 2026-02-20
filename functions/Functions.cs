@@ -10,7 +10,7 @@ namespace everything_timeline
     public class Functions(ILogger<Functions> logger, IRepository repository)
     {
         [Function("Test")]
-        public IActionResult TestFunction([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+        public IActionResult TestFunction([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
         {
             logger.LogInformation("C# HTTP trigger function processed a request.");
             return new OkObjectResult("Welcome to Azure Functions!");
@@ -18,7 +18,7 @@ namespace everything_timeline
 
         [Function("GetEvents")]
         public async Task<HttpResponseData> GetEvents(
-            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
             var response = req.CreateResponse();
             response.Headers.Add("Content-Type", "application/json");
@@ -65,7 +65,7 @@ namespace everything_timeline
 
         [Function("AddEvent")]
         public async Task<HttpResponseData> AddEvents(
-            [HttpTrigger(AuthorizationLevel.Function, "post")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post")]
             HttpRequestData req)
         {
             var response = req.CreateResponse();
