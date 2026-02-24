@@ -3,7 +3,7 @@
   background-color: var(--ink);
   min-height: 100vh;
   width: 100vw;
-  overflow: var(--parchment);
+  overflow: auto;
 }
 
 .App-logo {
@@ -56,4 +56,10 @@
   --era-2: #4a3728;
   --era-3: #2a3d52;
   --era-4: #3d2a4a;
+}
+
+/* Ensure scroll background is always --ink */
+html, body {
+  background-color: var(--ink);
+  overflow: auto;
 }

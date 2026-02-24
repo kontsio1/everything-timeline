@@ -15,6 +15,7 @@ export const timelineTopEventsMargin = timelineHeight*0.1
 
 export const bgColor = "#0f0e0b"
 export const txtColor = "#f5f0e8"
+export const txtColor2 = "#9aa5b4"
 
 // --ink: #0f0e0b;
 // --parchment: #f5f0e8;

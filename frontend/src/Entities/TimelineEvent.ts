@@ -4,7 +4,7 @@ import {defaultEventStemHeight} from "../Constants/GlobalConfigConstants";
 
 export class TimelineEvent extends BaseEvent {
     date: Date;
-    opacity: number = 0.3
+    opacity: number = 0.5;
     colour: string
     stemHeight: number
     radius: number = 6

@@ -80,7 +80,7 @@ export const Header = () => {
                         fontWeight: 700,
                         letterSpacing: '-0.5px',
                         color: '#f5f0e8',
-                    }}>Kontsio</span>
+                    }}>Kontsio's</span>
 
                     <div className="logo-dot" style={{
                         width: '6px',
@@ -102,7 +102,8 @@ export const Header = () => {
                 <div className="controls" style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
+                    gap: "1vw",
+                    marginBottom: 10
                 }}>
                     <div className="db-select" style={{ position: 'relative' }}>
                         <select>

@@ -94,13 +94,14 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         if (axisRef.current && xScale) {
             d3.select(axisRef.current)
                 .call(d3.axisBottom(xScale)
-                    .ticks(ticksNo)
+                    .ticks(ticksNo) 
                     .tickFormat(formatTicks));
             d3.select(axisRef.current).selectAll(".domain")
                 .attr("stroke", `url(#${axisGradientId})`)
                 .attr("stroke-width", 3);
             d3.select(axisRef.current).selectAll(".tick text")
-                .attr("fill", txtColor);
+                .attr("fill", txtColor)
+                .attr("dy", "1.71em");
             d3.select(axisRef.current).selectAll(".tick line")
                 .attr("stroke", txtColor);
         }

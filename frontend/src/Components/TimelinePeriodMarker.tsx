@@ -1,6 +1,6 @@
 import React from "react";
 import { TimelinePeriod } from "../Entities/TimelinePeriod";
-import {timelineHeight, timelineWidth} from "../Constants/GlobalConfigConstants";
+import {timelineHeight, timelineWidth, txtColor2} from "../Constants/GlobalConfigConstants";
 
 interface TimelinePeriodMarkerProps {
   period: TimelinePeriod;
@@ -26,7 +26,7 @@ const TimelinePeriodMarker: React.FC<TimelinePeriodMarkerProps> = ({ period, x, 
         width={rectWidth}
         height={rectHeight}
         fill={period.colour}
-        opacity={period.opacity}
+        opacity={period.opacity * 0.3}
         id={period.label}
         onMouseOver={e => console.log("over")}
         onMouseMove={e =>  console.log("move")}
@@ -40,8 +40,8 @@ const TimelinePeriodMarker: React.FC<TimelinePeriodMarkerProps> = ({ period, x, 
         id={period.label}
         z={100}
         textAnchor="middle"
-        fontSize={(rectWidth > timelineWidth*0.02) ? 12 : 0}
-        fill="black"
+        fontSize={(rectWidth > timelineWidth*0.03) ? 12 : 0}
+        fill={txtColor2}
         style={{ cursor: "default" }}
         // onMouseOver={e => onMouseOver?.(e, period)}
         // onMouseMove={e => onMouseMove?.(e, period)}
