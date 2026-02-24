@@ -40,7 +40,7 @@ const TimelinePeriodMarker: React.FC<TimelinePeriodMarkerProps> = ({ period, x, 
         id={period.label}
         z={100}
         textAnchor="middle"
-        fontSize={(rectWidth > timelineWidth*0.03) ? 12 : 0}
+        fontSize={(rectWidth > timelineWidth*0.04) ? 12 : 0}
         fill={txtColor2}
         style={{ cursor: "default" }}
         // onMouseOver={e => onMouseOver?.(e, period)}
