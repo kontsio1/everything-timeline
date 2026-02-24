@@ -32,12 +32,8 @@ export const TimelinePage = () => {
     
     // Test API call handlers
     const handleTestFunction = async () => {
-        try {
             const result = await testFunction();
-            alert("TestFunction result: " + JSON.stringify(result));
-        } catch (err) {
-            alert("TestFunction error: " + err);
-        }
+            console.log("TestFunction result: " + JSON.stringify(result));
     };
     const handleGetEvents = async () => {
         try {

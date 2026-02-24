@@ -59,7 +59,6 @@ export const Header = () => {
 
             <header className="App-header" style={{
                 display: 'flex',
-                minHeight: '10vh',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 position: 'sticky',

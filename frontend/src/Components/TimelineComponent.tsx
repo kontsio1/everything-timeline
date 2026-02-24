@@ -5,7 +5,7 @@ import {
     timelineHeight,
     timelineInitialDomain,
     timelineWidth,
-    noOfVisiblePeriods, timelineTopEventsMargin, horizontalPaddingOfTimeline
+    noOfVisiblePeriods, timelineTopEventsMargin, horizontalPaddingOfTimeline, bgColor, txtColor
 } from "../Constants/GlobalConfigConstants";
 import {TimelinePeriod} from "../Entities/TimelinePeriod";
 import {TimelineEvent} from "../Entities/TimelineEvent";
@@ -96,6 +96,13 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                 .call(d3.axisBottom(xScale)
                     .ticks(ticksNo)
                     .tickFormat(formatTicks));
+            d3.select(axisRef.current).selectAll(".domain")
+                .attr("stroke", `url(#${axisGradientId})`)
+                .attr("stroke-width", 3);
+            d3.select(axisRef.current).selectAll(".tick text")
+                .attr("fill", txtColor);
+            d3.select(axisRef.current).selectAll(".tick line")
+                .attr("stroke", txtColor);
         }
     }, [transform, visibleEvents, visiblePeriods]);
 
@@ -187,9 +194,11 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         }
     };
 
+    // Add gradient definition for tick stems and axis line
+    const axisGradientId = "axis-bar-gradient";
+
     return (
         <>
-            <h1>Timeline of Everything</h1>
             <div className={classes.timelineContainer}>
                 <div style={{display: "flex", gap: 10, marginBottom: 10}}>
                     <Autocomplete
@@ -208,7 +217,16 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                     />
                     <Button variant="contained" sx={{flex: "0 0 auto"}} onClick={searchAndZoom}>Search</Button>
                 </div>
-                <svg ref={svgRef} width="90vw" height="70vh" style={{background: "#f0f0f0"}}>
+                <svg ref={svgRef} width="90vw" height="70vh" style={{background: bgColor}}>
+                    {/* Gradient definitions for tick stems and axis line */}
+                    <defs>
+                        <linearGradient id={axisGradientId} x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="transparent" />
+                            <stop offset="5%" stopColor={txtColor} stopOpacity="0.15" />
+                            <stop offset="95%" stopColor={txtColor} stopOpacity="0.15" />
+                            <stop offset="100%" stopColor="transparent" />
+                        </linearGradient>
+                    </defs>
                     {/* Render markers/periods first, then axis to bring axis forward in z-order */}
                     {visiblePeriods.map(period => (
                         <TimelinePeriodMarker

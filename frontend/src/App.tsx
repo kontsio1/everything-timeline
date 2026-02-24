@@ -5,7 +5,7 @@ import {bgColor} from "./Constants/GlobalConfigConstants";
 
 function App() {
   return (
-    <div className="App" style={{backgroundColor: bgColor, height: '100vh'}}>
+    <div className="App">
         <TimelinePage/>
     </div>
   );

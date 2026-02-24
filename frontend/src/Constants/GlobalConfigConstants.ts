@@ -14,7 +14,7 @@ export const horizontalPaddingOfTimeline = timelineWidth*0.05; // horizontal dis
 export const timelineTopEventsMargin = timelineHeight*0.1
 
 export const bgColor = "#0f0e0b"
-export const txtColor = "#0f0e0b"
+export const txtColor = "#f5f0e8"
 
 // --ink: #0f0e0b;
 // --parchment: #f5f0e8;
