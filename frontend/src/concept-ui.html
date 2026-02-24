@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronos — Timeline of Everything</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0f0e0b;
+            --parchment: #f5f0e8;
+            --aged: #e8dfc8;
+            --rust: #c45c2e;
+            --gold: #b8963e;
+            --slate: #4a5568;
+            --mist: #9aa5b4;
+            --era-1: #2d4a3e;
+            --era-2: #4a3728;
+            --era-3: #2a3d52;
+            --era-4: #3d2a4a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--ink);
+            color: var(--parchment);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.6;
+        }
+
+        /* ── Header ── */
+        header {
+            padding: 28px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            position: sticky;
+            top: 0;
+            background: rgba(15,14,11,0.92);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .logo-word {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--parchment);
+        }
+
+        .logo-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--rust);
+            margin-bottom: 3px;
+        }
+
+        .logo-sub {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            color: var(--mist);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .db-select {
+            position: relative;
+        }
+
+        .db-select select {
+            appearance: none;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: var(--parchment);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            padding: 9px 36px 9px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .db-select select:hover { border-color: rgba(255,255,255,0.25); }
+        .db-select select:focus { border-color: var(--gold); }
+
+        .db-select::after {
+            content: '▾';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--mist);
+            pointer-events: none;
+            font-size: 12px;
+        }
+
+        .search-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-wrap input {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: var(--parchment);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            padding: 9px 40px 9px 14px;
+            border-radius: 6px;
+            width: 260px;
+            outline: none;
+            transition: border-color 0.2s, width 0.3s;
+        }
+
+        .search-wrap input::placeholder { color: var(--mist); }
+        .search-wrap input:focus {
+            border-color: var(--gold);
+            width: 320px;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            color: var(--mist);
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .search-icon:hover { color: var(--gold); }
+
+        .add-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--rust);
+            color: #fff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            letter-spacing: 0.2px;
+        }
+
+        .add-btn:hover { background: #d4683a; }
+        .add-btn:active { transform: scale(0.97); }
+
+        /* ── Era legend ── */
+        .era-legend {
+            display: flex;
+            gap: 20px;
+            padding: 14px 48px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .era-chip {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            color: var(--mist);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .era-swatch {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        /* ── Main timeline area ── */
+        .timeline-outer {
+            height: calc(100vh - 120px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .timeline-scroll {
+            height: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0 48px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.15) transparent;
+        }
+
+        .timeline-scroll::-webkit-scrollbar { height: 4px; }
+        .timeline-scroll::-webkit-scrollbar-track { background: transparent; }
+        .timeline-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+        }
+
+        .timeline-canvas {
+            width: 3200px;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Events zone (upper half) */
+        .events-zone {
+            flex: 1;
+            position: relative;
+            min-height: 280px;
+        }
+
+        /* The axis */
+        .axis-bar {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 5%, rgba(255,255,255,0.15) 95%, transparent);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        /* Era bands (lower half) */
+        .era-bands {
+            height: 160px;
+            position: relative;
+            display: flex;
+            flex-shrink: 0;
+        }
+
+        /* Tick marks */
+        .tick {
+            position: absolute;
+            bottom: -1px;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tick-line {
+            width: 1px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tick-line.major { height: 12px; background: rgba(255,255,255,0.4); }
+        .tick-line.minor { height: 6px; }
+
+        .tick-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            color: var(--mist);
+            letter-spacing: 1px;
+            margin-top: 5px;
+            white-space: nowrap;
+        }
+
+        /* Event cards */
+        .event-card {
+            position: absolute;
+            transform: translateX(-50%);
+            bottom: 28px;
+        }
+
+        .event-card .stem {
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3));
+            margin: 0 auto;
+        }
+
+        .event-card .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: 1.5px solid var(--gold);
+            background: var(--ink);
+            margin: 0 auto;
+            transition: transform 0.2s;
+        }
+
+        .event-card:hover .dot {
+            transform: scale(1.6);
+            background: var(--gold);
+        }
+
+        .event-card .label {
+            background: rgba(20,18,14,0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 11px;
+            color: var(--aged);
+            white-space: nowrap;
+            margin-bottom: 6px;
+            transition: border-color 0.2s;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+        }
+
+        .event-card:hover .label {
+            border-color: var(--gold);
+            color: var(--parchment);
+        }
+
+        .event-card .date-tag {
+            font-family: 'DM Mono', monospace;
+            font-size: 9px;
+            color: var(--rust);
+            text-align: center;
+            margin-top: 2px;
+            letter-spacing: 1px;
+        }
+
+        /* Era band segments */
+        .era-band {
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 16px 10px;
+            transition: opacity 0.2s;
+        }
+
+        .era-band:hover { opacity: 0.85; }
+
+        .era-band-label {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        /* Selected event highlight */
+        .event-card.highlighted .label {
+            border-color: var(--gold);
+            background: rgba(184,150,62,0.15);
+            color: var(--parchment);
+        }
+        .event-card.highlighted .dot {
+            background: var(--gold);
+            transform: scale(1.4);
+        }
+
+        /* ── Add event modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: #181612;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            width: 480px;
+            padding: 32px;
+            transform: translateY(20px);
+            transition: transform 0.25s;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+        }
+
+        .modal-overlay.open .modal { transform: translateY(0); }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            color: var(--parchment);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--mist);
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            padding: 2px;
+            transition: color 0.2s;
+        }
+        .modal-close:hover { color: var(--parchment); }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            color: var(--mist);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--parchment);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus { border-color: var(--gold); }
+        .form-input::placeholder { color: rgba(154,165,180,0.5); }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+
+        .btn-ghost {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.12);
+            color: var(--mist);
+            padding: 9px 20px;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-ghost:hover { border-color: rgba(255,255,255,0.3); color: var(--parchment); }
+
+        .btn-primary {
+            background: var(--rust);
+            color: #fff;
+            border: none;
+            padding: 9px 22px;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover { background: #d4683a; }
+
+        /* scroll hint */
+        .scroll-hint {
+            position: fixed;
+            bottom: 32px;
+            right: 48px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            color: var(--mist);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .scroll-arrow {
+            font-size: 16px;
+            animation: nudge 1.5s ease-in-out infinite;
+        }
+
+        @keyframes nudge {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+
+        /* fade edges */
+        .timeline-outer::before,
+        .timeline-outer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .timeline-outer::before {
+            left: 0;
+            background: linear-gradient(to right, var(--ink), transparent);
+        }
+
+        .timeline-outer::after {
+            right: 0;
+            background: linear-gradient(to left, var(--ink), transparent);
+        }
+
+        /* animate in */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .event-card {
+            animation: slideUp 0.4s ease both;
+        }
+
+        .event-card:nth-child(1) { animation-delay: 0.05s; }
+        .event-card:nth-child(2) { animation-delay: 0.1s; }
+        .event-card:nth-child(3) { animation-delay: 0.15s; }
+        .event-card:nth-child(4) { animation-delay: 0.2s; }
+        .event-card:nth-child(5) { animation-delay: 0.25s; }
+        .event-card:nth-child(6) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <div class="logo">
+        <span class="logo-word">Chronos</span>
+        <div class="logo-dot"></div>
+        <span class="logo-sub">Timeline of Everything</span>
+    </div>
+
+    <div class="controls">
+        <div class="db-select">
+            <select>
+                <option>UK History</option>
+                <option>World History</option>
+                <option>Ancient Civilizations</option>
+                <option>Science & Discovery</option>
+                <option>Art & Culture</option>
+            </select>
+        </div>
+
+        <div class="search-wrap">
+            <input type="text" placeholder="Search events…" value="Arrival of St Augustine" />
+            <span class="search-icon">⌕</span>
+        </div>
+
+        <button class="add-btn" onclick="openModal()">
+            <span>＋</span> Add Event
+        </button>
+    </div>
+</header>
+
+<!-- Era legend -->
+<div class="era-legend">
+    <div class="era-chip"><div class="era-swatch" style="background:#2d4a3e"></div> Iron Age</div>
+    <div class="era-chip"><div class="era-swatch" style="background:#2a3d52"></div> Classical Antiquity</div>
+    <div class="era-chip"><div class="era-swatch" style="background:#3d2a4a"></div> Middle Ages</div>
+    <div class="era-chip"><div class="era-swatch" style="background:#4a3728"></div> Early Modern</div>
+</div>
+
+<!-- Main timeline -->
+<div class="timeline-outer">
+    <div class="timeline-scroll" id="timelineScroll">
+        <div class="timeline-canvas">
+
+            <!-- Events zone -->
+            <div class="events-zone">
+
+                <!-- Events -->
+                <div class="event-card" style="left: 520px; bottom: 40px;">
+                    <div class="label">Anglo-Saxon settlement begins</div>
+                    <div class="stem" style="height: 40px;"></div>
+                    <div class="dot"></div>
+                    <div class="date-tag">410 AD</div>
+                </div>
+
+                <div class="event-card" style="left: 420px; bottom: 90px;">
+                    <div class="label">End of Roman rule in Britain</div>
+                    <div class="stem" style="height: 80px;"></div>
+                    <div class="dot"></div>
+                    <div class="date-tag">410 AD</div>
+                </div>
+
+                <div class="event-card highlighted" style="left: 800px; bottom: 40px;">
+                    <div class="label">Arrival of St Augustine</div>
+                    <div class="stem" style="height: 40px;"></div>
+                    <div class="dot"></div>
+                    <div class="date-tag">597 AD</div>
+                </div>
+
+                <div class="event-card" style="left: 1260px; bottom: 90px;">
+                    <div class="label">Viking raid on Lindisfarne</div>
+                    <div class="stem" style="height: 80px;"></div>
+                    <div class="dot"></div>
+                    <div class="date-tag">793 AD</div>
+                </div>
+
+                <div class="event-card" style="left: 1420px; bottom: 40px;">
+                    <div class="label">Alfred the Great — King of Wessex</div>
+                    <div class="stem" style="height: 40px;"></div>
+                    <div class="dot"></div>
+                    <div class="date-tag">871 AD</div>
+                </div>
+
+                <div class="event-card" style="left: 1620px; bottom: 70px;">
+                    <div class="label">Athelstan — First King of England</div>
+                    <div class="stem" style="height: 60px;"></div>
+                    <div class="dot"></div>
+                    <div class="date-tag">927 AD</div>
+                </div>
+
+            </div>
+
+            <!-- Axis -->
+            <div class="axis-bar">
+                <!-- Ticks generated by JS -->
+            </div>
+
+            <!-- Era bands -->
+            <div class="era-bands">
+                <div class="era-band" style="left: 0; width: 750px; background: rgba(45,74,62,0.5);">
+                    <span class="era-band-label">Iron Age</span>
+                </div>
+                <div class="era-band" style="left: 750px; width: 1000px; background: rgba(42,61,82,0.5);">
+                    <span class="era-band-label">Classical Antiquity</span>
+                </div>
+                <div class="era-band" style="left: 1750px; width: 1450px; background: rgba(61,42,74,0.4);">
+                    <span class="era-band-label">Middle Ages</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Scroll hint -->
+<div class="scroll-hint">
+    <span>Scroll to explore</span>
+    <span class="scroll-arrow">→</span>
+</div>
+
+<!-- Add event modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Event</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Event Name</label>
+            <input class="form-input" type="text" placeholder="e.g. Battle of Hastings" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Year</label>
+                <input class="form-input" type="text" placeholder="e.g. 1066" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Era / Period</label>
+                <select class="form-input">
+                    <option value="">Select era…</option>
+                    <option>Iron Age</option>
+                    <option>Classical Antiquity</option>
+                    <option>Middle Ages</option>
+                    <option>Early Modern</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-input" rows="3" placeholder="Brief description of the event…" style="resize: vertical;"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Database</label>
+            <select class="form-input">
+                <option>UK History</option>
+                <option>World History</option>
+                <option>Science & Discovery</option>
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn-primary">Save Event</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Build tick marks dynamically
+    const axisBar = document.querySelector('.axis-bar');
+    const canvas = document.querySelector('.timeline-canvas');
+    const totalWidth = 3200;
+    const startYear = 200;
+    const endYear = 1400;
+    const yearRange = endYear - startYear;
+    const pxPerYear = totalWidth / yearRange;
+
+    for (let y = startYear; y <= endYear; y += 25) {
+        const tick = document.createElement('div');
+        tick.className = 'tick';
+        const x = ((y - startYear) / yearRange) * totalWidth;
+        tick.style.left = x + 'px';
+
+        const isMajor = y % 100 === 0;
+        const line = document.createElement('div');
+        line.className = 'tick-line ' + (isMajor ? 'major' : 'minor');
+        tick.appendChild(line);
+
+        if (isMajor) {
+            const label = document.createElement('div');
+            label.className = 'tick-label';
+            label.textContent = y + ' AD';
+            tick.appendChild(label);
+        }
+
+        axisBar.appendChild(tick);
+    }
+
+    // Scroll to highlight (St Augustine at ~597 AD)
+    const stAugX = ((597 - startYear) / yearRange) * totalWidth;
+    document.getElementById('timelineScroll').scrollLeft = stAugX - 400;
+
+    // Modal
+    function openModal() {
+        document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function closeModal(e) {
+        if (!e || e.target === document.getElementById('modalOverlay') || e.currentTarget?.classList.contains('modal-close')) {
+            document.getElementById('modalOverlay').classList.remove('open');
+        }
+    }
+</script>
+</body>
+</html>

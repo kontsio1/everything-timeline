@@ -1,12 +1,10 @@
 import {TimelineComponent, TimelineComponentHandle} from "./TimelineComponent";
 import React, {useRef} from "react";
 import {TimelineEvent} from "../Entities/TimelineEvent";
-import {computeRelativePeriodOverlaps} from "../Helpers/GenericHelperFunctions";
-import * as d3 from "d3";
 import {DefaultEvents, seedPeriods} from "../Seed/DefaultEvents";
-import {TimelinePeriod} from "../Entities/TimelinePeriod";
 import {UkEvents} from "../Seed/UkEvents";
 import { testFunction, getEvents, addEvents } from "../api/api";
+import {Header} from "./Header";
 
 export const TimelinePage = () => {
     const timelineRef = useRef<TimelineComponentHandle>(null);
@@ -60,14 +58,14 @@ export const TimelinePage = () => {
     };
 
     return (
-        <div>
-            {/* Test API Buttons */}
-            <div style={{ marginBottom: 16 }}>
-                <button onClick={handleTestFunction}>TestFunction</button>
-                <button onClick={handleGetEvents}>GetEvents</button>
-                <button onClick={handleAddEvents}>AddEvents</button>
-            </div>
+        <>
+            <Header/>
+            {/*<div style={{ marginBottom: 16 }}>*/}
+            {/*    <button onClick={handleTestFunction}>TestFunction</button>*/}
+            {/*    <button onClick={handleGetEvents}>GetEvents</button>*/}
+            {/*    <button onClick={handleAddEvents}>AddEvents</button>*/}
+            {/*</div>*/}
             <TimelineComponent handleInputChange={handleInputChange} handleSearch={handleSearch} inputValue={inputValue} events={events} periods={periods} handleDatabaseChange={handleDatabaseChange} databaseOptions={databaseOptions}/>
-        </div>
+        </>
     );
 }

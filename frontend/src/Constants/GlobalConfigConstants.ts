@@ -12,3 +12,20 @@ export const eventBoxMargin = 15; // min margin enforced between event boxes for
 export const defaultEventStemHeight = 50;
 export const horizontalPaddingOfTimeline = timelineWidth*0.05; // horizontal distance between the left edge of the timeline rectangle (SVG) and the start of the timeline, also applied to the right edge
 export const timelineTopEventsMargin = timelineHeight*0.1
+
+export const bgColor = "#0f0e0b"
+export const txtColor = "#0f0e0b"
+
+// --ink: #0f0e0b;
+// --parchment: #f5f0e8;
+// --aged: #e8dfc8;
+// --rust: #c45c2e;
+// --gold: #b8963e;
+// --slate: #4a5568;
+// --mist: #9aa5b4;
+// --era-1: #2d4a3e;
+// --era-2: #4a3728;
+// --era-3: #2a3d52;
+// --era-4: #3d2a4a;
+
+// font-family: 'DM Sans', sans-serif;
