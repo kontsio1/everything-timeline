@@ -46,6 +46,7 @@
 
 :root {
   --ink: #0f0e0b;
+  --ink2: rgba(55, 31, 3, 0.8);
   --parchment: #f5f0e8;
   --aged: #e8dfc8;
   --rust: #c45c2e;
