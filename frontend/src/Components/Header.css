@@ -16,6 +16,9 @@
 .db-select select:hover { border-color: rgba(255,255,255,0.25); }
 .db-select select:focus { border-color: #b8963e; }
 .db-select select option { background: #0f0e0b; }
+.db-select select::placeholder {
+    font-size: 9px;
+}
 
 .db-select::after {
     content: '▾';
@@ -25,7 +28,7 @@
     transform: translateY(-50%);
     color: #9aa5b4;
     pointer-events: none;
-    font-size: 12px;
+    font-size: 20px;
 }
 
 .search-wrap input {
@@ -40,7 +43,10 @@
     outline: none;
     transition: border-color 0.2s, width 0.3s;
 }
-.search-wrap input::placeholder { color: #9aa5b4; }
+.search-wrap input::placeholder {
+    color: #9aa5b4;
+    font-size: 11px;
+}
 .search-wrap input:focus {
     border-color: #b8963e;
     width: 320px;
@@ -62,26 +68,37 @@
     }
     .logo-word {
         font-size: 16px !important;
-    }tim
+    }
     .logo-sub {
         font-size: 8px !important;
     }
     .controls {
-        gap: 8px !important;
+        width: 100%;
+        margin-left: 8px;
+        margin-right: 8px;
+        gap: 12px !important;
         margin-bottom: 0 !important;
         flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .controls .db-select,
+    .controls .search-wrap,
+    .controls .add-btn {
+        width: 100%;
+        margin-bottom: 12px;
     }
     .controls .db-select-dropdown {
-        max-width: 120px;
+        max-width: 100%;
     }
     .controls .search-wrap input {
-        max-width: 100px;
+        max-width: 100%;
     }
     .controls .add-btn {
-        max-width: 120px;
+        max-width: 100%;
     }
     .search-wrap input {
-        width: 100px;
+        width: 100%;
         min-width: 0;
         font-size: 12px;
     }
@@ -106,22 +123,31 @@
         font-size: 6px !important;
     }
     .controls {
+        width: 100%;
+        margin-left: 4px;
+        margin-right: 4px;
         flex-direction: column;
         align-items: stretch;
         gap: 4px !important;
         padding-bottom: 10px;
     }
+    .controls .db-select,
+    .controls .search-wrap,
+    .controls .add-btn {
+        width: 100%;
+        margin-bottom: 8px;
+    }
     .controls .db-select {
-        max-width: 90px;
+        max-width: 100%;
     }
     .controls .search-wrap input {
-        max-width: 80px;
+        max-width: 100%;
     }
     .controls .add-btn {
-        max-width: 90px;
+        max-width: 100%;
     }
     .search-wrap input {
-        width: 80px;
+        width: 100%;
         font-size: 11px;
     }
     .add-btn {

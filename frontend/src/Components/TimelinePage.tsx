@@ -8,28 +8,31 @@ import {Header} from "./Header";
 
 export const TimelinePage = () => {
     const timelineRef = useRef<TimelineComponentHandle>(null);
-    const [inputValue, setInputValue] = React.useState<TimelineEvent>();
+    const [selectedEvent, setSelectedEvent] = React.useState<TimelineEvent | null>(null);
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
-    const periods = seedPeriods
+    const [selectedDatabase, setSelectedDatabase] = React.useState<string | null>(null);
+    const periods = seedPeriods;
 
-    const handleInputChange = (event: React.SyntheticEvent, newValue: TimelineEvent | null) => {
-        setInputValue(newValue ?? undefined);
+    const handleEventSearch = (event: React.SyntheticEvent, newValue: TimelineEvent | null) => {
+        setSelectedEvent(newValue);
+        timelineRef.current?.zoomToEvent(newValue?.date);
     };
-    
-    const handleSearch = () => {
-        timelineRef.current?.zoomToEvent(inputValue?.date);
-    }
 
-    const databases = [DefaultEvents, UkEvents]
-    const databaseOptions: string[] = databases.map(s => s.Name)
+    const databases = [DefaultEvents, UkEvents];
+    const databaseOptions: string[] = databases.map(s => s.Name);
 
     const handleDatabaseChange = (e: React.SyntheticEvent, name: string | null) => {
+        setSelectedDatabase(name);
         const events: TimelineEvent[] = databases.flatMap(d =>
             d.Name === name ? d.Events : []
-        )
-        setEvents(events)
-    }
-    
+        );
+        setEvents(events);
+    };
+
+    const handleAddEvent = () => {
+        // Placeholder for add event functionality
+    };
+
     // Test API call handlers
     const handleTestFunction = async () => {
             const result = await testFunction();
@@ -55,13 +58,30 @@ export const TimelinePage = () => {
 
     return (
         <>
-            <Header/>
+            <Header
+                databaseOptions={databaseOptions}
+                events={events}
+                onDatabaseChange={handleDatabaseChange}
+                onEventSearch={handleEventSearch}
+                onAddEvent={handleAddEvent}
+                selectedDatabase={selectedDatabase}
+                selectedEvent={selectedEvent}
+            />
             {/*<div style={{ marginBottom: 16 }}>*/}
             {/*    <button onClick={handleTestFunction}>TestFunction</button>*/}
             {/*    <button onClick={handleGetEvents}>GetEvents</button>*/}
             {/*    <button onClick={handleAddEvents}>AddEvents</button>*/}
             {/*</div>*/}
-            <TimelineComponent handleInputChange={handleInputChange} handleSearch={handleSearch} inputValue={inputValue} events={events} periods={periods} handleDatabaseChange={handleDatabaseChange} databaseOptions={databaseOptions}/>
+            <TimelineComponent
+                ref={timelineRef}
+                events={events}
+                periods={periods}
+                selectedDatabase={selectedDatabase}
+                selectedEvent={selectedEvent}
+                onDatabaseChange={handleDatabaseChange}
+                onEventSearch={handleEventSearch}
+                onAddEvent={handleAddEvent}
+            />
         </>
     );
 }

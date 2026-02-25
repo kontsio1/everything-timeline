@@ -1,11 +1,11 @@
 import * as d3 from "d3";
-import React, {forwardRef, SyntheticEvent, useEffect, useImperativeHandle, useRef, useState} from "react";
+import React, {forwardRef, SyntheticEvent, useEffect, useRef, useState, useImperativeHandle} from "react";
 import {
     ticksNo,
     timelineHeight,
     timelineInitialDomain,
     timelineWidth,
-    noOfVisiblePeriods, timelineTopEventsMargin, horizontalPaddingOfTimeline, bgColor, txtColor
+    noOfVisiblePeriods, horizontalPaddingOfTimeline, bgColor, txtColor
 } from "../Constants/GlobalConfigConstants";
 import {TimelinePeriod} from "../Entities/TimelinePeriod";
 import {TimelineEvent} from "../Entities/TimelineEvent";
@@ -15,13 +15,11 @@ import {
     getYearLabel
 } from "../Helpers/GenericHelperFunctions";
 import {PeriodTooltip} from "./PeriodTooltip";
-import {EventTooltip} from "./EventTooltip";
-import Autocomplete from '@mui/material/Autocomplete';
-import {Button, TextField} from "@mui/material";
 import {makeStyles} from "@mui/styles";
 import TimelinePeriodMarker from "./TimelinePeriodMarker";
 import EventMarker from "./EventMarker";
 import {svg} from "d3";
+import './Header.css';
 
 const useStyles = makeStyles({
     timelineContainer: {
@@ -33,13 +31,13 @@ const useStyles = makeStyles({
 });
 
 interface TimelineComponentProps {
-    handleInputChange: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
-    inputValue?: TimelineEvent;
-    handleSearch: () => void;
-    handleDatabaseChange: (event: SyntheticEvent, value: string | null) => void;
     events: TimelineEvent[];
     periods: TimelinePeriod[];
-    databaseOptions: string[];
+    selectedDatabase: string | null;
+    selectedEvent: TimelineEvent | null;
+    onDatabaseChange: (event: SyntheticEvent, value: string | null) => void;
+    onEventSearch: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
+    onAddEvent: () => void;
 }
 
 export interface TimelineComponentHandle {
@@ -153,71 +151,40 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         setVisiblePeriods(periodsByStartDate);
     };
 
-    const searchAndZoom = async () => {
-        var date = props.inputValue?.date
-        const xScale = xScaleRef.current;
-        if (props.inputValue != undefined) {
-            if (date && xScale && svgRef.current) {
-                let extraZoom = 0
-                let searchedEvent = events.find(p => p.label === props.inputValue?.label);
-                do {
-                    // Calculate the x position of the selected date
-                    const targetX = xScale(date);
-                    // Center of the axis in the SVG
-                    const centerX = timelineWidth / 2;
-                    // Choose a zoom level (can be made configurable)
-                    const zoomLevel = 7 + extraZoom;
-                    // Calculate translation so the date is centered after zoom
-                    const translateX = centerX - targetX * zoomLevel;
-                    // Create the target zoom transform
-                    const targetTransform = d3.zoomIdentity.translate(translateX, 0).scale(zoomLevel);
-                    // Use the already-attached zoom behavior
-                    const svgSelection = d3.select(svgRef.current);
-                    const zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
-                        .scaleExtent([1, 1000])
-                        .translateExtent([[horizontalPaddingOfTimeline, 0], [timelineWidth - horizontalPaddingOfTimeline, 0]])
-                        .extent([[50, 0], [timelineWidth - 50, timelineHeight]])
-                        .on("zoom", (event) => {
-                            setTransform({x: event.transform.x, k: event.transform.k});
-                            const newX = event.transform.rescaleX(xScaleRef.current!);
-                            updatePeriods(newX);
-                            updateEvents(newX);
-                        });
-                    svgSelection.call(zoomBehavior);
-                    // Animate the zoom using d3's transition and zoomBehavior.transform
-                    svgSelection.transition()
-                        .duration(1200)
-                        .call(zoomBehavior.transform, targetTransform);
-                    await new Promise(resolve => setTimeout(resolve, 1200)); // Wait for transition
-                    extraZoom+=14;
-                } while (searchedEvent?.stemHeight == -1)
-            }
-        }
-    };
-
     // Add gradient definition for tick stems and axis line
     const axisGradientId = "axis-bar-gradient";
+
+    // Expose zoomToEvent via ref
+    useImperativeHandle(ref, () => ({
+        zoomToEvent(date?: Date) {
+            if (!date || !xScaleRef.current || !svgRef.current) return;
+            const xScale = xScaleRef.current;
+            const targetX = xScale(date);
+            const centerX = timelineWidth / 2;
+            const zoomLevel = 7;
+            const translateX = centerX - targetX * zoomLevel;
+            const targetTransform = d3.zoomIdentity.translate(translateX, 0).scale(zoomLevel);
+            const svgSelection = d3.select(svgRef.current);
+            const zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
+                .scaleExtent([1, 1000])
+                .translateExtent([[horizontalPaddingOfTimeline, 0], [timelineWidth - horizontalPaddingOfTimeline, 0]])
+                .extent([[50, 0], [timelineWidth - 50, timelineHeight]])
+                .on("zoom", (event) => {
+                    setTransform({x: event.transform.x, k: event.transform.k});
+                    const newX = event.transform.rescaleX(xScaleRef.current!);
+                    updatePeriods(newX);
+                    updateEvents(newX);
+                });
+            svgSelection.call(zoomBehavior);
+            svgSelection.transition()
+                .duration(1200)
+                .call(zoomBehavior.transform, targetTransform);
+        }
+    }));
 
     return (
         <>
             <div className={classes.timelineContainer}>
-                <div style={{display: "flex", gap: 10, marginBottom: 10}}>
-                    <Autocomplete
-                        multiple={false}
-                        sx={{flex: 0.5}}
-                        options={props.databaseOptions}
-                        renderInput={(params) => <TextField {...params} label="Select a database"/>}
-                        onChange={props.handleDatabaseChange}
-                    />
-                    <Autocomplete
-                        multiple={false}
-                        sx={{flex: 1}}
-                        options={events.map((e) => e)}
-                        renderInput={(params) => <TextField {...params} label="Search for an event"/>}
-                        onChange={props.handleInputChange}
-                    />
-                    <Button variant="contained" sx={{flex: "0 0 auto"}} onClick={searchAndZoom}>Search</Button>
-                </div>
                 <svg ref={svgRef} width="90vw" height="70vh" style={{background: bgColor}}>
                     {/* Gradient definitions for tick stems and axis line */}
                     <defs>
