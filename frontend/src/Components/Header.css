@@ -131,20 +131,54 @@
 .add-btn:hover {
     background: #d4683a !important;
 }
+.db-select-input .MuiInputLabel-root,
+.search-input .MuiInputLabel-root {
+    color: var(--txtColor2) !important;
+}
+.db-select-input .MuiInputBase-input,
+.search-input .MuiInputBase-input {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 13px !important;
+    color: var(--txtColor2) !important;
+}
+.db-select-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.search-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #c45c2e !important;
+}
+.db-select-input .MuiInputLabel-outlined.Mui-focused,
+.search-input .MuiInputLabel-outlined.Mui-focused {
+    color: var(--txtColor2) !important;
+    border-color: var(--txtColor2) !important;
+}
+.db-select-input .MuiAutocomplete-popupIndicator,
+.search-input .MuiAutocomplete-popupIndicator {
+    display: none !important;
+}
+.db-select-input .MuiAutocomplete-clearIndicator,
+.search-input .MuiAutocomplete-clearIndicator {
+    color: var(--txtColor2) !important;
+}
+.db-select-input .MuiAutocomplete-noOptions,
+.search-input .MuiAutocomplete-noOptions {
+    color: var(--txtColor2) !important;
+}
+.autocomplete-paper {
+    background-color: rgba(55, 31, 3, 0.9) !important;
+    color: var(--txtColor2) !important;
+}
 
 /* Responsive styles for header */
 @media (max-width: 600px) {
     .App-header {
         padding: 16px 12px;
         flex-direction: column;
-        align-items: stretch;
-        gap: 30px;
+        gap: 0px;
     }
     .logo-word {
-        font-size: 16px !important;
+        font-size: 20px !important;
     }
     .logo-sub {
-        font-size: 8px !important;
+        font-size: 12px !important;
     }
     .controls {
         flex-wrap: wrap;
@@ -159,25 +193,5 @@
         flex: 1 1 100px;
         min-width: 0;
         margin-bottom: 0;
-    }
-    .controls .add-btn {
-        color: #fff;
-        display: flex;
-        align-items: center;
-        border: none;
-        border-radius: 6px;
-        font-family: DM Sans, sans-serif;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background 0.2s, transform 0.1s;
-        letter-spacing: 0.2px;
-        box-shadow: none;
-    }
-    .controls .add-btn {
-        max-width: 100%;
-    }
-    .add-btn {
-        padding: 7px 12px;
-        font-size: 12px;
     }
 }

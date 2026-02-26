@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {IApiDataset, IApiEvent, IApiPeriod} from "./Interfaces";
 
 // const BASE_URL = "http://localhost:7071/api";
 const BASE_URL = "https://everything-api-function-app-exb5hnguezfydxhv.canadacentral-01.azurewebsites.net/api" 
@@ -8,7 +9,7 @@ export async function testFunction(method: 'get' | 'post' = 'get') {
         url: `${BASE_URL}/Test`,
         method,
     });
-    return response.data;
+    return response.data as string;
 }
 export async function getEvents(datasetId?: string) {
     const params: Record<string, string> = {};
@@ -16,7 +17,7 @@ export async function getEvents(datasetId?: string) {
     const response = await axios.get(`${BASE_URL}/GetEvents`, {
         params,
     });
-    return response.data;
+    return response.data as IApiEvent[];
 }
 export async function addEvents(events: any[]) {
     const response = await axios.post(`${BASE_URL}/AddEvent`, events, {
@@ -25,4 +26,16 @@ export async function addEvents(events: any[]) {
         },
     });
     return response.data;
+}
+export async function getPeriods(datasetId?: string) {
+    const params: Record<string, string> = {};
+    if (datasetId) params.dataset = datasetId;
+    const response = await axios.get(`${BASE_URL}/GetPeriods`, {
+        params,
+    });
+    return response.data as IApiPeriod[];
+}
+export async function getDatasets() {
+    const response = await axios.get(`${BASE_URL}/GetDatasets`);
+    return response.data as IApiDataset[];
 }

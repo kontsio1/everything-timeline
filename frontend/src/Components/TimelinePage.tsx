@@ -1,32 +1,45 @@
 import {TimelineComponent, TimelineComponentHandle} from "./TimelineComponent";
-import React, {useRef} from "react";
+import React, {useEffect, useMemo, useRef} from "react";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import {DefaultEvents, seedPeriods} from "../Seed/DefaultEvents";
 import {UkEvents} from "../Seed/UkEvents";
-import { testFunction, getEvents, addEvents } from "../api/api";
+import {testFunction, getEvents, addEvents, getDatasets} from "../api/api";
 import {Header} from "./Header";
+import {IApiDataset} from "../api/Interfaces";
 
 export const TimelinePage = () => {
     const timelineRef = useRef<TimelineComponentHandle>(null);
     const [selectedEvent, setSelectedEvent] = React.useState<TimelineEvent | null>(null);
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
-    const [selectedDatabase, setSelectedDatabase] = React.useState<string | null>(null);
+    const [selectedDataset, setSelectedDataset] = React.useState<IApiDataset | null>(null);
+    const [datasets, setDatasets] = React.useState<IApiDataset[]>([]);
     const periods = seedPeriods;
 
+    useMemo(() => {
+        const fetchDatasets = async () => {
+            var datasets = await getDatasets();
+            setDatasets(datasets);
+        };
+        fetchDatasets();
+    }, [])
+    useEffect(() => {
+        const fetchEvents = async () => {
+            const events = await getEvents(selectedDataset?.id);
+            const timelineEvents = events.map(e => new TimelineEvent([e.date], e.name, e.info))
+            setEvents(timelineEvents);
+        };
+        fetchEvents();
+    }, [selectedDataset]);
+    
     const handleEventSearch = (event: React.SyntheticEvent, newValue: TimelineEvent | null) => {
         setSelectedEvent(newValue);
         timelineRef.current?.zoomToEvent(newValue?.date);
     };
 
-    const databases = [DefaultEvents, UkEvents];
-    const databaseOptions: string[] = databases.map(s => s.Name);
 
     const handleDatabaseChange = (e: React.SyntheticEvent, name: string | null) => {
-        setSelectedDatabase(name);
-        const events: TimelineEvent[] = databases.flatMap(d =>
-            d.Name === name ? d.Events : []
-        );
-        setEvents(events);
+        const selectedDataset = datasets.find(d => d.name === name) || null;
+        setSelectedDataset(selectedDataset);
     };
 
     const handleAddEvent = () => {
@@ -35,8 +48,8 @@ export const TimelinePage = () => {
 
     // Test API call handlers
     const handleTestFunction = async () => {
-            const result = await testFunction();
-            console.log("TestFunction result: " + JSON.stringify(result));
+        const result = await testFunction();
+        console.log("TestFunction result: " + JSON.stringify(result));
     };
     const handleGetEvents = async () => {
         try {
@@ -59,24 +72,19 @@ export const TimelinePage = () => {
     return (
         <>
             <Header
-                databaseOptions={databaseOptions}
+                databaseOptions={datasets.map(s => s.name)}
                 events={events}
                 onDatabaseChange={handleDatabaseChange}
                 onEventSearch={handleEventSearch}
-                onAddEvent={handleAddEvent}
-                selectedDatabase={selectedDatabase}
+                onAddEvent={handleAddEvents}
+                selectedDatabase={selectedDataset?.name ?? null}
                 selectedEvent={selectedEvent}
             />
-            {/*<div style={{ marginBottom: 16 }}>*/}
-            {/*    <button onClick={handleTestFunction}>TestFunction</button>*/}
-            {/*    <button onClick={handleGetEvents}>GetEvents</button>*/}
-            {/*    <button onClick={handleAddEvents}>AddEvents</button>*/}
-            {/*</div>*/}
             <TimelineComponent
                 ref={timelineRef}
                 events={events}
                 periods={periods}
-                selectedDatabase={selectedDatabase}
+                selectedDatabase={selectedDataset?.name ?? null}
                 selectedEvent={selectedEvent}
                 onDatabaseChange={handleDatabaseChange}
                 onEventSearch={handleEventSearch}

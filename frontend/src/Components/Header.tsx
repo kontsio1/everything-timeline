@@ -26,12 +26,12 @@ export const Header = ({
                            selectedEvent,
                            children
                        }: HeaderProps) => {
-    // Local state for event selection
+    
     const [localSelectedEvent, setLocalSelectedEvent] = useState<TimelineEvent | null>(selectedEvent);
     useEffect(() => {
         setLocalSelectedEvent(selectedEvent);
     }, [selectedEvent]);
-
+    
     return (
         <>
             <header className="App-header">
@@ -53,65 +53,18 @@ export const Header = ({
                                 <TextField
                                     {...params}
                                     label="Select a database"
-                                    sx={{
-                                        '& .MuiInputLabel-root': {color: txtColor2},
-                                        '& .MuiInputBase-input': {
-                                            fontFamily: 'DM Sans, sans-serif',
-                                            fontSize: 13,
-                                            color: txtColor2,
-                                            paddingRight: '44px', // leave space for icon
-                                        },
-                                        '& .MuiInputLabel-outlined.Mui-focused': {
-                                            color: txtColor2,
-                                            borderColor: txtColor2,
-                                        },
-                                        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                            borderColor: btnColor,
-                                        },
-                                        '& .MuiAutocomplete-popupIndicator': {
-                                            display: 'none'
-                                        },
-                                        '& .MuiAutocomplete-clearIndicator': {
-                                            color: txtColor2,
-                                        },
-                                        '& .MuiAutocomplete-noOptions': {
-                                            color: txtColor2,
-                                        },
-                                    }}
+                                    className="db-select-input"
                                 />
                             )}
                             slotProps={{
                                 paper: {
-                                    sx: {
-                                        backgroundColor: 'rgba(55, 31, 3, 0.9)',
-                                        color: txtColor2,
-                                    },
+                                    className: 'autocomplete-paper',
                                 },
                             }}
                         />
                         <Button
                             className="add-btn"
                             variant="contained"
-                            sx={{
-                                backgroundColor: '#c45c2e',
-                                minWidth: 0,
-                                width: 36,
-                                height: 36,
-                                borderRadius: '50%',
-                                position: 'absolute',
-                                right: 0,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                padding: 0,
-                                boxShadow: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: 22,
-                                '&:hover': {
-                                    backgroundColor: '#d4683a',
-                                },
-                            }}
                             onClick={onAddEvent}
                         >
                             +
@@ -127,59 +80,18 @@ export const Header = ({
                                 <TextField
                                     {...params}
                                     label="Search for an event"
-                                    sx={{
-                                        '& .MuiInputLabel-root': {color: txtColor2},
-                                        '& .MuiInputBase-input': {
-                                            fontFamily: 'DM Sans, sans-serif',
-                                            fontSize: 13,
-                                            color: txtColor2,
-                                            paddingRight: '44px', // leave space for icon
-                                        },
-                                        '& .MuiInputLabel-outlined.Mui-focused': {
-                                            color: txtColor2,
-                                            borderColor: txtColor2,
-                                        },
-                                        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                            borderColor: btnColor,
-                                        },
-                                        '& .MuiAutocomplete-popupIndicator': {
-                                            display: 'none'
-                                        },
-                                        '& .MuiAutocomplete-clearIndicator': {
-                                            color: txtColor2,
-                                        },
-                                        '& .MuiAutocomplete-noOptions': {
-                                            color: txtColor2,
-                                        },
-                                    }}
+                                    className="search-input"
                                 />
                             )}
                             slotProps={{
-                                paper: {sx: {backgroundColor: 'rgba(55, 31, 3, 0.9)', color: txtColor2},},
+                                paper: {
+                                    className: 'autocomplete-paper',
+                                },
                             }}
                         />
                         <Button
                             className="search-icon"
                             variant="contained"
-                            sx={{
-                                backgroundColor: '#c45c2e',
-                                minWidth: 0,
-                                width: 36,
-                                height: 36,
-                                borderRadius: '50%',
-                                position: 'absolute',
-                                right: 0,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                padding: 0,
-                                boxShadow: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                '&:hover': {
-                                    backgroundColor: '#d4683a',
-                                },
-                            }}
                             onClick={e => onEventSearch(e, localSelectedEvent)}
                         >
                             &#x2315;
