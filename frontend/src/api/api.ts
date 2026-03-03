@@ -1,8 +1,7 @@
 import axios from 'axios';
 import {IApiDataset, IApiEvent, IApiPeriod} from "./Interfaces";
 
-// const BASE_URL = "http://localhost:7071/api";
-const BASE_URL = "https://everything-api-function-app-exb5hnguezfydxhv.canadacentral-01.azurewebsites.net/api" 
+const BASE_URL = process.env.REACT_APP_API_URL || "https://everything-api-function-app-exb5hnguezfydxhv.canadacentral-01.azurewebsites.net/api"; 
 
 export async function testFunction(method: 'get' | 'post' = 'get') {
     const response = await axios({

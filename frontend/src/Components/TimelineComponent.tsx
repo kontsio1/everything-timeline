@@ -118,6 +118,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     const recalculateEventBoxes = (events: TimelineEvent[], xScale: d3.ScaleTime<number, number, never>) => {
         const padding = 4;
         const fontSize = 12;
+        if (events == null) return;
         events.forEach(event => {
             const timelineX = xScale(event.date);
             const textWidth = event.label.length * fontSize * 0.6;

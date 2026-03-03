@@ -31,7 +31,7 @@ export class TimelineEvent extends BaseEvent {
     public rectWidth(): number {
         const fontSize = 12; //also eq to text height
         // Estimate text width (for simplicity, use label length * font size * factor)
-        const textWidth = this.label.length * fontSize * 0.6;
+        const textWidth = this.label?.length * fontSize * 0.6;
         return (textWidth + this.padding * 2);
     }
 }

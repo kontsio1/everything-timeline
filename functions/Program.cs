@@ -11,6 +11,17 @@ var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 builder.Services.AddDbContext<DbContext>(options =>
 {
     var connectionString = Environment.GetEnvironmentVariable("SqlConnectionString") ?? builder.Configuration.GetConnectionString("SqlConnectionString");
@@ -21,4 +32,6 @@ builder.Services.AddDbContext<DbContext>(options =>
 builder.Services.AddScoped<IRepository, Repository>();
 builder.Services.AddApplicationInsightsTelemetryWorkerService().ConfigureFunctionsApplicationInsights();
 
-builder.Build().Run();
+var host = builder.Build();
+
+host.Run();

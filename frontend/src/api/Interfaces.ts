@@ -1,22 +1,22 @@
 export interface IApiEvent {
-    id: string;
-    datasetId: string;
-    name: string;
-    info: string;
-    date: number;
+    Id: string;
+    DatasetId: string;
+    Name: string;
+    Info: string;
+    Date: number;
 }
 export interface IApiPeriod {
-    id: string;
-    datasetId: string;
-    name: string;
-    info: string;
-    startYear: number;
-    endYear: number;
+    Id: string;
+    DatasetId: string;
+    Name: string;
+    Info: string;
+    StartYear: number;
+    EndYear: number;
 }
 export interface IApiDataset {
-    id: string;
-    name: string;
-    createdBy: string;
-    createdAt: Date;
-    value: number;
+    Id: string;
+    Name: string;
+    CreatedBy: string;
+    CreatedAt: Date;
+    Value: number;
 }

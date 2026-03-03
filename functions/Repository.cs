@@ -11,6 +11,7 @@ public interface IRepository
     Task<Event?> UpdateEvent(Event eventToUpdate);
     Task<bool> DeleteEvent(Guid id);
     Task<int> GetEventsCountByDataset(Guid datasetId);
+    Task<IEnumerable<Dataset>> GetAllDatasets();
 }
 
 public class Repository : IRepository
@@ -94,5 +95,12 @@ public class Repository : IRepository
     {
         return await _dbContext.Events
             .CountAsync(e => e.DatasetId == datasetId);
+    }
+
+    public async Task<IEnumerable<Dataset>> GetAllDatasets()
+    {
+        return await _dbContext.Datasets
+            .OrderBy(d => d.Name)
+            .ToListAsync();
     }
 }

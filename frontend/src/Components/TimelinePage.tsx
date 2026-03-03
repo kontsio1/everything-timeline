@@ -24,8 +24,8 @@ export const TimelinePage = () => {
     }, [])
     useEffect(() => {
         const fetchEvents = async () => {
-            const events = await getEvents(selectedDataset?.id);
-            const timelineEvents = events.map(e => new TimelineEvent([e.date], e.name, e.info))
+            const events = await getEvents(selectedDataset?.Id);
+            const timelineEvents = events.map(e => new TimelineEvent([e.Date, 0, 0], e.Name, e.Info))
             setEvents(timelineEvents);
         };
         fetchEvents();
@@ -38,7 +38,7 @@ export const TimelinePage = () => {
 
 
     const handleDatabaseChange = (e: React.SyntheticEvent, name: string | null) => {
-        const selectedDataset = datasets.find(d => d.name === name) || null;
+        const selectedDataset = datasets.find(d => d.Name === name) || null;
         setSelectedDataset(selectedDataset);
     };
 
@@ -72,19 +72,19 @@ export const TimelinePage = () => {
     return (
         <>
             <Header
-                databaseOptions={datasets.map(s => s.name)}
+                databaseOptions={datasets.map(s => s.Name)}
                 events={events}
                 onDatabaseChange={handleDatabaseChange}
                 onEventSearch={handleEventSearch}
                 onAddEvent={handleAddEvents}
-                selectedDatabase={selectedDataset?.name ?? null}
+                selectedDatabase={selectedDataset?.Name ?? null}
                 selectedEvent={selectedEvent}
             />
             <TimelineComponent
                 ref={timelineRef}
                 events={events}
                 periods={periods}
-                selectedDatabase={selectedDataset?.name ?? null}
+                selectedDatabase={selectedDataset?.Name ?? null}
                 selectedEvent={selectedEvent}
                 onDatabaseChange={handleDatabaseChange}
                 onEventSearch={handleEventSearch}

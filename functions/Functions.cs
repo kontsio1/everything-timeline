@@ -9,6 +9,25 @@ namespace everything_timeline
 {
     public class Functions(ILogger<Functions> logger, IRepository repository)
     {
+        private static void SetCorsHeaders(HttpResponseData response)
+        {
+            response.Headers.Add("Access-Control-Allow-Origin", "*");
+            response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, x-requested-with");
+        }
+
+        [Function("Options")]
+        public HttpResponseData HandleOptions([HttpTrigger(AuthorizationLevel.Anonymous, "options", Route = "{*any}")] HttpRequestData req)
+        {
+            var response = req.CreateResponse();
+            response.StatusCode = HttpStatusCode.OK;
+            
+            SetCorsHeaders(response);
+            response.Headers.Add("Access-Control-Max-Age", "86400");
+            
+            return response;
+        }
+
         [Function("Test")]
         public IActionResult TestFunction([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
         {
@@ -22,6 +41,7 @@ namespace everything_timeline
         {
             var response = req.CreateResponse();
             response.Headers.Add("Content-Type", "application/json");
+            SetCorsHeaders(response);
 
             try
             {
@@ -70,6 +90,7 @@ namespace everything_timeline
         {
             var response = req.CreateResponse();
             response.Headers.Add("Content-Type", "application/json");
+            SetCorsHeaders(response);
 
             try
             {
@@ -132,6 +153,33 @@ namespace everything_timeline
                 logger.LogError(ex, "Error adding events");
                 response.StatusCode = HttpStatusCode.InternalServerError;
                 await response.WriteStringAsync("An error occurred while adding events");
+                return response;
+            }
+        }
+
+        [Function("GetDatasets")]
+        public async Task<HttpResponseData> GetDatasets(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
+        {
+            var response = req.CreateResponse();
+            response.Headers.Add("Content-Type", "application/json");
+            SetCorsHeaders(response);
+
+            try
+            {
+                var datasets = await repository.GetAllDatasets();
+                
+                logger.LogInformation("Retrieved {Count} datasets", datasets.Count());
+
+                response.StatusCode = HttpStatusCode.OK;
+                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(datasets));
+                return response;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error retrieving datasets");
+                response.StatusCode = HttpStatusCode.InternalServerError;
+                await response.WriteStringAsync("An error occurred while retrieving datasets");
                 return response;
             }
         }
