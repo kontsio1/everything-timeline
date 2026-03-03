@@ -31,9 +31,12 @@ export const TimelinePage = () => {
         fetchEvents();
     }, [selectedDataset]);
     
-    const handleEventSearch = (event: React.SyntheticEvent, newValue: TimelineEvent | null) => {
-        setSelectedEvent(newValue);
-        timelineRef.current?.zoomToEvent(newValue?.date);
+    const handleEventSearch = (event: React.SyntheticEvent, searchedEvent: TimelineEvent | null) => {
+        if(searchedEvent) {
+            setSelectedEvent(searchedEvent);
+            searchedEvent.isHighlighted = true;
+            timelineRef.current?.zoomToEvent(searchedEvent?.date);
+        }
     };
 
 
@@ -45,20 +48,7 @@ export const TimelinePage = () => {
     const handleAddEvent = () => {
         // Placeholder for add event functionality
     };
-
-    // Test API call handlers
-    const handleTestFunction = async () => {
-        const result = await testFunction();
-        console.log("TestFunction result: " + JSON.stringify(result));
-    };
-    const handleGetEvents = async () => {
-        try {
-            const result = await getEvents();
-            alert("GetEvents result: " + JSON.stringify(result));
-        } catch (err) {
-            alert("GetEvents error: " + err);
-        }
-    };
+    
     const handleAddEvents = async () => {
         try {
             // Example: send empty array or a sample event

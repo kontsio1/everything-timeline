@@ -137,6 +137,11 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         const eventsInDomain = events.filter(p => p.date >= domainStart && p.date <= domainEnd);
         computeEventPositionByLaneStrategy(eventsInDomain);
         let filteredEvents = eventsInDomain.filter(e => e.stemHeight != -1);
+        events.forEach(event => {
+            if (!filteredEvents.includes(event)) {
+                event.isHighlighted = false;
+            }
+        });
         setVisibleEvents(filteredEvents);
     };
     const updatePeriods = (newX: d3.ScaleTime<number, number, never>) => {

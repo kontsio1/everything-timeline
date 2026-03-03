@@ -1,6 +1,6 @@
 import {BaseEvent} from "./BaseEvent";
 import {stringToUnique01} from "../Helpers/LogarithmicScaleHelper";
-import {defaultEventStemHeight} from "../Constants/GlobalConfigConstants";
+import {defaultEventStemHeight, highlightColor} from "../Constants/GlobalConfigConstants";
 
 export class TimelineEvent extends BaseEvent {
     date: Date;
@@ -15,6 +15,24 @@ export class TimelineEvent extends BaseEvent {
     boxX: number = 0;
     info?: string;
     padding: number = 4;
+    private _isHighlighted: boolean = false;
+    private originalColour: string = "";
+    
+    get isHighlighted(): boolean {
+        return this._isHighlighted;
+    }
+    set isHighlighted(value: boolean) {
+        this._isHighlighted = value;
+        //TODO; see if colour change is appropriate
+        if (value) {
+            if (!this.originalColour) {
+                this.originalColour = this.colour;
+            }
+            this.colour = highlightColor
+        } else if (this.originalColour) {
+            this.colour = this.originalColour;
+        }
+    }
     
     constructor(date: number[], label: string, info?: string, colour?: string) { 
         super(label, colour);
@@ -22,6 +40,7 @@ export class TimelineEvent extends BaseEvent {
         this.date.setFullYear(date[0], date[1] ?? 0, date[2] ?? 0);
         this.stemHeight = this.defaultHeight;
         this.colour = colour || "#" + Math.floor(stringToUnique01(this.label, 2) * 16777215).toString(16).padStart(6, "0");
+        this.originalColour = this.colour;
         this.info = info || undefined;
         this.boxWidth = this.rectWidth();
     }

@@ -3,11 +3,6 @@ import Autocomplete from "@mui/material/Autocomplete";
 import { Button, TextField } from "@mui/material";
 import { TimelineEvent } from "../Entities/TimelineEvent";
 import React, { useState, useEffect } from "react";
-import {
-  btnColor,
-  txtColor,
-  txtColor2,
-} from "../Constants/GlobalConfigConstants";
 
 interface HeaderProps {
   databaseOptions: string[];
@@ -35,10 +30,15 @@ export const Header = ({
 }: HeaderProps) => {
   const [localSelectedEvent, setLocalSelectedEvent] =
     useState<TimelineEvent | null>(selectedEvent);
+  
   useEffect(() => {
     setLocalSelectedEvent(selectedEvent);
   }, [selectedEvent]);
 
+  const handleSelectEvent = (event: React.SyntheticEvent, newValue: TimelineEvent | null) => {
+    setLocalSelectedEvent(newValue)
+    onEventSearch(event, newValue);
+  }
   return (
     <>
       <header className="App-header">
@@ -80,7 +80,7 @@ export const Header = ({
             <Autocomplete
               options={events}
               value={localSelectedEvent}
-              onChange={(e, newValue) => setLocalSelectedEvent(newValue)}
+              onChange={handleSelectEvent}
               popupIcon={null}
               noOptionsText="Select a database to load events"
               renderInput={(params) => (

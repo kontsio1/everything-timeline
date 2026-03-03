@@ -17,6 +17,7 @@ export const bgColor = "#0f0e0b"
 export const txtColor = "#f5f0e8"
 export const txtColor2 = "#e8dfc8"
 export const btnColor = "#c45c2e"
+export const highlightColor = "#c45c2e"
 
 // --ink: #0f0e0b;
 // --parchment: #f5f0e8;
