@@ -5,7 +5,7 @@ import {
     timelineHeight,
     timelineInitialDomain,
     timelineWidth,
-    noOfVisiblePeriods, horizontalPaddingOfTimeline, bgColor, txtColor
+    noOfVisiblePeriods, horizontalPaddingOfTimeline, bgColor, txtColor, btnColor
 } from "../Constants/GlobalConfigConstants";
 import {TimelinePeriod} from "../Entities/TimelinePeriod";
 import {TimelineEvent} from "../Entities/TimelineEvent";
@@ -20,6 +20,7 @@ import TimelinePeriodMarker from "./TimelinePeriodMarker";
 import EventMarker from "./EventMarker";
 import {svg} from "d3";
 import './Header.css';
+import {LinearProgress} from "@mui/material";
 
 const useStyles = makeStyles({
     timelineContainer: {

@@ -6,6 +6,8 @@ import {UkEvents} from "../Seed/UkEvents";
 import {testFunction, getEvents, addEvents, getDatasets} from "../api/api";
 import {Header} from "./Header";
 import {IApiDataset} from "../api/Interfaces";
+import {LinearProgress} from "@mui/material";
+import {btnColor} from "../Constants/GlobalConfigConstants";
 
 export const TimelinePage = () => {
     const timelineRef = useRef<TimelineComponentHandle>(null);
@@ -13,22 +15,25 @@ export const TimelinePage = () => {
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
     const [selectedDataset, setSelectedDataset] = React.useState<IApiDataset | null>(null);
     const [datasets, setDatasets] = React.useState<IApiDataset[]>([]);
+    const [loading, setLoading] = React.useState(false);
     const periods = seedPeriods;
 
     useMemo(() => {
+        setLoading(true);
         const fetchDatasets = async () => {
             var datasets = await getDatasets();
             setDatasets(datasets);
         };
-        fetchDatasets();
+        fetchDatasets().then(r => setLoading(false));
     }, [])
     useEffect(() => {
+        setLoading(true);
         const fetchEvents = async () => {
             const events = await getEvents(selectedDataset?.Id);
             const timelineEvents = events.map(e => new TimelineEvent([e.Date, 0, 0], e.Name, e.Info))
             setEvents(timelineEvents);
         };
-        fetchEvents();
+        fetchEvents().then(r => setLoading(false));
     }, [selectedDataset]);
     
     const handleEventSearch = (event: React.SyntheticEvent, searchedEvent: TimelineEvent | null) => {
@@ -70,6 +75,7 @@ export const TimelinePage = () => {
                 selectedDatabase={selectedDataset?.Name ?? null}
                 selectedEvent={selectedEvent}
             />
+            {loading && <LinearProgress sx={{ bgcolor: 'rgba(196, 92, 46, 0.2)', '& .MuiLinearProgress-bar': { bgcolor: btnColor } }} />}
             <TimelineComponent
                 ref={timelineRef}
                 events={events}
