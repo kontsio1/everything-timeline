@@ -38,7 +38,6 @@ interface TimelineComponentProps {
     selectedEvent: TimelineEvent | null;
     onDatabaseChange: (event: SyntheticEvent, value: string | null) => void;
     onEventSearch: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
-    onAddEvent: () => void;
 }
 
 export interface TimelineComponentHandle {

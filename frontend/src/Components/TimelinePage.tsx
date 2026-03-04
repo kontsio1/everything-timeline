@@ -5,7 +5,7 @@ import {DefaultEvents, seedPeriods} from "../Seed/DefaultEvents";
 import {UkEvents} from "../Seed/UkEvents";
 import {testFunction, getEvents, addEvents, getDatasets} from "../api/api";
 import {Header} from "./Header";
-import {IApiDataset} from "../api/Interfaces";
+import {IApiDataset, IApiEvent} from "../api/Interfaces";
 import {LinearProgress} from "@mui/material";
 import {btnColor} from "../Constants/GlobalConfigConstants";
 
@@ -49,19 +49,21 @@ export const TimelinePage = () => {
         const selectedDataset = datasets.find(d => d.Name === name) || null;
         setSelectedDataset(selectedDataset);
     };
-
-    const handleAddEvent = () => {
-        // Placeholder for add event functionality
-    };
     
-    const handleAddEvents = async () => {
+    const handleAddEvent = async (eventData: {
+        name: string;
+        year: number;
+        info: string;
+    }) => {
+        const newEvent = { Date: eventData.year, Name: eventData.name, Info: eventData.info, DatasetId: selectedDataset?.Id} as IApiEvent;
         try {
-            // Example: send empty array or a sample event
-            const result = await addEvents([]);
-            alert("AddEvents result: " + JSON.stringify(result));
+            const result = await addEvents([newEvent]);
+            // setEvents([...events, newEvent]);   
+            // alert("AddEvents result: " + JSON.stringify(result));
         } catch (err) {
             alert("AddEvents error: " + err);
         }
+        console.log("New event added:", eventData);
     };
 
     return (
@@ -71,9 +73,10 @@ export const TimelinePage = () => {
                 events={events}
                 onDatabaseChange={handleDatabaseChange}
                 onEventSearch={handleEventSearch}
-                onAddEvent={handleAddEvents}
+                onSubmitEvent={handleAddEvent}
                 selectedDatabase={selectedDataset?.Name ?? null}
                 selectedEvent={selectedEvent}
+                loading={loading}
             />
             {loading && <LinearProgress sx={{ bgcolor: 'rgba(196, 92, 46, 0.2)', '& .MuiLinearProgress-bar': { bgcolor: btnColor } }} />}
             <TimelineComponent
@@ -84,7 +87,6 @@ export const TimelinePage = () => {
                 selectedEvent={selectedEvent}
                 onDatabaseChange={handleDatabaseChange}
                 onEventSearch={handleEventSearch}
-                onAddEvent={handleAddEvent}
             />
         </>
     );

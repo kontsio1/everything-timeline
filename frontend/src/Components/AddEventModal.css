@@ -1,0 +1,170 @@
+/* Modal styling using color constants from GlobalConfigConstants.ts */
+.modal-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #0f0e0b; /* bgColor */
+  color: #f5f0e8; /* txtColor */
+  padding: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  min-width: 400px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  outline: none;
+}
+
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: #f5f0e8; /* txtColor */
+  margin: 0 0 24px 0;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+.modal-field {
+  margin-bottom: 20px;
+}
+
+/* TextField and Autocomplete styling */
+.modal-input .MuiInputLabel-root {
+  color: #e8dfc8 !important; /* txtColor2 */
+  font-family: 'DM Sans', sans-serif !important;
+}
+
+.modal-input .MuiInputBase-input {
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 14px !important;
+  color: #f5f0e8 !important; /* txtColor */
+}
+
+.modal-input .MuiOutlinedInput-root {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-input .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.modal-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.modal-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #c45c2e !important; /* btnColor/highlightColor */
+}
+
+.modal-input .MuiInputLabel-outlined.Mui-focused {
+  color: #f5f0e8 !important; /* txtColor */
+}
+
+/* Disabled state */
+.modal-input .MuiOutlinedInput-root.Mui-disabled {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.modal-input .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.modal-input .MuiInputLabel-root.Mui-disabled {
+  color: rgba(232, 223, 200, 0.5) !important; /* txtColor2 with opacity */
+}
+
+.modal-input .MuiInputBase-input.Mui-disabled {
+  color: rgba(245, 240, 232, 0.5) !important; /* txtColor with opacity */
+  -webkit-text-fill-color: rgba(245, 240, 232, 0.5) !important;
+}
+
+/* Autocomplete clear indicator */
+.modal-input .MuiAutocomplete-clearIndicator {
+  color: #e8dfc8 !important; /* txtColor2 */
+}
+
+/* Autocomplete dropdown paper */
+.modal-autocomplete-paper {
+  background-color: rgba(55, 31, 3, 0.95) !important;
+  color: #f5f0e8 !important; /* txtColor */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.modal-autocomplete-paper .MuiAutocomplete-option {
+  font-family: 'DM Sans', sans-serif !important;
+  color: #e8dfc8 !important; /* txtColor2 */
+}
+
+.modal-autocomplete-paper .MuiAutocomplete-option:hover {
+  background-color: rgba(196, 92, 46, 0.2) !important; /* btnColor with opacity */
+}
+
+.modal-autocomplete-paper .MuiAutocomplete-option[aria-selected="true"] {
+  background-color: rgba(196, 92, 46, 0.3) !important; /* btnColor with opacity */
+}
+
+/* Action buttons */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.modal-btn {
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  padding: 10px 24px !important;
+  border-radius: 4px !important;
+}
+
+.modal-btn-cancel {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #f5f0e8 !important; /* txtColor */
+}
+
+.modal-btn-cancel:hover {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.modal-btn-submit {
+  background: #c45c2e !important; /* btnColor */
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.modal-btn-submit:hover {
+  background: #d4683a !important; /* lighter btnColor */
+}
+
+.modal-btn-submit:disabled {
+  background: rgba(196, 92, 46, 0.3) !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .modal-container {
+    min-width: unset;
+    width: calc(100vw - 32px);
+    padding: 24px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .modal-btn {
+    width: 100%;
+  }
+}
+
