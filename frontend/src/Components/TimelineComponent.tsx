@@ -160,6 +160,8 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
 
     // Add gradient definition for tick stems and axis line
     const axisGradientId = "axis-bar-gradient";
+    const periodMaskId = "period-edge-fade-mask";
+    const periodMaskGradientId = "period-mask-gradient";
 
     // Expose zoomToEvent via ref
     useImperativeHandle(ref, () => ({
@@ -201,15 +203,36 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                             <stop offset="95%" stopColor={txtColor} stopOpacity="0.15" />
                             <stop offset="100%" stopColor="transparent" />
                         </linearGradient>
+                        
+                        {/* Gradient for period edge fade mask */}
+                        <linearGradient id={periodMaskGradientId} x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="white" stopOpacity="0" />
+                            <stop offset="5%" stopColor="white" stopOpacity="1" />
+                            <stop offset="95%" stopColor="white" stopOpacity="1" />
+                            <stop offset="100%" stopColor="white" stopOpacity="0" />
+                        </linearGradient>
+                        
+                        {/* Mask that applies edge fade to periods */}
+                        <mask id={periodMaskId}>
+                            <rect 
+                                x={horizontalPaddingOfTimeline} 
+                                y="0" 
+                                width={timelineWidth - 2 * horizontalPaddingOfTimeline} 
+                                height={timelineHeight} 
+                                fill={`url(#${periodMaskGradientId})`}
+                            />
+                        </mask>
                     </defs>
                     {/* Render markers/periods first, then axis to bring axis forward in z-order */}
-                    {visiblePeriods.map(period => (
-                        <TimelinePeriodMarker
-                            key={period.label + period.startDate.toISOString()}
-                            period={period}
-                            x={getTransformedXScale() ?? (() => 0)}
-                        />
-                    ))}
+                    <g mask={`url(#${periodMaskId})`}>
+                        {visiblePeriods.map(period => (
+                            <TimelinePeriodMarker
+                                key={period.label + period.startDate.toISOString()}
+                                period={period}
+                                x={getTransformedXScale() ?? (() => 0)}
+                            />
+                        ))}
+                    </g>
                     {visibleEvents.map(event => (
                         <EventMarker
                             key={event.label + event.date.toISOString()}
