@@ -1,5 +1,12 @@
-on: [push]
-name: Deploy to ACI
+
+# Workflow disabled until further notice
+# To renable comment out the workflow_dispatch trigger and uncomment the push trigger bellow
+
+#on: [push]
+#name: Deploy to ACI
+on:
+  workflow_dispatch:  # Manual trigger only - effectively disabled
+name: Deploy to ACI (DISABLED)
 
 jobs:
   build-and-deploy:
