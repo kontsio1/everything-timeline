@@ -1,0 +1,21 @@
+export const LoadingMessages = [
+    "Investigating events that definitely happened… probably…",
+    "Interviewing Theodosius…",
+    "Cross-referencing scrolls with gossip from the agora…",
+    "Time-traveling responsibly…",
+    "Polishing the Stone Age…",
+    "Untangling the Gordian Knot…",
+    "Fact-checking Herodotus…",
+    "Fact-checking Herodotus (again)…",
+    "Waiting for the Renaissance to start…",
+    "Searching for Atlantis…",
+    "Syncing the timeline—please don’t alt-tab…",
+    "Compiling empires…",
+    "Fetching hot takes…",
+    "Spawning NPCs…",
+    "Summoning the gods…",
+    "Fetching patch notes…",
+    "Verifying sources…",
+    "Generating canon events…",
+    "Enlightenment moment incoming…"
+]

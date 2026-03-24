@@ -8,24 +8,34 @@ import {Header} from "./Header";
 import {IApiDataset, IApiEvent} from "../api/Interfaces";
 import {LinearProgress} from "@mui/material";
 import {btnColor} from "../Constants/GlobalConfigConstants";
+import {useDatasetContext} from "../context/DatasetContext";
 
 export const TimelinePage = () => {
     const timelineRef = useRef<TimelineComponentHandle>(null);
     const [selectedEvent, setSelectedEvent] = React.useState<TimelineEvent | null>(null);
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
     const [selectedDataset, setSelectedDataset] = React.useState<IApiDataset | null>(null);
-    const [datasets, setDatasets] = React.useState<IApiDataset[]>([]);
     const [loading, setLoading] = React.useState(false);
     const periods = seedPeriods;
+    
+    const { datasets, setDatasets, isInitialized, setIsInitialized } = useDatasetContext();
 
     useMemo(() => {
+        // Only fetch datasets if not already initialized via welcome page
+        if (isInitialized && datasets.length > 0) {
+            return;
+        }
+        
         setLoading(true);
         const fetchDatasets = async () => {
-            var datasets = await getDatasets();
-            setDatasets(datasets);
+            var fetchedDatasets = await getDatasets();
+            setDatasets(fetchedDatasets);
+            setIsInitialized(true);
+            sessionStorage.setItem('everythingTimeline_initialized', 'true');
         };
         fetchDatasets().then(r => setLoading(false));
-    }, [])
+    }, [isInitialized, datasets.length, setDatasets, setIsInitialized])
+    
     useEffect(() => {
         setLoading(true);
         const fetchEvents = async () => {
