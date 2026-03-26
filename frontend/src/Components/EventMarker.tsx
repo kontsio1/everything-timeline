@@ -1,5 +1,4 @@
-import React, {useEffect, useState} from "react";
-import Popover from '@mui/material/Popover';
+import React, {useState} from "react";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import {bgColor, timelineHeight, txtColor, txtColor2} from "../Constants/GlobalConfigConstants";
 import {EventTooltip} from "./EventTooltip";
@@ -36,7 +35,7 @@ const EventMarker: React.FC<EventMarkerProps> = ({event, x}) => {
 
     const handleClick = (clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
         setAnchorEl(clickEvent.currentTarget);
-        setOpen(prev => !prev);
+        setOpen(true);
         event.isHighlighted = true;
     }
 
