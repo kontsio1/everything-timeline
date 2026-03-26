@@ -18,8 +18,7 @@
 }
 
 .App-header {
-  background-color: rgba(15,14,11,0.92);
-  backdrop-filter: blur(12px);
+  background-color: var(--ink);
   position: sticky;
   top: 0;
   min-height: 10vh;

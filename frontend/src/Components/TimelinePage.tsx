@@ -6,8 +6,6 @@ import {UkEvents} from "../Seed/UkEvents";
 import {testFunction, getEvents, addEvents, getDatasets} from "../api/api";
 import {Header} from "./Header";
 import {IApiDataset, IApiEvent} from "../api/Interfaces";
-import {LinearProgress} from "@mui/material";
-import {btnColor} from "../Constants/GlobalConfigConstants";
 import {useDatasetContext} from "../context/DatasetContext";
 
 export const TimelinePage = () => {
@@ -88,7 +86,6 @@ export const TimelinePage = () => {
                 selectedEvent={selectedEvent}
                 loading={loading}
             />
-            {loading && <LinearProgress sx={{ bgcolor: 'rgba(196, 92, 46, 0.2)', '& .MuiLinearProgress-bar': { bgcolor: btnColor } }} />}
             <TimelineComponent
                 ref={timelineRef}
                 events={events}
@@ -97,6 +94,7 @@ export const TimelinePage = () => {
                 selectedEvent={selectedEvent}
                 onDatabaseChange={handleDatabaseChange}
                 onEventSearch={handleEventSearch}
+                loading={loading}
             />
         </>
     );

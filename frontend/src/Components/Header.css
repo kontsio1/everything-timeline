@@ -12,9 +12,7 @@
     top: 0;
     z-index: 100;
     padding: 28px 48px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    background: rgba(60, 56, 53, 0.4);
-    backdrop-filter: blur(12px);
+    background: var(--ink);
 }
 .logo {
     display: flex;
@@ -165,6 +163,17 @@
 .autocomplete-paper {
     background-color: rgba(55, 31, 3, 0.9) !important;
     color: var(--txtColor2) !important;
+}
+
+/* Axis loading animation - moving white line overlay */
+.axis-loading-line {
+    animation: axis-loading-move 1.5s linear infinite;
+}
+
+@keyframes axis-loading-move {
+    0% { transform: translateX(0); opacity: 0; }
+    50% { opacity: 0.6; }
+    100% { transform: translateX(calc(90vw - 170px)); opacity: 0; }
 }
 
 /* Responsive styles for header */

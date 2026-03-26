@@ -5,7 +5,7 @@ import {
     timelineHeight,
     timelineInitialDomain,
     timelineWidth,
-    noOfVisiblePeriods, horizontalPaddingOfTimeline, bgColor, txtColor, btnColor
+    noOfVisiblePeriods, horizontalPaddingOfTimeline, bgColor, txtColor
 } from "../Constants/GlobalConfigConstants";
 import {TimelinePeriod} from "../Entities/TimelinePeriod";
 import {TimelineEvent} from "../Entities/TimelineEvent";
@@ -18,9 +18,7 @@ import {PeriodTooltip} from "./PeriodTooltip";
 import {makeStyles} from "@mui/styles";
 import TimelinePeriodMarker from "./TimelinePeriodMarker";
 import EventMarker from "./EventMarker";
-import {svg} from "d3";
 import './Header.css';
-import {LinearProgress} from "@mui/material";
 
 const useStyles = makeStyles({
     timelineContainer: {
@@ -31,22 +29,23 @@ const useStyles = makeStyles({
     },
 });
 
-interface TimelineComponentProps {
+export interface TimelineComponentProps {
     events: TimelineEvent[];
     periods: TimelinePeriod[];
     selectedDatabase: string | null;
     selectedEvent: TimelineEvent | null;
     onDatabaseChange: (event: SyntheticEvent, value: string | null) => void;
     onEventSearch: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
+    loading: boolean;
 }
 
 export interface TimelineComponentHandle {
     zoomToEvent: (date?: Date) => void;
 }
 
-export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineComponentProps>((props, ref) => {
+export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineComponentProps>(function TimelineComponent(props, ref) {
     const classes = useStyles();
-    const {events, periods} = props;
+    const {events, periods, loading} = props;
     const svgRef = useRef<SVGSVGElement>(null); // SVG ref for React-managed SVG
     const axisRef = useRef<SVGGElement>(null);
     const xScaleRef = useRef<d3.ScaleTime<number, number, never> | null>(null);
@@ -90,20 +89,23 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     useEffect(() => {
         const xScale = getTransformedXScale();
         if (axisRef.current && xScale) {
-            d3.select(axisRef.current)
+            const axisSelection = d3.select(axisRef.current)
                 .call(d3.axisBottom(xScale)
                     .ticks(ticksNo) 
                     .tickFormat(formatTicks));
-            d3.select(axisRef.current).selectAll(".domain")
+
+            axisSelection.selectAll(".domain")
                 .attr("stroke", `url(#${axisGradientId})`)
                 .attr("stroke-width", 3);
-            d3.select(axisRef.current).selectAll(".tick text")
+
+            // Keep tick styling consistent
+            axisSelection.selectAll(".tick text")
                 .attr("fill", txtColor)
                 .attr("dy", "1.71em");
-            d3.select(axisRef.current).selectAll(".tick line")
+            axisSelection.selectAll(".tick line")
                 .attr("stroke", txtColor);
         }
-    }, [transform, visibleEvents, visiblePeriods]);
+    }, [transform, visibleEvents, visiblePeriods, loading]);
 
     const getTransformedXScale = () => {
         const baseScale = xScaleRef.current;
@@ -203,6 +205,15 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                             <stop offset="100%" stopColor="transparent" />
                         </linearGradient>
                         
+                        {/* Gradient for axis loading animation - white line faded on edges */}
+                        <linearGradient id="axis-loading-gradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="white" stopOpacity="0" />
+                            <stop offset="20%" stopColor="white" stopOpacity="0.9" />
+                            <stop offset="50%" stopColor="white" stopOpacity="1" />
+                            <stop offset="80%" stopColor="white" stopOpacity="0.9" />
+                            <stop offset="100%" stopColor="white" stopOpacity="0" />
+                        </linearGradient>
+                        
                         {/* Gradient for period edge fade mask */}
                         <linearGradient id={periodMaskGradientId} x1="0" y1="0" x2="1" y2="0">
                             <stop offset="0%" stopColor="white" stopOpacity="0" />
@@ -240,6 +251,17 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                         />
                     ))}
                     <g ref={axisRef} transform={`translate(0,${timelineHeight / 2})`}/>
+                    {/* Loading animation - white line moving across the axis */}
+                    {loading && (
+                        <rect
+                            className="axis-loading-line"
+                            x={horizontalPaddingOfTimeline}
+                            y={timelineHeight / 2 - 2}
+                            width={120}
+                            height={4}
+                            fill="url(#axis-loading-gradient)"
+                        />
+                    )}
                 </svg>
                 <PeriodTooltip/>
             </div>
