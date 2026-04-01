@@ -1,14 +1,14 @@
 import React, {useState} from "react";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import {bgColor, timelineHeight, txtColor, txtColor2} from "../Constants/GlobalConfigConstants";
-import {EventTooltip} from "./EventTooltip";
 
 interface EventMarkerProps {
     event: TimelineEvent;
     x: (date: Date) => number;
+    onSelect?: (event: TimelineEvent) => void;
 }
 
-const EventComponent: React.FC<EventMarkerProps> = ({event, x}) => {
+const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect}) => {
     const [open, setOpen] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState<SVGSVGElement | null>(null);
 
@@ -37,6 +37,7 @@ const EventComponent: React.FC<EventMarkerProps> = ({event, x}) => {
         setAnchorEl(clickEvent.currentTarget);
         setOpen(true);
         event.isHighlighted = true;
+        onSelect?.(event);
     }
 
     const handleClose = () => {
@@ -108,7 +109,6 @@ const EventComponent: React.FC<EventMarkerProps> = ({event, x}) => {
                     {event.label}
                 </text>
             </svg>
-            <EventTooltip event={event} open={open} anchorEl={anchorEl} onClose={handleClose}/>
         </>
     );
 };

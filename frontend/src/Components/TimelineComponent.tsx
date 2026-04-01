@@ -36,6 +36,7 @@ export interface TimelineComponentProps {
     selectedEvent: TimelineEvent | null;
     onDatabaseChange: (event: SyntheticEvent, value: string | null) => void;
     onEventSearch: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
+    onEventSelect?: (event: TimelineEvent) => void;
     loading: boolean;
 }
 
@@ -45,7 +46,7 @@ export interface TimelineComponentHandle {
 
 export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineComponentProps>(function TimelineComponent(props, ref) {
     const classes = useStyles();
-    const {events, periods, loading} = props;
+    const {events, periods, loading, onEventSelect} = props;
     const svgRef = useRef<SVGSVGElement>(null); // SVG ref for React-managed SVG
     const axisRef = useRef<SVGGElement>(null);
     const xScaleRef = useRef<d3.ScaleTime<number, number, never> | null>(null);
@@ -250,6 +251,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                             key={event.label + event.date.toISOString()}
                             event={event}
                             x={getTransformedXScale() ?? (() => 0)}
+                            onSelect={onEventSelect}
                         />
                     ))}
                     <g ref={axisRef} transform={`translate(0,${timelineHeight / 2})`}/>

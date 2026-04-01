@@ -72,6 +72,7 @@ export const Header = ({
     return (
         <>
             <header className="App-header">
+                {/*Maybe app bar?*/}
                 <div className="controls">
                     {/*Consider changing to ListItemButton*/}
                     <div className="db-select">

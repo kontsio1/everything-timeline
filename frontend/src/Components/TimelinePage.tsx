@@ -7,10 +7,12 @@ import {testFunction, getEvents, addEvents, getDatasets} from "../api/api";
 import {Header} from "./Header";
 import {IApiDataset, IApiEvent} from "../api/Interfaces";
 import {useDatasetContext} from "../context/DatasetContext";
+import {EventDetailsPanel} from "./EventDetailsPanel";
 
 export const TimelinePage = () => {
     const timelineRef = useRef<TimelineComponentHandle>(null);
     const [selectedEvent, setSelectedEvent] = React.useState<TimelineEvent | null>(null);
+    const [detailsEvent, setDetailsEvent] = React.useState<TimelineEvent | null>(null);
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
     const [selectedDataset, setSelectedDataset] = React.useState<IApiDataset | null>(null);
     const [loading, setLoading] = React.useState(false);
@@ -48,6 +50,7 @@ export const TimelinePage = () => {
         if(searchedEvent) {
             searchedEvent.isHighlighted = true;
             setSelectedEvent(searchedEvent);
+            setDetailsEvent(searchedEvent);
             timelineRef.current?.zoomToEvent(searchedEvent);
         }
     };
@@ -74,6 +77,14 @@ export const TimelinePage = () => {
         console.log("New event added:", eventData);
     };
 
+    const handleEventSelect = (event: TimelineEvent) => {
+        setDetailsEvent(event);
+    };
+
+    const handleCloseDetails = () => {
+        setDetailsEvent(null);
+    };
+
     return (
         <>
             <Header
@@ -94,7 +105,12 @@ export const TimelinePage = () => {
                 selectedEvent={selectedEvent}
                 onDatabaseChange={handleDatabaseChange}
                 onEventSearch={handleEventSearch}
+                onEventSelect={handleEventSelect}
                 loading={loading}
+            />
+            <EventDetailsPanel
+                event={detailsEvent}
+                onClose={handleCloseDetails}
             />
         </>
     );
