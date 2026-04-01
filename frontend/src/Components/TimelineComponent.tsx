@@ -5,7 +5,7 @@ import {
     timelineHeight,
     timelineInitialDomain,
     timelineWidth,
-    noOfVisiblePeriods, horizontalPaddingOfTimeline, bgColor, txtColor
+    noOfVisiblePeriods, horizontalPaddingOfTimeline, bgColor, txtColor, zoomToEventDuration
 } from "../Constants/GlobalConfigConstants";
 import {TimelinePeriod} from "../Entities/TimelinePeriod";
 import {TimelineEvent} from "../Entities/TimelineEvent";
@@ -17,7 +17,7 @@ import {
 import {PeriodTooltip} from "./PeriodTooltip";
 import {makeStyles} from "@mui/styles";
 import TimelinePeriodMarker from "./TimelinePeriodMarker";
-import EventMarker from "./EventMarker";
+import EventComponent from "./EventComponent";
 import './Header.css';
 
 const useStyles = makeStyles({
@@ -40,7 +40,7 @@ export interface TimelineComponentProps {
 }
 
 export interface TimelineComponentHandle {
-    zoomToEvent: (date?: Date) => void;
+    zoomToEvent: (event?: TimelineEvent) => void;
 }
 
 export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineComponentProps>(function TimelineComponent(props, ref) {
@@ -166,7 +166,8 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
 
     // Expose zoomToEvent via ref
     useImperativeHandle(ref, () => ({
-        zoomToEvent(date?: Date) {
+        zoomToEvent(event?: TimelineEvent) {
+            const date = event?.date;
             if (!date || !xScaleRef.current || !svgRef.current) return;
             const xScale = xScaleRef.current;
             const targetX = xScale(date);
@@ -187,8 +188,9 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                 });
             svgSelection.call(zoomBehavior);
             svgSelection.transition()
-                .duration(1200)
+                .duration(zoomToEventDuration)
                 .call(zoomBehavior.transform, targetTransform);
+            setTimeout(()=> {event.isHighlighted = true}, zoomToEventDuration)
         }
     }));
 
@@ -244,7 +246,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                         ))}
                     </g>
                     {visibleEvents.map(event => (
-                        <EventMarker
+                        <EventComponent
                             key={event.label + event.date.toISOString()}
                             event={event}
                             x={getTransformedXScale() ?? (() => 0)}

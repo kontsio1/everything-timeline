@@ -46,9 +46,9 @@ export const TimelinePage = () => {
     
     const handleEventSearch = (event: React.SyntheticEvent, searchedEvent: TimelineEvent | null) => {
         if(searchedEvent) {
-            setSelectedEvent(searchedEvent);
             searchedEvent.isHighlighted = true;
-            timelineRef.current?.zoomToEvent(searchedEvent?.date);
+            setSelectedEvent(searchedEvent);
+            timelineRef.current?.zoomToEvent(searchedEvent);
         }
     };
 

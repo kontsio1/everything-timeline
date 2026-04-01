@@ -8,7 +8,7 @@ interface EventMarkerProps {
     x: (date: Date) => number;
 }
 
-const EventMarker: React.FC<EventMarkerProps> = ({event, x}) => {
+const EventComponent: React.FC<EventMarkerProps> = ({event, x}) => {
     const [open, setOpen] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState<SVGSVGElement | null>(null);
 
@@ -113,4 +113,4 @@ const EventMarker: React.FC<EventMarkerProps> = ({event, x}) => {
     );
 };
 
-export default EventMarker;
+export default EventComponent;

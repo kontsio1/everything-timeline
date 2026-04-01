@@ -1,9 +1,11 @@
 import "./Header.css";
 import Autocomplete from "@mui/material/Autocomplete";
-import {Button, TextField} from "@mui/material";
+import {Button, Fab, TextField} from "@mui/material";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import React, {useState, useEffect} from "react";
 import {AddEventModal} from "./AddEventModal";
+import AddIcon from '@mui/icons-material/Edit';
 
 interface HeaderProps {
     databaseOptions: string[];
@@ -70,13 +72,8 @@ export const Header = ({
     return (
         <>
             <header className="App-header">
-                <div className="logo">
-                    <span className="logo-word">Kontsio's</span>
-                    <div className="logo-dot"></div>
-                    <span className="logo-sub">Timeline of Everything</span>
-                </div>
-
                 <div className="controls">
+                    {/*Consider changing to ListItemButton*/}
                     <div className="db-select">
                         <Autocomplete
                             options={databaseOptions}
@@ -101,8 +98,7 @@ export const Header = ({
                             variant="contained"
                             disabled={selectedDatabase =="" || selectedDatabase === null || loading}
                             onClick={handleOpenModal}
-                        >
-                            +
+                        >+{/*TODO: consider changing to FAB*/}
                         </Button>
                     </div>
                     <div className="search-wrap-autocomplete">
@@ -134,7 +130,12 @@ export const Header = ({
                         </Button>
                     </div>
                 </div>
-
+                <div className="logo">
+                    <span className="logo-word">Kontsio's</span>
+                    <div className="logo-dot"></div>
+                    <span className="logo-sub">Timeline of Everything</span>
+                </div>
+                <AccountCircleIcon className="user-icon" />
                 {children}
             </header>
 
