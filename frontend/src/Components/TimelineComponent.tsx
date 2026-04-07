@@ -54,6 +54,9 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     const [visibleEvents, setVisibleEvents] = useState<TimelineEvent[]>([]);
     const [visiblePeriods, setVisiblePeriods] = useState<TimelinePeriod[]>([]);
     const [transform, setTransform] = useState<{ x: number, k: number }>({x: 0, k: 1}); //x axis panning & scale/zoom state
+    const [renderEvents, setRenderEvents] = useState<{ event: TimelineEvent; fade: "enter" | "stable" }[]>([]);
+
+    const getEventKey = (event: TimelineEvent) => `${event.label}-${event.date.toISOString()}`;
 
     const formatTicks = (domainValue: any) => {
         const date = domainValue instanceof Date ? domainValue : new Date(Number(domainValue));
@@ -107,6 +110,27 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                 .attr("stroke", txtColor);
         }
     }, [transform, visibleEvents, visiblePeriods, loading]);
+
+    useEffect(() => {
+        setRenderEvents(prev => {
+            const prevByKey = new Map(prev.map(item => [getEventKey(item.event), item]));
+            return visibleEvents.map(event => {
+                const key = getEventKey(event);
+                const previous = prevByKey.get(key);
+                return {event, fade: previous ? "stable" : "enter"};
+            });
+        });
+    }, [visibleEvents]);
+
+    useEffect(() => {
+        const hasEntering = renderEvents.some(item => item.fade === "enter");
+        if (!hasEntering) return;
+        const rafId = window.requestAnimationFrame(() => {
+            setRenderEvents(prev => prev.map(item => item.fade === "enter" ? {...item, fade: "stable"} : item));
+        });
+        return () => window.cancelAnimationFrame(rafId);
+    }, [renderEvents]);
+
 
     const getTransformedXScale = () => {
         const baseScale = xScaleRef.current;
@@ -246,12 +270,13 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                             />
                         ))}
                     </g>
-                    {visibleEvents.map(event => (
+                    {renderEvents.map(item => (
                         <EventComponent
-                            key={event.label + event.date.toISOString()}
-                            event={event}
+                            key={getEventKey(item.event)}
+                            event={item.event}
                             x={getTransformedXScale() ?? (() => 0)}
                             onSelect={onEventSelect}
+                            fadeState={item.fade}
                         />
                     ))}
                     <g ref={axisRef} transform={`translate(0,${timelineHeight / 2})`}/>

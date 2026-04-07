@@ -1,0 +1,8 @@
+.event-fade {
+    opacity: 1;
+    transition: opacity 2500ms ease;
+}
+
+.event-fade-enter {
+    opacity: 0;
+}

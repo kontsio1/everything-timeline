@@ -1,14 +1,16 @@
 import React, {useState} from "react";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import {bgColor, timelineHeight, txtColor, txtColor2} from "../Constants/GlobalConfigConstants";
+import './EventComponent.css';
 
 interface EventMarkerProps {
     event: TimelineEvent;
     x: (date: Date) => number;
     onSelect?: (event: TimelineEvent) => void;
+    fadeState?: "enter" | "stable";
 }
 
-const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect}) => {
+const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect, fadeState = "stable"}) => {
     const [open, setOpen] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState<SVGSVGElement | null>(null);
 
@@ -52,6 +54,7 @@ const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect}) => {
         <>
             <svg
                 onClick={handleClick}
+                className={`event-fade event-fade-${fadeState}`}
                 style={{cursor: "pointer", background: '#222'}}
                 width={window.innerWidth * 0.9}
                 height={window.innerHeight * 0.7}
