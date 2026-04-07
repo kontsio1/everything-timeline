@@ -125,7 +125,7 @@ export const Header = ({
                         <Button
                             className="search-icon"
                             variant="contained"
-                            onClick={(e) => onEventSearch(e, localSelectedEvent)}
+                            onClick={(e) => handleSelectEvent(e, localSelectedEvent)}
                         >
                             &#x2315;
                         </Button>

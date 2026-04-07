@@ -5,17 +5,18 @@ import './EventDetailsPanel.css';
 interface EventDetailsPanelProps {
     event: TimelineEvent | null;
     onClose: () => void;
+    scrollOnOpen: boolean;
 }
 
-export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({ event, onClose }) => {
+export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({ event, onClose, scrollOnOpen }) => {
     const isVisible = event !== null;
     const panelRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        if (event && panelRef.current) {
+        if (scrollOnOpen && event && panelRef.current) {
             panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    }, [event]);
+    }, [event, scrollOnOpen]);
 
     return (
         <div

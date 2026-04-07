@@ -1,6 +1,6 @@
-import React, {useState} from "react";
+import React from "react";
 import {TimelineEvent} from "../Entities/TimelineEvent";
-import {bgColor, timelineHeight, txtColor, txtColor2} from "../Constants/GlobalConfigConstants";
+import {bgColor, timelineHeight, txtColor2} from "../Constants/GlobalConfigConstants";
 import './EventComponent.css';
 
 interface EventMarkerProps {
@@ -8,12 +8,11 @@ interface EventMarkerProps {
     x: (date: Date) => number;
     onSelect?: (event: TimelineEvent) => void;
     fadeState?: "enter" | "stable";
+    isHighlighted: boolean;
+    shouldPulse: boolean;
 }
 
-const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect, fadeState = "stable"}) => {
-    const [open, setOpen] = useState(false);
-    const [anchorEl, setAnchorEl] = React.useState<SVGSVGElement | null>(null);
-
+const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect, fadeState = "stable", isHighlighted, shouldPulse}) => {
     const timelineX = x(event.date);
     const baseY = timelineHeight / 2;
 
@@ -35,26 +34,20 @@ const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect, fadeSta
     //left edge of the box, used for tooltip positioning
     event.boxX = rectX;
 
-    const handleClick = (clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-        setAnchorEl(clickEvent.currentTarget);
-        setOpen(true);
-        event.isHighlighted = true;
+    const handleClick = () => {
         onSelect?.(event);
     }
 
-    const handleClose = () => {
-        event.isHighlighted = false;
-        setOpen(false);
-    }
     const gradientId = `event-stem-gradient-${event.date.getTime()}`;
     const stemHeight = Math.abs(stem.bottom - stem.top);
-    const strokeWidth = event.isHighlighted ? 5 : 1;
+    const strokeWidth = isHighlighted ? 5 : 1;
 
     return (
         <>
             <svg
                 onClick={handleClick}
-                className={`event-fade event-fade-${fadeState}`}
+                className={`timeline-event event-fade event-fade-${fadeState} ${shouldPulse ? "event-pulse" : ""}`}
+                data-event-key={`${event.label}-${event.date.toISOString()}`}
                 style={{cursor: "pointer", background: '#222'}}
                 width={window.innerWidth * 0.9}
                 height={window.innerHeight * 0.7}
@@ -71,6 +64,7 @@ const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect, fadeSta
                 <rect x={timelineX + 0.25} y={stem.top} height={stemHeight} width="0.5" fill={`url(#${gradientId})`}
                       z={-10}/>
                 <circle
+                    className="event-circle"
                     cx={timelineX}
                     cy={baseY}
                     r={event.radius}
@@ -90,6 +84,7 @@ const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect, fadeSta
                     strokeWidth={0}
                 />
                 <rect
+                    className="event-label"
                     width={rectWidth}
                     height={rectHeight}
                     x={rectX}

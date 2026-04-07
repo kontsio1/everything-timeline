@@ -13,6 +13,7 @@ export const defaultEventStemHeight = 50;
 export const horizontalPaddingOfTimeline = timelineWidth*0.05; // horizontal distance between the left edge of the timeline rectangle (SVG) and the start of the timeline, also applied to the right edge
 export const timelineTopEventsMargin = timelineHeight*0.1
 export const zoomToEventDuration = 1200;
+export const pulseEventDuration = 10000; // doesn't work
 
 export const bgColor = "#0f0e0b"
 export const txtColor = "#f5f0e8"

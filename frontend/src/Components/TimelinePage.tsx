@@ -1,24 +1,28 @@
 import {TimelineComponent, TimelineComponentHandle} from "./TimelineComponent";
 import React, {useEffect, useMemo, useRef} from "react";
 import {TimelineEvent} from "../Entities/TimelineEvent";
-import {DefaultEvents, seedPeriods} from "../Seed/DefaultEvents";
-import {UkEvents} from "../Seed/UkEvents";
-import {testFunction, getEvents, addEvents, getDatasets} from "../api/api";
+import {seedPeriods} from "../Seed/DefaultEvents";
+import {getEvents, addEvents, getDatasets} from "../api/api";
 import {Header} from "./Header";
 import {IApiDataset, IApiEvent} from "../api/Interfaces";
 import {useDatasetContext} from "../context/DatasetContext";
 import {EventDetailsPanel} from "./EventDetailsPanel";
+import {pulseEventDuration, zoomToEventDuration} from "../Constants/GlobalConfigConstants";
 
 export const TimelinePage = () => {
     const timelineRef = useRef<TimelineComponentHandle>(null);
-    const [selectedEvent, setSelectedEvent] = React.useState<TimelineEvent | null>(null);
+    const [highlightedEvent, setHighlightedEvent] = React.useState<TimelineEvent | null>(null);
     const [detailsEvent, setDetailsEvent] = React.useState<TimelineEvent | null>(null);
+    const [pulseEventKey, setPulseEventKey] = React.useState<string | null>(null);
+    const [scrollDetailsOnOpen, setScrollDetailsOnOpen] = React.useState(false);
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
     const [selectedDataset, setSelectedDataset] = React.useState<IApiDataset | null>(null);
     const [loading, setLoading] = React.useState(false);
     const periods = seedPeriods;
     
     const { datasets, setDatasets, isInitialized, setIsInitialized } = useDatasetContext();
+
+    const getEventKey = (event: TimelineEvent) => `${event.label}-${event.date.toISOString()}`;
 
     useMemo(() => {
         // Only fetch datasets if not already initialized via welcome page
@@ -46,13 +50,35 @@ export const TimelinePage = () => {
         fetchEvents().then(r => setLoading(false));
     }, [selectedDataset]);
     
+    useEffect(() => {
+        const handleOutsideClick = (event: MouseEvent) => {
+            const target = event.target as HTMLElement | null;
+            if (!target?.closest(".timeline-event")) {
+                setHighlightedEvent(null);
+            }
+        };
+        document.addEventListener("mousedown", handleOutsideClick);
+        return () => document.removeEventListener("mousedown", handleOutsideClick);
+    }, []);
+
+    useEffect(() => {
+        setHighlightedEvent(null);
+        setDetailsEvent(null);
+        setPulseEventKey(null);
+        setScrollDetailsOnOpen(false);
+    }, [selectedDataset]);
+
     const handleEventSearch = (event: React.SyntheticEvent, searchedEvent: TimelineEvent | null) => {
-        if(searchedEvent) {
-            searchedEvent.isHighlighted = true;
-            setSelectedEvent(searchedEvent);
-            setDetailsEvent(searchedEvent);
-            timelineRef.current?.zoomToEvent(searchedEvent);
-        }
+        if (!searchedEvent) return;
+        const eventKey = getEventKey(searchedEvent);
+        setHighlightedEvent(searchedEvent);
+        setDetailsEvent(searchedEvent);
+        setScrollDetailsOnOpen(false);
+        setPulseEventKey(eventKey);
+        timelineRef.current?.zoomToEvent(searchedEvent);
+        window.setTimeout(() => {
+            setPulseEventKey(current => (current === eventKey ? null : current));
+        }, zoomToEventDuration + pulseEventDuration);
     };
 
 
@@ -78,11 +104,16 @@ export const TimelinePage = () => {
     };
 
     const handleEventSelect = (event: TimelineEvent) => {
+        setHighlightedEvent(event);
         setDetailsEvent(event);
+        setScrollDetailsOnOpen(true);
+        setPulseEventKey(null);
     };
 
     const handleCloseDetails = () => {
+        setHighlightedEvent(null);
         setDetailsEvent(null);
+        setScrollDetailsOnOpen(false);
     };
 
     return (
@@ -94,7 +125,7 @@ export const TimelinePage = () => {
                 onEventSearch={handleEventSearch}
                 onSubmitEvent={handleAddEvent}
                 selectedDatabase={selectedDataset?.Name ?? null}
-                selectedEvent={selectedEvent}
+                selectedEvent={detailsEvent}
                 loading={loading}
             />
             <TimelineComponent
@@ -102,7 +133,8 @@ export const TimelinePage = () => {
                 events={events}
                 periods={periods}
                 selectedDatabase={selectedDataset?.Name ?? null}
-                selectedEvent={selectedEvent}
+                highlightedEventKey={highlightedEvent ? getEventKey(highlightedEvent) : null}
+                pulseEventKey={pulseEventKey}
                 onDatabaseChange={handleDatabaseChange}
                 onEventSearch={handleEventSearch}
                 onEventSelect={handleEventSelect}
@@ -111,6 +143,7 @@ export const TimelinePage = () => {
             <EventDetailsPanel
                 event={detailsEvent}
                 onClose={handleCloseDetails}
+                scrollOnOpen={scrollDetailsOnOpen}
             />
         </>
     );

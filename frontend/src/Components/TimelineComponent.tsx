@@ -33,7 +33,8 @@ export interface TimelineComponentProps {
     events: TimelineEvent[];
     periods: TimelinePeriod[];
     selectedDatabase: string | null;
-    selectedEvent: TimelineEvent | null;
+    highlightedEventKey: string | null;
+    pulseEventKey: string | null;
     onDatabaseChange: (event: SyntheticEvent, value: string | null) => void;
     onEventSearch: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
     onEventSelect?: (event: TimelineEvent) => void;
@@ -164,11 +165,6 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         const eventsInDomain = events.filter(p => p.date >= domainStart && p.date <= domainEnd);
         computeEventPositionByLaneStrategy(eventsInDomain);
         let filteredEvents = eventsInDomain.filter(e => e.stemHeight != -1);
-        events.forEach(event => {
-            if (!filteredEvents.includes(event)) {
-                event.isHighlighted = false;
-            }
-        });
         setVisibleEvents(filteredEvents);
     };
     const updatePeriods = (newX: d3.ScaleTime<number, number, never>) => {
@@ -215,7 +211,6 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
             svgSelection.transition()
                 .duration(zoomToEventDuration)
                 .call(zoomBehavior.transform, targetTransform);
-            setTimeout(()=> {event.isHighlighted = true}, zoomToEventDuration)
         }
     }));
 
@@ -277,6 +272,8 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                             x={getTransformedXScale() ?? (() => 0)}
                             onSelect={onEventSelect}
                             fadeState={item.fade}
+                            isHighlighted={getEventKey(item.event) === props.highlightedEventKey}
+                            shouldPulse={getEventKey(item.event) === props.pulseEventKey}
                         />
                     ))}
                     <g ref={axisRef} transform={`translate(0,${timelineHeight / 2})`}/>
