@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { TimelineEvent } from '../Entities/TimelineEvent';
 import './EventDetailsPanel.css';
 
@@ -9,9 +9,19 @@ interface EventDetailsPanelProps {
 
 export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({ event, onClose }) => {
     const isVisible = event !== null;
+    const panelRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (event && panelRef.current) {
+            panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [event]);
 
     return (
-        <div className={`event-details-panel ${isVisible ? 'visible' : ''}`}>
+        <div
+            ref={panelRef}
+            className={`event-details-panel ${isVisible ? 'visible' : ''}`}
+        >
             <button 
                 className="close-button"
                 onClick={onClose}
@@ -32,5 +42,3 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({ event, onC
         </div>
     );
 };
-
-
