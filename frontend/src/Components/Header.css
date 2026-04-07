@@ -48,6 +48,27 @@
     font-size: 36px;
     cursor: pointer;
 }
+
+.user-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.hover-line-toggle .MuiFormControlLabel-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--txtColor2);
+}
+
+.hover-line-toggle .MuiSwitch-root {
+    padding: 0;
+}
+
+.hover-line-toggle .MuiSwitch-switchBase.Mui-checked .MuiSwitch-thumb {
+    background-color: #c45c2e;
+}
 .controls {
     display: flex;
     align-items: flex-start;
@@ -211,5 +232,9 @@
         flex: 1 1 100px;
         min-width: 0;
         margin-bottom: 0;
+    }
+
+    .user-controls {
+        margin-top: 8px;
     }
 }

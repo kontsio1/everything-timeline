@@ -18,6 +18,7 @@ import {PeriodTooltip} from "./PeriodTooltip";
 import {makeStyles} from "@mui/styles";
 import TimelinePeriodMarker from "./TimelinePeriodMarker";
 import EventComponent from "./EventComponent";
+import TimelineHoverLine from "./TimelineHoverLine";
 import './Header.css';
 
 const useStyles = makeStyles({
@@ -39,6 +40,7 @@ export interface TimelineComponentProps {
     onEventSearch: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
     onEventSelect?: (event: TimelineEvent) => void;
     loading: boolean;
+    hoverLineEnabled: boolean;
 }
 
 export interface TimelineComponentHandle {
@@ -56,6 +58,9 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     const [visiblePeriods, setVisiblePeriods] = useState<TimelinePeriod[]>([]);
     const [transform, setTransform] = useState<{ x: number, k: number }>({x: 0, k: 1}); //x axis panning & scale/zoom state
     const [renderEvents, setRenderEvents] = useState<{ event: TimelineEvent; fade: "enter" | "stable" }[]>([]);
+    const [hoverX, setHoverX] = useState<number | null>(null);
+    const [hoverY, setHoverY] = useState<number | null>(null);
+    const [isHoveringTimeline, setIsHoveringTimeline] = useState(false);
 
     const getEventKey = (event: TimelineEvent) => `${event.label}-${event.date.toISOString()}`;
 
@@ -185,6 +190,18 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     const periodMaskId = "period-edge-fade-mask";
     const periodMaskGradientId = "period-mask-gradient";
 
+    const handleTimelineMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
+        if (!svgRef.current) return;
+        const rect = svgRef.current.getBoundingClientRect();
+        setHoverX(event.clientX - rect.left);
+        setHoverY(event.clientY - rect.top);
+        setIsHoveringTimeline(true);
+    };
+
+    const handleTimelineMouseLeave = () => {
+        setIsHoveringTimeline(false);
+    };
+
     // Expose zoomToEvent via ref
     useImperativeHandle(ref, () => ({
         zoomToEvent(event?: TimelineEvent) {
@@ -217,7 +234,14 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     return (
         <>
             <div className={classes.timelineContainer}>
-                <svg ref={svgRef} width="90vw" height="70vh" style={{background: bgColor}}>
+                <svg
+                    ref={svgRef}
+                    width="90vw"
+                    height="70vh"
+                    style={{background: bgColor}}
+                    onMouseMove={handleTimelineMouseMove}
+                    onMouseLeave={handleTimelineMouseLeave}
+                >
                     {/* Gradient definitions for tick stems and axis line */}
                     <defs>
                         <linearGradient id={axisGradientId} x1="0" y1="0" x2="1" y2="0">
@@ -265,17 +289,27 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                             />
                         ))}
                     </g>
-                    {renderEvents.map(item => (
-                        <EventComponent
-                            key={getEventKey(item.event)}
-                            event={item.event}
-                            x={getTransformedXScale() ?? (() => 0)}
-                            onSelect={onEventSelect}
-                            fadeState={item.fade}
-                            isHighlighted={getEventKey(item.event) === props.highlightedEventKey}
-                            shouldPulse={getEventKey(item.event) === props.pulseEventKey}
+                    <g mask={`url(#${periodMaskId})`}>
+                        {renderEvents.map(item => (
+                            <EventComponent
+                                key={getEventKey(item.event)}
+                                event={item.event}
+                                x={getTransformedXScale() ?? (() => 0)}
+                                onSelect={onEventSelect}
+                                fadeState={item.fade}
+                                isHighlighted={getEventKey(item.event) === props.highlightedEventKey}
+                                shouldPulse={getEventKey(item.event) === props.pulseEventKey}
+                            />
+                        ))}
+                    </g>
+                    {props.hoverLineEnabled && (
+                        <TimelineHoverLine
+                            xScale={getTransformedXScale()}
+                            hoverX={hoverX}
+                            hoverY={hoverY}
+                            isActive={isHoveringTimeline && !loading}
                         />
-                    ))}
+                    )}
                     <g ref={axisRef} transform={`translate(0,${timelineHeight / 2})`}/>
                     {/* Loading animation - white line moving across the axis */}
                     {loading && (

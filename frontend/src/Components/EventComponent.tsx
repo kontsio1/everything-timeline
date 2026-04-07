@@ -43,71 +43,66 @@ const EventComponent: React.FC<EventMarkerProps> = ({event, x, onSelect, fadeSta
     const strokeWidth = isHighlighted ? 5 : 1;
 
     return (
-        <>
-            <svg
-                onClick={handleClick}
-                className={`timeline-event event-fade event-fade-${fadeState} ${shouldPulse ? "event-pulse" : ""}`}
-                data-event-key={`${event.label}-${event.date.toISOString()}`}
-                style={{cursor: "pointer", background: '#222'}}
-                width={window.innerWidth * 0.9}
-                height={window.innerHeight * 0.7}
-                viewBox={`0 0 ${window.innerWidth * 0.9} ${window.innerHeight * 0.7}`}
+        <g
+            onClick={handleClick}
+            className={`timeline-event event-fade event-fade-${fadeState} ${shouldPulse ? "event-pulse" : ""}`}
+            data-event-key={`${event.label}-${event.date.toISOString()}`}
+            style={{cursor: "pointer"}}
+        >
+            <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="transparent"/>
+                    <stop offset="100%" stopColor={txtColor2}/>
+                </linearGradient>
+            </defs>
+            //actually draw the stem as a thin rectangle with the gradient fill, instead of a line, to allow for the
+            gradient effect
+            <rect x={timelineX + 0.25} y={stem.top} height={stemHeight} width="0.5" fill={`url(#${gradientId})`}
+                  z={-10}/>
+            <circle
+                className="event-circle"
+                cx={timelineX}
+                cy={baseY}
+                r={event.radius}
+                fill={event.colour}
+                fillOpacity={0.2}
+                stroke={txtColor2}
+                strokeOpacity={event.opacity}
+                strokeWidth={strokeWidth}
+                z={100}
+            />
+            <line
+                x1={timelineX}
+                y1={stem.top}
+                x2={timelineX}
+                y2={stem.bottom}
+                opacity={0}
+                strokeWidth={0}
+            />
+            <rect
+                className="event-label"
+                width={rectWidth}
+                height={rectHeight}
+                x={rectX}
+                y={rectY}
+                fill={bgColor}
+                strokeOpacity={event.opacity}
+                stroke={event.colour}
+                strokeWidth={strokeWidth}
+                rx={8}
+                ry={8}
+            />
+            <text
+                x={timelineX}
+                y={textY}
+                textAnchor="middle"
+                fontSize={fontSize}
+                alignmentBaseline="middle"
+                fill={txtColor2}
             >
-                <defs>
-                    <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="transparent"/>
-                        <stop offset="100%" stopColor={txtColor2}/>
-                    </linearGradient>
-                </defs>
-                //actually draw the stem as a thin rectangle with the gradient fill, instead of a line, to allow for the
-                gradient effect
-                <rect x={timelineX + 0.25} y={stem.top} height={stemHeight} width="0.5" fill={`url(#${gradientId})`}
-                      z={-10}/>
-                <circle
-                    className="event-circle"
-                    cx={timelineX}
-                    cy={baseY}
-                    r={event.radius}
-                    fill={event.colour}
-                    fillOpacity={0.2}
-                    stroke={txtColor2}
-                    strokeOpacity={event.opacity}
-                    strokeWidth={strokeWidth}
-                    z={100}
-                />
-                <line
-                    x1={timelineX}
-                    y1={stem.top}
-                    x2={timelineX}
-                    y2={stem.bottom}
-                    opacity={0}
-                    strokeWidth={0}
-                />
-                <rect
-                    className="event-label"
-                    width={rectWidth}
-                    height={rectHeight}
-                    x={rectX}
-                    y={rectY}
-                    fill={bgColor}
-                    strokeOpacity={event.opacity}
-                    stroke={event.colour}
-                    strokeWidth={strokeWidth}
-                    rx={8}
-                    ry={8}
-                />
-                <text
-                    x={timelineX}
-                    y={textY}
-                    textAnchor="middle"
-                    fontSize={fontSize}
-                    alignmentBaseline="middle"
-                    fill={txtColor2}
-                >
-                    {event.label}
-                </text>
-            </svg>
-        </>
+                {event.label}
+            </text>
+        </g>
     );
 };
 

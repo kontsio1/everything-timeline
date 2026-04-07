@@ -1,0 +1,20 @@
+.timeline-hover-line-stroke {
+    stroke: #f5f0e8;
+    stroke-width: 0.5;
+    opacity: 0.9;
+}
+
+.timeline-hover-label {
+    fill: #ffffff;
+    stroke: #f5f0e8;
+    stroke-width: 0.5;
+    opacity: 0.3;
+}
+
+.timeline-hover-label-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
