@@ -6,6 +6,34 @@
   overflow: auto;
 }
 
+.dev-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(196, 92, 46, 0.15);
+  color: var(--parchment);
+  border-bottom: 1px solid rgba(196, 92, 46, 0.4);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+}
+
+.dev-banner-close {
+  background: transparent;
+  border: 1px solid rgba(245, 240, 232, 0.5);
+  color: var(--parchment);
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.dev-banner-close:hover {
+  border-color: rgba(245, 240, 232, 0.8);
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
