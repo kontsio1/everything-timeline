@@ -18,7 +18,6 @@ export const TimelinePage = () => {
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
     const [selectedDataset, setSelectedDataset] = React.useState<IApiDataset | null>(null);
     const [loading, setLoading] = React.useState(false);
-    const [hoverLineEnabled, setHoverLineEnabled] = React.useState(true);
     const periods = seedPeriods;
     
     const { datasets, setDatasets, isInitialized, setIsInitialized } = useDatasetContext();
@@ -127,8 +126,6 @@ export const TimelinePage = () => {
                 onSubmitEvent={handleAddEvent}
                 selectedDatabase={selectedDataset?.Name ?? null}
                 selectedEvent={detailsEvent}
-                hoverLineEnabled={hoverLineEnabled}
-                onHoverLineToggle={setHoverLineEnabled}
                 loading={loading}
             />
             <TimelineComponent
@@ -142,7 +139,6 @@ export const TimelinePage = () => {
                 onEventSearch={handleEventSearch}
                 onEventSelect={handleEventSelect}
                 loading={loading}
-                hoverLineEnabled={hoverLineEnabled}
             />
             <EventDetailsPanel
                 event={detailsEvent}

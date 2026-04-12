@@ -9,7 +9,12 @@ export const ticksNo = (window.innerWidth > 500)? 10 : 4;
 export const noOfVisiblePeriods = 7;
 export const priorityOverlapBonuses = [2, 0.3, 0, -0.25, -0.5] // [0, 0-100, 100-200, 200-200, >300]
 export const eventBoxMargin = 15; // min margin enforced between event boxes for overalap handling
-export const defaultEventStemHeight = 50;
+export const defaultEventStemHeight = 50; //s controlled
+export const defaultLaneHeightPadding = 30 //overrides calculated value in computeEventPositionByLaneStrategy - is controlled
+export const defaultEventStemHeightFudgeFactor = 0.65; // slight proportional bump from lane padding
+export const deriveDefaultEventStemHeight = (lanePadding: number) => (
+    defaultEventStemHeight + lanePadding * defaultEventStemHeightFudgeFactor
+);
 export const horizontalPaddingOfTimeline = timelineWidth*0.05; // horizontal distance between the left edge of the timeline rectangle (SVG) and the start of the timeline, also applied to the right edge
 export const timelineTopEventsMargin = timelineHeight*0.1
 export const zoomToEventDuration = 1200;

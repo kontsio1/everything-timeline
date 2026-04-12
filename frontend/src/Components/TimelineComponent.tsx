@@ -20,6 +20,7 @@ import TimelinePeriodMarker from "./TimelinePeriodMarker";
 import EventComponent from "./EventComponent";
 import TimelineHoverLine from "./TimelineHoverLine";
 import './Header.css';
+import {useControlsContext} from "../context/ControlsContext";
 
 const useStyles = makeStyles({
     timelineContainer: {
@@ -40,7 +41,6 @@ export interface TimelineComponentProps {
     onEventSearch: (event: SyntheticEvent, newValue: TimelineEvent | null) => void;
     onEventSelect?: (event: TimelineEvent) => void;
     loading: boolean;
-    hoverLineEnabled: boolean;
 }
 
 export interface TimelineComponentHandle {
@@ -49,10 +49,13 @@ export interface TimelineComponentHandle {
 
 export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineComponentProps>(function TimelineComponent(props, ref) {
     const classes = useStyles();
+    const {controls} = useControlsContext();
     const {events, periods, loading, onEventSelect} = props;
     const svgRef = useRef<SVGSVGElement>(null); // SVG ref for React-managed SVG
     const axisRef = useRef<SVGGElement>(null);
     const xScaleRef = useRef<d3.ScaleTime<number, number, never> | null>(null);
+    const laneHeightPaddingRef = useRef<number>(controls.visibleEventsLaneHeightPadding);
+    const defaultEventStemHeightRef = useRef<number>(controls.defaultEventStemHeight);
 
     const [visibleEvents, setVisibleEvents] = useState<TimelineEvent[]>([]);
     const [visiblePeriods, setVisiblePeriods] = useState<TimelinePeriod[]>([]);
@@ -168,7 +171,11 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         recalculateEventBoxes(events, newX);
         const [domainStart, domainEnd] = newX.domain();
         const eventsInDomain = events.filter(p => p.date >= domainStart && p.date <= domainEnd);
-        computeEventPositionByLaneStrategy(eventsInDomain);
+        computeEventPositionByLaneStrategy(
+            eventsInDomain,
+            laneHeightPaddingRef.current,
+            defaultEventStemHeightRef.current
+        );
         let filteredEvents = eventsInDomain.filter(e => e.stemHeight != -1);
         setVisibleEvents(filteredEvents);
     };
@@ -184,6 +191,17 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         const periodsByStartDate = topPriorityPeriods.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
         setVisiblePeriods(periodsByStartDate);
     };
+
+    useEffect(() => {
+        laneHeightPaddingRef.current = controls.visibleEventsLaneHeightPadding;
+        defaultEventStemHeightRef.current = controls.defaultEventStemHeight;
+        events.forEach(event => {
+            event.defaultHeight = defaultEventStemHeightRef.current;
+        });
+        const xScale = getTransformedXScale();
+        if (!xScale) return;
+        updateEvents(xScale);
+    }, [controls.visibleEventsLaneHeightPadding, controls.defaultEventStemHeight]);
 
     // Add gradient definition for tick stems and axis line
     const axisGradientId = "axis-bar-gradient";
@@ -302,7 +320,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                             />
                         ))}
                     </g>
-                    {props.hoverLineEnabled && (
+                    {controls.hoverLineEnabled && (
                         <TimelineHoverLine
                             xScale={getTransformedXScale()}
                             hoverX={hoverX}

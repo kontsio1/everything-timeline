@@ -1,11 +1,11 @@
 import "./Header.css";
 import Autocomplete from "@mui/material/Autocomplete";
-import {Button, Fab, TextField, Switch, FormControlLabel} from "@mui/material";
+import {Button, TextField} from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import React, {useState, useEffect} from "react";
 import {AddEventModal} from "./AddEventModal";
-import AddIcon from '@mui/icons-material/Edit';
+import {Controls} from "./Controls";
 
 interface HeaderProps {
     databaseOptions: string[];
@@ -22,8 +22,6 @@ interface HeaderProps {
     }) => Promise<void>;
     selectedDatabase: string | null;
     selectedEvent: TimelineEvent | null;
-    hoverLineEnabled: boolean;
-    onHoverLineToggle: (enabled: boolean) => void;
     children?: React.ReactNode;
     loading: boolean;
 }
@@ -36,8 +34,6 @@ export const Header = ({
                            onSubmitEvent,
                            selectedDatabase,
                            selectedEvent,
-                           hoverLineEnabled,
-                           onHoverLineToggle,
                            children,
                            loading,
                        }: HeaderProps) => {
@@ -142,18 +138,7 @@ export const Header = ({
                 </div>
                 <div className="user-controls">
                     <AccountCircleIcon className="user-icon" />
-                    <FormControlLabel
-                        className="hover-line-toggle"
-                        control={(
-                            <Switch
-                                size="small"
-                                checked={hoverLineEnabled}
-                                onChange={(event) => onHoverLineToggle(event.target.checked)}
-                            />
-                        )}
-                        label="Hover line"
-                        labelPlacement="bottom"
-                    />
+                    <Controls />
                 </div>
                 {children}
             </header>

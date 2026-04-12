@@ -3,7 +3,7 @@ import {TimelinePeriod} from "../Entities/TimelinePeriod";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import {
     defaultEventStemHeight,
-    eventBoxMargin,
+    eventBoxMargin, defaultLaneHeightPadding,
     timelineHeight,
     timelineTopEventsMargin, timelineWidth
 } from "../Constants/GlobalConfigConstants";
@@ -68,10 +68,15 @@ export function computeRelativePeriodOverlaps(periods: TimelinePeriod[]): Period
     return overlaps; // Each index: total overlap percentage with others
 }
 
-export function computeEventPositionByLaneStrategy(events: TimelineEvent[]): void {
-    const lane1start = defaultEventStemHeight;
+export function computeEventPositionByLaneStrategy(
+    events: TimelineEvent[],
+    laneHeightPaddingOverride?: number,
+    defaultEventStemHeightOverride?: number
+): void {
+    const lane1start = defaultEventStemHeightOverride ?? defaultEventStemHeight;
     const topEventHeightLimit = timelineHeight / 2 - timelineTopEventsMargin;
-    const laneHeight = 20 + eventBoxMargin; // height of event box + margin
+    const resolvedLaneHeightPadding = laneHeightPaddingOverride ?? defaultLaneHeightPadding;
+    const laneHeight = resolvedLaneHeightPadding + eventBoxMargin; // height of event box + margin
     const noOfLanes =  Math.floor(Math.abs(lane1start - topEventHeightLimit)/laneHeight);
     const lanesHeights: number[] = [];
     events.forEach(e => e.stemHeight = -1);
