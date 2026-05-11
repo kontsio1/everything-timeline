@@ -39,7 +39,6 @@ A full-stack historical timeline visualization app with:
 ```bash
 npm start          # Dev server at localhost:3000
 npm run build      # Production build to /build
-npm test           # Jest tests
 ```
 
 ### Backend (`/functions`)

@@ -45,8 +45,24 @@
 }
 .user-icon {
     color: #c45c2e;
-    font-size: 36px;
+    font-size: 48px !important;
     cursor: pointer;
+}
+
+.user-menu-paper {
+    background-color: rgba(55, 31, 3, 0.95) !important;
+    color: var(--txtColor2) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    min-width: 160px !important;
+}
+
+.user-menu-paper .MuiMenuItem-root {
+    color: var(--txtColor2) !important;
+    font-family: 'DM Sans', sans-serif !important;
+}
+
+.user-menu-paper .MuiMenuItem-root:hover:not(.Mui-disabled) {
+    background-color: rgba(196, 92, 46, 0.2) !important;
 }
 
 .user-controls {
