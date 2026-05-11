@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
   workflow_dispatch:
 
 env:
@@ -14,7 +18,29 @@ env:
   DOTNET_VERSION: '10.0.x' # set this to the dotnet version to use
 
 jobs:
+  # For Dependabot PRs: build only (no deploy) to verify the code compiles
+  dependabot_build_job:
+    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]' && github.event.action != 'closed'
+    runs-on: windows-latest
+    name: Dependabot Build Check (No Deploy)
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@v4
+
+      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: 'Resolve Project Dependencies Using Dotnet'
+        shell: pwsh
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet build everything-timeline.csproj --configuration Release --output ./output
+          popd
+
   build-and-deploy:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
     permissions:
       id-token: write #This is required for requesting the JWT
