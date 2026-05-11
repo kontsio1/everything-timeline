@@ -8,10 +8,10 @@ import { LogLevel } from '@azure/msal-browser';
 
 export const msalConfig = {
     auth: {
-        clientId: '326c7123-50a6-410e-af20-474f79b78e08', // This is the ONLY mandatory field that you need to supply.
-        authority: 'https://everythingtimeline.ciamlogin.com', // Use a full Microsoft Entra authority URL.
-        redirectUri: 'http://localhost:3000/', // Points to window.location.origin. You must register this URI on Azure Portal/App Registration.
-        postLogoutRedirectUri: 'http://localhost:3000/', // Indicates the page to navigate after logout.
+        clientId: process.env.REACT_APP_CLIENT_ID ?? "", // This is the ONLY mandatory field that you need to supply.
+        authority: process.env.REACT_APP_AUTHORITY_URL ?? "", // Use a full Microsoft Entra authority URL.
+        redirectUri: window.location.origin ?? "/", // Points to window.location.origin. You must register this URI on Azure Portal/App Registration.
+        postLogoutRedirectUri: window.location.origin ?? "/", // Indicates the page to navigate after logout.
         navigateToLoginRequestUrl: false, // If "true", will navigate back to the original request location before processing the auth code response.
     },
     cache: {

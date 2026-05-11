@@ -5,7 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {ControlsProvider} from "./context/ControlsContext";
 import {PublicClientApplication, EventType} from '@azure/msal-browser';
-import {loginRequest, msalConfig} from "./api/authConfig";
+import {msalConfig} from "./api/authConfig";
 import {MsalProvider} from "@azure/msal-react";
 
 /**
