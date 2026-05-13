@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -21,20 +22,27 @@ namespace everything_timeline
         {
             var response = req.CreateResponse();
             response.StatusCode = HttpStatusCode.OK;
-            
+
             SetCorsHeaders(response);
             response.Headers.Add("Access-Control-Max-Age", "86400");
-            
+
             return response;
         }
 
         [Function("Test")]
-        public IActionResult TestFunction([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
+        public IActionResult TestFunction(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
         {
-            logger.LogInformation("C# HTTP trigger function processed a request.");
-            return new OkObjectResult("Welcome to Azure Functions!");
-        }
+            var isAuthenticated = req.HttpContext.User.Identity?.IsAuthenticated == true;
+            var userId = req.HttpContext.User.FindFirst("oid")?.Value
+                      ?? req.HttpContext.User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
+            var userName = req.HttpContext.User.FindFirst("preferred_username")?.Value;
 
+            logger.LogInformation("Request processed. Authenticated: {IsAuthenticated}, User: {UserId}", isAuthenticated, userId);
+
+            return new OkObjectResult(new { message = "Welcome to Azure Functions!", isAuthenticated, userId, userName });
+        }
+        
         [Function("GetEvents")]
         public async Task<HttpResponseData> GetEvents(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
@@ -96,7 +104,7 @@ namespace everything_timeline
             {
                 // Read the request body
                 var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                
+
                 if (string.IsNullOrEmpty(requestBody))
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
@@ -106,7 +114,7 @@ namespace everything_timeline
 
                 // Deserialize the events
                 var events = System.Text.Json.JsonSerializer.Deserialize<Event[]>(requestBody);
-                
+
                 if (events == null || events.Length == 0)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
@@ -123,7 +131,7 @@ namespace everything_timeline
                         await response.WriteStringAsync("DatasetId is required for all events");
                         return response;
                     }
-                    
+
                     if (string.IsNullOrEmpty(evt.Name))
                     {
                         response.StatusCode = HttpStatusCode.BadRequest;
@@ -168,7 +176,7 @@ namespace everything_timeline
             try
             {
                 var datasets = await repository.GetAllDatasets();
-                
+
                 logger.LogInformation("Retrieved {Count} datasets", datasets.Count());
 
                 response.StatusCode = HttpStatusCode.OK;
