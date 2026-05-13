@@ -6,6 +6,7 @@ import React, {useState, useEffect} from "react";
 import {AddEventModal} from "./AddEventModal";
 import {Controls} from "./Controls";
 import {Login} from "./Login";
+import {testFunction} from "../api/api";
 
 interface HeaderProps {
     databaseOptions: string[];
@@ -67,6 +68,23 @@ export const Header = ({
             await onSubmitEvent(eventData);
         }
         setIsModalOpen(false);
+    };
+
+    const handleDebugUser = async () => {
+        const result = await testFunction();
+        if (!result.isAuthenticated) {
+            console.log('not logged in');
+            return;
+        }
+        console.log('=== User Info ===');
+        console.log('User ID (oid):', result.userId);
+        console.log('Email:', result.email);
+        console.log('Name:', result.name);
+        console.log('Given name:', result.givenName);
+        console.log('Family name:', result.familyName);
+        console.log('Tenant ID:', result.tenantId);
+        console.log('Scope:', result.scope);
+        console.log('All claims:', result.allClaims);
     };
 
     return (
@@ -138,6 +156,25 @@ export const Header = ({
                 </div>
                 <div className="user-controls">
                     <Login />
+                    <Button
+                        title="Debug user info"
+                        variant="contained"
+                        onClick={handleDebugUser}
+                        sx={{
+                            minWidth: 0,
+                            width: 36,
+                            height: 36,
+                            borderRadius: '50%',
+                            background: '#c45c2e',
+                            color: '#fff',
+                            fontSize: 18,
+                            padding: 0,
+                            boxShadow: 'none',
+                            '&:hover': { background: '#d4683a' },
+                        }}
+                    >
+                        🔍
+                    </Button>
                     <Controls />
                 </div>
                 {children}

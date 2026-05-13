@@ -33,14 +33,43 @@ namespace everything_timeline
         public IActionResult TestFunction(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
         {
-            var isAuthenticated = req.HttpContext.User.Identity?.IsAuthenticated == true;
-            var userId = req.HttpContext.User.FindFirst("oid")?.Value
-                      ?? req.HttpContext.User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
-            var userName = req.HttpContext.User.FindFirst("preferred_username")?.Value;
+            var user = req.HttpContext.User;
+            var isAuthenticated = user.Identity?.IsAuthenticated == true;
 
-            logger.LogInformation("Request processed. Authenticated: {IsAuthenticated}, User: {UserId}", isAuthenticated, userId);
+            if (!isAuthenticated)
+                return new OkObjectResult(new { isAuthenticated = false });
 
-            return new OkObjectResult(new { message = "Welcome to Azure Functions!", isAuthenticated, userId, userName });
+            var allClaims = user.Claims
+                .GroupBy(c => c.Type)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(c => c.Value).ToArray()
+                );
+
+            var userInfo = new
+            {
+                isAuthenticated = true,
+                userId     = user.FindFirst("oid")?.Value
+                          ?? user.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value,
+                email      = user.FindFirst("preferred_username")?.Value
+                          ?? user.FindFirst("email")?.Value
+                          ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value,
+                name       = user.FindFirst("name")?.Value
+                          ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value,
+                givenName  = user.FindFirst("given_name")?.Value
+                          ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname")?.Value,
+                familyName = user.FindFirst("family_name")?.Value
+                          ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname")?.Value,
+                tenantId   = user.FindFirst("tid")?.Value,
+                scope      = user.FindFirst("scp")?.Value,
+                allClaims
+            };
+
+            logger.LogInformation(
+                "Test called. Authenticated: {IsAuthenticated}, User: {UserId} ({Email})",
+                isAuthenticated, userInfo.userId, userInfo.email);
+
+            return new OkObjectResult(userInfo);
         }
         
         [Function("GetEvents")]

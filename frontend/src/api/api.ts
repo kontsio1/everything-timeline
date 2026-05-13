@@ -41,13 +41,29 @@ async function authHeaders(): Promise<Record<string, string>> {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function testFunction(method: 'get' | 'post' = 'get') {
+export interface IUserInfo {
+    isAuthenticated: boolean;
+    userId?: string;
+    email?: string;
+    name?: string;
+    givenName?: string;
+    familyName?: string;
+    tenantId?: string;
+    scope?: string;
+    allClaims?: Record<string, string[]>;
+}
+
+export async function testFunction(method: 'get' | 'post' = 'get'): Promise<IUserInfo> {
+    const token = await getAccessToken();
+    if (!token) {
+        return { isAuthenticated: false };
+    }
     const response = await axios({
         url: `${BASE_URL}/Test`,
         method,
         headers: await authHeaders(),
     });
-    return response.data as string;
+    return response.data as IUserInfo;
 }
 export async function getEvents(datasetId?: string) {
     const params: Record<string, string> = {};
