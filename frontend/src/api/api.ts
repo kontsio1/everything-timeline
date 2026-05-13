@@ -37,7 +37,6 @@ async function getAccessToken(): Promise<string | null> {
 
 async function authHeaders(): Promise<Record<string, string>> {
     const token = await getAccessToken();
-    console.log("Token:", token);
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
