@@ -72,19 +72,10 @@ export const Header = ({
 
     const handleDebugUser = async () => {
         const result = await testFunction();
-        if (!result.isAuthenticated) {
-            console.log('not logged in');
-            return;
-        }
         console.log('=== User Info ===');
         console.log('User ID (oid):', result.userId);
         console.log('Email:', result.email);
         console.log('Name:', result.name);
-        console.log('Given name:', result.givenName);
-        console.log('Family name:', result.familyName);
-        console.log('Tenant ID:', result.tenantId);
-        console.log('Scope:', result.scope);
-        console.log('All claims:', result.allClaims);
     };
 
     return (

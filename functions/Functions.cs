@@ -49,20 +49,9 @@ namespace everything_timeline
             var userInfo = new
             {
                 isAuthenticated = true,
-                userId     = user.FindFirst("oid")?.Value
-                          ?? user.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value,
-                email      = user.FindFirst("preferred_username")?.Value
-                          ?? user.FindFirst("email")?.Value
-                          ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value,
-                name       = user.FindFirst("name")?.Value
-                          ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value,
-                givenName  = user.FindFirst("given_name")?.Value
-                          ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname")?.Value,
-                familyName = user.FindFirst("family_name")?.Value
-                          ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname")?.Value,
-                tenantId   = user.FindFirst("tid")?.Value,
-                scope      = user.FindFirst("scp")?.Value,
-                allClaims
+                userId     = user.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value,
+                email      = user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value,
+                name       = user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value == "unknown" ? "unknown" : user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")?.Value,
             };
 
             logger.LogInformation(

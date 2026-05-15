@@ -41,21 +41,15 @@ async function authHeaders(): Promise<Record<string, string>> {
 }
 
 export interface IUserInfo {
-    isAuthenticated: boolean;
     userId?: string;
     email?: string;
     name?: string;
-    givenName?: string;
-    familyName?: string;
-    tenantId?: string;
-    scope?: string;
-    allClaims?: Record<string, string[]>;
 }
 
 export async function testFunction(method: 'get' | 'post' = 'get'): Promise<IUserInfo> {
     const token = await getAccessToken();
     if (!token) {
-        return { isAuthenticated: false };
+        return { userId: undefined, email: undefined, name: undefined };
     }
     const response = await axios({
         url: `${BASE_URL}/Test`,
