@@ -58,4 +58,11 @@ builder.Services.AddApplicationInsightsTelemetryWorkerService().ConfigureFunctio
 
 var host = builder.Build();
 
+// Apply migrations on startup
+using (var scope = host.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DbContext>();
+    db.Database.Migrate();
+}
+
 host.Run();

@@ -1,3 +1,4 @@
+using everything_timeline.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace everything_timeline;
