@@ -12,7 +12,7 @@ public interface IRepository
     Task<Event?> UpdateEvent(Event eventToUpdate);
     Task<bool> DeleteEvent(Guid id);
     Task<int> GetEventsCountByDataset(Guid datasetId);
-    Task<IEnumerable<Dataset>> GetAllDatasets();
+    Task<IEnumerable<Dataset>> GetAllDatasets(Guid userId);
 }
 
 public class Repository : IRepository
@@ -98,10 +98,11 @@ public class Repository : IRepository
             .CountAsync(e => e.DatasetId == datasetId);
     }
 
-    public async Task<IEnumerable<Dataset>> GetAllDatasets()
+    public async Task<IEnumerable<Dataset>> GetAllDatasets(Guid userId = default)
     {
         return await _dbContext.Datasets
-            .OrderBy(d => d.Name)
-            .ToListAsync();
+                .Where(d => d.UserId == userId)
+                .OrderBy(d => d.Name)
+                .ToListAsync();
     }
 }

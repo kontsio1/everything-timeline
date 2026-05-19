@@ -10,6 +10,20 @@ namespace everything_timeline
 {
     public class Functions(ILogger<Functions> logger, IRepository repository)
     {
+        /// <summary>
+        /// Extracts the Azure AD object ID (oid) from the authenticated user's claims.
+        /// Returns <c>null</c> if the user is not authenticated or the claim is absent.
+        /// </summary>
+        private static Guid GetUserId(HttpRequestData req)
+        {
+            var user = req.FunctionContext.GetHttpContext()?.User;
+            if (user?.Identity?.IsAuthenticated != true)
+                return Guid.Empty;
+
+            var id = user.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
+            return Guid.TryParse(id, out var guid) ? guid : Guid.Empty;
+        }
+
         private static void SetCorsHeaders(HttpResponseData response)
         {
             response.Headers.Add("Access-Control-Allow-Origin", "*");
@@ -38,13 +52,6 @@ namespace everything_timeline
 
             if (!isAuthenticated)
                 return new OkObjectResult(new { isAuthenticated = false });
-
-            var allClaims = user.Claims
-                .GroupBy(c => c.Type)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(c => c.Value).ToArray()
-                );
 
             var userInfo = new
             {
@@ -193,7 +200,8 @@ namespace everything_timeline
 
             try
             {
-                var datasets = await repository.GetAllDatasets();
+                var userId = GetUserId(req);
+                var datasets = await repository.GetAllDatasets(userId);
 
                 logger.LogInformation("Retrieved {Count} datasets", datasets.Count());
 
