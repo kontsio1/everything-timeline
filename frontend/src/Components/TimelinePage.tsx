@@ -4,7 +4,7 @@ import {TimelineEvent} from "../Entities/TimelineEvent";
 import {seedPeriods} from "../Seed/DefaultEvents";
 import {getEvents, addEvents, getDatasets} from "../api/api";
 import {Header} from "./Header";
-import {IDatasetResponse, IEventResponse} from "../api/Interfaces";
+import {IDatasetResponse, IEventAddRequest, IEventResponse} from "../api/Interfaces";
 import {useDatasetContext} from "../context/DatasetContext";
 import {EventDetailsPanel} from "./EventDetailsPanel";
 import {pulseEventDuration, zoomToEventDuration} from "../Constants/GlobalConfigConstants";
@@ -92,7 +92,7 @@ export const TimelinePage = () => {
         year: number;
         info: string;
     }) => {
-        const newEvent = { Date: eventData.year, Name: eventData.name, Info: eventData.info, DatasetId: selectedDataset?.Id} as IEventResponse;
+        const newEvent = { Date: eventData.year, Name: eventData.name, Info: eventData.info, DatasetId: selectedDataset?.Id} as IEventAddRequest;
         try {
             const result = await addEvents([newEvent]);
             // setEvents([...events, newEvent]);   

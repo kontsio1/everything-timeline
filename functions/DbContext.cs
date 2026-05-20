@@ -54,9 +54,6 @@ public class DbContext : Microsoft.EntityFrameworkCore.DbContext
                 
             entity.Property(d => d.CreatedAt)
                 .IsRequired();
-                
-            entity.Property(d => d.Value)
-                .IsRequired();
         });
 
         modelBuilder.Entity<Period>(entity =>

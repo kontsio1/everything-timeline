@@ -114,7 +114,7 @@ public class Repository : IRepository
         {
             UserId = userId,
             Name = request.Name,
-            Value = request.Value,
+            Description = request.Description,
             CreatedAt = DateTime.UtcNow,
             Events = new List<Event>(),
             Periods = new List<Period>()

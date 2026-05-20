@@ -1,5 +1,12 @@
 import axios from 'axios';
-import {IDatasetResponse, IEventResponse, IPeriodResponse} from "./Interfaces";
+import {
+    IDatasetAddRequest,
+    IDatasetResponse,
+    IEventAddRequest,
+    IEventResponse,
+    IPeriodResponse,
+    IUserResponse
+} from "./Interfaces";
 import { msalInstance } from './msalInstance';
 import { loginRequest } from './authConfig';
 
@@ -45,13 +52,7 @@ async function authHeaders(): Promise<Record<string, string>> {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export interface IUserInfo {
-    userId?: string;
-    email?: string;
-    name?: string;
-}
-
-export async function testFunction(method: 'get' | 'post' = 'get'): Promise<IUserInfo> {
+export async function testFunction(method: 'get' | 'post' = 'get'): Promise<IUserResponse> {
     const token = await getAccessToken();
     if (!token) {
         return { userId: undefined, email: undefined, name: undefined };
@@ -61,7 +62,7 @@ export async function testFunction(method: 'get' | 'post' = 'get'): Promise<IUse
         method,
         headers: await authHeaders(),
     });
-    return response.data as IUserInfo;
+    return response.data as IUserResponse;
 }
 export async function getEvents(datasetId?: string) {
     const params: Record<string, string> = {};
@@ -72,7 +73,7 @@ export async function getEvents(datasetId?: string) {
     });
     return response.data as IEventResponse[];
 }
-export async function addEvents(events: any[]) {
+export async function addEvents(events: IEventAddRequest[]) {
     const response = await axios.post(`${BASE_URL}/AddEvent`, events, {
         headers: {
             'Content-Type': 'application/json',
@@ -97,8 +98,7 @@ export async function getDatasets() {
     return response.data as IDatasetResponse[];
 }
 
-// TODO: endpoint not yet defined — replace with actual endpoint when ready
-export async function addDataset(data: { name: string; value: number; }) {
+export async function addDataset(data: IDatasetAddRequest) {
     const response = await axios.post(`${BASE_URL}/AddDataset`, data, {
         headers: {
             'Content-Type': 'application/json',
