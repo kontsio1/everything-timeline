@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { IApiDataset } from '../api/Interfaces';
+import { IDatasetResponse } from '../api/Interfaces';
 
 interface DatasetContextType {
-    datasets: IApiDataset[];
-    setDatasets: (datasets: IApiDataset[]) => void;
+    datasets: IDatasetResponse[];
+    setDatasets: (datasets: IDatasetResponse[]) => void;
     isInitialized: boolean;
     setIsInitialized: (initialized: boolean) => void;
 }
@@ -15,7 +15,7 @@ interface DatasetProviderProps {
 }
 
 export const DatasetProvider: React.FC<DatasetProviderProps> = ({ children }) => {
-    const [datasets, setDatasets] = useState<IApiDataset[]>([]);
+    const [datasets, setDatasets] = useState<IDatasetResponse[]>([]);
     const [isInitialized, setIsInitialized] = useState(false);
 
     return (

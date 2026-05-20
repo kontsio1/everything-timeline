@@ -1,5 +1,6 @@
 using System.Net;
 using everything_timeline.Entities;
+using everything_timeline.UseCases;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -10,10 +11,7 @@ namespace everything_timeline
 {
     public class Functions(ILogger<Functions> logger, IRepository repository)
     {
-        /// <summary>
-        /// Extracts the Azure AD object ID (oid) from the authenticated user's claims.
-        /// Returns <c>null</c> if the user is not authenticated or the claim is absent.
-        /// </summary>
+        //TODO: This could be extension method of HttpContextExtensions
         private static Guid GetUserId(HttpRequestData req)
         {
             var user = req.FunctionContext.GetHttpContext()?.User;
@@ -98,6 +96,7 @@ namespace everything_timeline
                 }
 
                 // Get events filtered by dataset using repository
+                //TODO: make sure user is allowed to see this dataset
                 var filteredEvents = (await repository.GetEventsByDatasetId(datasetId)).ToList();
 
                 logger.LogInformation("Retrieved {Count} events for dataset {DatasetId}", filteredEvents.Count,
@@ -214,6 +213,63 @@ namespace everything_timeline
                 logger.LogError(ex, "Error retrieving datasets");
                 response.StatusCode = HttpStatusCode.InternalServerError;
                 await response.WriteStringAsync("An error occurred while retrieving datasets");
+                return response;
+            }
+        }
+        
+        [Function("AddDataset")]
+        public async Task<HttpResponseData> AddDataset(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post")]
+            HttpRequestData req)
+        {
+            var response = req.CreateResponse();
+            response.Headers.Add("Content-Type", "application/json");
+            SetCorsHeaders(response);
+
+            try
+            {
+                // Read the request body
+                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+
+                if (string.IsNullOrEmpty(requestBody))
+                {
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    await response.WriteStringAsync("Request body cannot be empty");
+                    return response;
+                }
+
+                // Deserialize the request
+                var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var datasetCreateRequest = System.Text.Json.JsonSerializer.Deserialize<DatasetCreateRequest>(requestBody, jsonOptions);
+
+                // Add events using repository
+                var userId = GetUserId(req);
+                if (userId == Guid.Empty)
+                {
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    await response.WriteStringAsync("Please login to create a dataset");
+                    return response;
+                }
+                var addedDataset = await repository.AddDataset(datasetCreateRequest, userId);
+
+                logger.LogInformation("Added dataset: {DatasetName}", addedDataset.Name);
+
+                response.StatusCode = HttpStatusCode.Created;
+                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(addedDataset));
+                return response;
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                logger.LogError(ex, "Invalid JSON in request body");
+                response.StatusCode = HttpStatusCode.BadRequest;
+                await response.WriteStringAsync("Invalid JSON format");
+                return response;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error adding dataset");
+                response.StatusCode = HttpStatusCode.InternalServerError;
+                await response.WriteStringAsync("An error occurred while adding dataset");
                 return response;
             }
         }

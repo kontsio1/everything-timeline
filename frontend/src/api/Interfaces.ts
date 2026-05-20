@@ -1,11 +1,11 @@
-export interface IApiEvent {
+export interface IEventResponse {
     Id: string;
     DatasetId: string;
     Name: string;
     Info: string;
     Date: number;
 }
-export interface IApiPeriod {
+export interface IPeriodResponse {
     Id: string;
     DatasetId: string;
     Name: string;
@@ -13,7 +13,7 @@ export interface IApiPeriod {
     StartYear: number;
     EndYear: number;
 }
-export interface IApiDataset {
+export interface IDatasetResponse {
     Id: string;
     Name: string;
     CreatedBy: string;

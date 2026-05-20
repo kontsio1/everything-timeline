@@ -4,9 +4,11 @@ import {Button, TextField} from "@mui/material";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import React, {useState, useEffect} from "react";
 import {AddEventModal} from "./AddEventModal";
+import {AddDatasetModal} from "./AddDatasetModal";
 import {Controls} from "./Controls";
 import {Login} from "./Login";
-import {testFunction} from "../api/api";
+import {testFunction, addDataset, getDatasets} from "../api/api";
+import {useDatasetContext} from "../context/DatasetContext";
 
 interface HeaderProps {
     databaseOptions: string[];
@@ -40,7 +42,10 @@ export const Header = ({
                        }: HeaderProps) => {
     const [localSelectedEvent, setLocalSelectedEvent] =
         useState<TimelineEvent | null>(selectedEvent);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+    const [isDatasetModalOpen, setIsDatasetModalOpen] = useState(false);
+
+    const { setDatasets } = useDatasetContext();
 
     useEffect(() => {
         setLocalSelectedEvent(selectedEvent);
@@ -51,12 +56,28 @@ export const Header = ({
         onEventSearch(event, newValue);
     }
 
-    const handleOpenModal = () => {
-        setIsModalOpen(true);
+    const handleOpenEventModal = () => {
+        setIsEventModalOpen(true);
     };
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
+    const handleCloseEventModal = () => {
+        setIsEventModalOpen(false);
+    };
+
+    const handleOpenDatabaseModal = () => {
+        setIsDatasetModalOpen(true);
+    };
+
+    const handleCloseDatasetModal = () => {
+        setIsDatasetModalOpen(false);
+    };
+
+    const handleSubmitDataset = async (data: { name: string; description: string }) => {
+        await addDataset({value: 0, ...data} as any);
+        // Refresh the dataset list
+        const updatedDatasets = await getDatasets();
+        setDatasets(updatedDatasets);
+        setIsDatasetModalOpen(false);
     };
 
     const handleSubmitEvent = async (eventData: {
@@ -67,7 +88,7 @@ export const Header = ({
         if (onSubmitEvent) {
             await onSubmitEvent(eventData);
         }
-        setIsModalOpen(false);
+        setIsEventModalOpen(false);
     };
 
     const handleDebugUser = async () => {
@@ -107,7 +128,7 @@ export const Header = ({
                             className="add-btn"
                             variant="contained"
                             disabled={selectedDatabase =="" || selectedDatabase === null || loading}
-                            onClick={handleOpenModal}
+                            onClick={handleOpenDatabaseModal}
                         >+{/*TODO: consider changing to FAB*/}
                         </Button>
                     </div>
@@ -132,11 +153,11 @@ export const Header = ({
                             }}
                         />
                         <Button
-                            className="search-icon"
+                            className="add-btn"
                             variant="contained"
-                            onClick={(e) => handleSelectEvent(e, localSelectedEvent)}
-                        >
-                            &#x2315;
+                            disabled={selectedDatabase =="" || selectedDatabase === null || loading}
+                            onClick={handleOpenEventModal}
+                        >+{/*TODO: consider changing to FAB*/}
                         </Button>
                     </div>
                 </div>
@@ -172,10 +193,15 @@ export const Header = ({
             </header>
 
             <AddEventModal
-                open={isModalOpen}
-                onClose={handleCloseModal}
+                open={isEventModalOpen}
+                onClose={handleCloseEventModal}
                 selectedDatabase={selectedDatabase}
                 onSubmit={handleSubmitEvent}
+            />
+            <AddDatasetModal
+                open={isDatasetModalOpen}
+                onClose={handleCloseDatasetModal}
+                onSubmit={handleSubmitDataset}
             />
         </>
     );

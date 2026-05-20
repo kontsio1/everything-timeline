@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {IApiDataset, IApiEvent, IApiPeriod} from "./Interfaces";
+import {IDatasetResponse, IEventResponse, IPeriodResponse} from "./Interfaces";
 import { msalInstance } from './msalInstance';
 import { loginRequest } from './authConfig';
 
@@ -7,6 +7,11 @@ const BASE_URL = process.env.REACT_APP_API_URL;
 
 // Resolved once MSAL has finished initialising and processing any redirect on page load.
 // Cached so subsequent calls are instant.
+
+//TODO: even if logged in auth headers are not being set?
+//TODO: red toast with error message when api call fails
+//TODO: Create proper request object for axios
+
 const msalReady: Promise<void> = msalInstance.initialize()
     .then(() => msalInstance.handleRedirectPromise())
     .then((response) => {
@@ -65,7 +70,7 @@ export async function getEvents(datasetId?: string) {
         params,
         headers: await authHeaders(),
     });
-    return response.data as IApiEvent[];
+    return response.data as IEventResponse[];
 }
 export async function addEvents(events: any[]) {
     const response = await axios.post(`${BASE_URL}/AddEvent`, events, {
@@ -83,11 +88,23 @@ export async function getPeriods(datasetId?: string) {
         params,
         headers: await authHeaders(),
     });
-    return response.data as IApiPeriod[];
+    return response.data as IPeriodResponse[];
 }
 export async function getDatasets() {
     const response = await axios.get(`${BASE_URL}/GetDatasets`, {
         headers: await authHeaders(),
     });
-    return response.data as IApiDataset[];
+    return response.data as IDatasetResponse[];
 }
+
+// TODO: endpoint not yet defined — replace with actual endpoint when ready
+export async function addDataset(data: { name: string; value: number; }) {
+    const response = await axios.post(`${BASE_URL}/AddDataset`, data, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...await authHeaders(),
+        },
+    });
+    return response.data as IDatasetResponse;
+}
+

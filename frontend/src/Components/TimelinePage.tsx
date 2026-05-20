@@ -4,7 +4,7 @@ import {TimelineEvent} from "../Entities/TimelineEvent";
 import {seedPeriods} from "../Seed/DefaultEvents";
 import {getEvents, addEvents, getDatasets} from "../api/api";
 import {Header} from "./Header";
-import {IApiDataset, IApiEvent} from "../api/Interfaces";
+import {IDatasetResponse, IEventResponse} from "../api/Interfaces";
 import {useDatasetContext} from "../context/DatasetContext";
 import {EventDetailsPanel} from "./EventDetailsPanel";
 import {pulseEventDuration, zoomToEventDuration} from "../Constants/GlobalConfigConstants";
@@ -16,7 +16,7 @@ export const TimelinePage = () => {
     const [pulseEventKey, setPulseEventKey] = React.useState<string | null>(null);
     const [scrollDetailsOnOpen, setScrollDetailsOnOpen] = React.useState(false);
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
-    const [selectedDataset, setSelectedDataset] = React.useState<IApiDataset | null>(null);
+    const [selectedDataset, setSelectedDataset] = React.useState<IDatasetResponse | null>(null);
     const [loading, setLoading] = React.useState(false);
     const periods = seedPeriods;
     
@@ -92,7 +92,7 @@ export const TimelinePage = () => {
         year: number;
         info: string;
     }) => {
-        const newEvent = { Date: eventData.year, Name: eventData.name, Info: eventData.info, DatasetId: selectedDataset?.Id} as IApiEvent;
+        const newEvent = { Date: eventData.year, Name: eventData.name, Info: eventData.info, DatasetId: selectedDataset?.Id} as IEventResponse;
         try {
             const result = await addEvents([newEvent]);
             // setEvents([...events, newEvent]);   

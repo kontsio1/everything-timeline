@@ -1,4 +1,5 @@
 using everything_timeline.Entities;
+using everything_timeline.UseCases;
 using Microsoft.EntityFrameworkCore;
 
 namespace everything_timeline;
@@ -13,6 +14,7 @@ public interface IRepository
     Task<bool> DeleteEvent(Guid id);
     Task<int> GetEventsCountByDataset(Guid datasetId);
     Task<IEnumerable<Dataset>> GetAllDatasets(Guid userId);
+    Task<Dataset> AddDataset(DatasetCreateRequest dataset, Guid userId);
 }
 
 public class Repository : IRepository
@@ -101,8 +103,25 @@ public class Repository : IRepository
     public async Task<IEnumerable<Dataset>> GetAllDatasets(Guid userId = default)
     {
         return await _dbContext.Datasets
-                .Where(d => d.UserId == userId)
+                .Where(d => d.UserId == userId || d.UserId == Guid.Empty)
                 .OrderBy(d => d.Name)
                 .ToListAsync();
+    }
+
+    public async Task<Dataset> AddDataset(DatasetCreateRequest request, Guid userId = default)
+    {
+        var dataset = new Dataset
+        {
+            UserId = userId,
+            Name = request.Name,
+            Value = request.Value,
+            CreatedAt = DateTime.UtcNow,
+            Events = new List<Event>(),
+            Periods = new List<Period>()
+        };
+
+        await _dbContext.Datasets.AddRangeAsync(dataset);
+        await _dbContext.SaveChangesAsync();
+        return dataset;
     }
 }
