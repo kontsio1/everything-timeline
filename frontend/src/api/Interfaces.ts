@@ -19,9 +19,9 @@ export interface IDatasetAddRequest {
 export interface IDatasetResponse {
     Id: string;
     Name: string;
+    Description: string;
     CreatedBy: string;
     CreatedAt: Date;
-    Value: number;
 }
 
 export interface IPeriodResponse {

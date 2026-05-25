@@ -1,6 +1,8 @@
 using System.Net;
 using everything_timeline.Entities;
 using everything_timeline.UseCases;
+using everything_timeline.UseCases.Datasets;
+using everything_timeline.UseCases.Events;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -76,34 +78,16 @@ namespace everything_timeline
 
             try
             {
-                // Extract dataset query parameter
                 var datasetParam = req.Query["dataset"];
+                Guid.TryParse(datasetParam, out Guid datasetId);
+                
+                var userId = GetUserId(req);
+                var eventsResponse = await repository.GetEventsByDatasetId(datasetId, userId);
 
-                if (string.IsNullOrEmpty(datasetParam))
-                {
-                    // If no dataset specified, return all events
-                    var allEvents = await repository.GetAllEvents();
-                    await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(allEvents));
-                    return response;
-                }
-
-                // Parse dataset as Guid
-                if (!Guid.TryParse(datasetParam, out Guid datasetId))
-                {
-                    response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteStringAsync("Dataset must be a valid GUID");
-                    return response;
-                }
-
-                // Get events filtered by dataset using repository
-                //TODO: make sure user is allowed to see this dataset
-                var filteredEvents = (await repository.GetEventsByDatasetId(datasetId)).ToList();
-
-                logger.LogInformation("Retrieved {Count} events for dataset {DatasetId}", filteredEvents.Count,
-                    datasetId);
+                logger.LogInformation("Retrieved {Count} events for dataset {DatasetId}", eventsResponse.Events.Count, datasetId);
 
                 response.StatusCode = HttpStatusCode.OK;
-                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(filteredEvents));
+                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(eventsResponse));
                 return response;
             }
             catch (Exception ex)
@@ -137,9 +121,10 @@ namespace everything_timeline
                 }
 
                 // Deserialize the events
-                var events = System.Text.Json.JsonSerializer.Deserialize<Event[]>(requestBody);
-
-                if (events == null || events.Length == 0)
+                var eventsRequest = System.Text.Json.JsonSerializer.Deserialize<EventCreateRequest>(requestBody);
+                var events = eventsRequest.Events;
+                
+                if (events.Count == 0)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
                     await response.WriteStringAsync("No events provided");
@@ -165,12 +150,12 @@ namespace everything_timeline
                 }
 
                 // Add events using repository
-                var addedEvents = (await repository.AddEvents(events)).ToList();
+                var addedEventsResponse = await repository.AddEvents(events);
 
-                logger.LogInformation("Added {Count} events", addedEvents.Count);
+                logger.LogInformation("Added {Count} events", addedEventsResponse.Events.Count);
 
                 response.StatusCode = HttpStatusCode.Created;
-                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(addedEvents));
+                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(addedEventsResponse));
                 return response;
             }
             catch (System.Text.Json.JsonException ex)
@@ -200,12 +185,12 @@ namespace everything_timeline
             try
             {
                 var userId = GetUserId(req);
-                var datasets = await repository.GetAllDatasets(userId);
+                var datasetsResponse = await repository.GetDatasets(userId);
 
-                logger.LogInformation("Retrieved {Count} datasets", datasets.Count());
+                logger.LogInformation("Retrieved {Count} datasets", datasetsResponse.Datasets.Count());
 
                 response.StatusCode = HttpStatusCode.OK;
-                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(datasets));
+                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(datasetsResponse));
                 return response;
             }
             catch (Exception ex)

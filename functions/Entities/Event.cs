@@ -7,11 +7,11 @@ public partial class Event
 {
     public Guid Id { get; set; }
     
-    public string? Name { get; set; }
+    public string Name { get; set; }
 
-    public string? Info { get; set; }
+    public string Info { get; set; }
 
-    public int? Date { get; set; }
+    public int Date { get; set; }
 
     public Guid DatasetId { get; set; }
     

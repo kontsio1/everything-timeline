@@ -1,5 +1,7 @@
 using everything_timeline.Entities;
 using everything_timeline.UseCases;
+using everything_timeline.UseCases.Datasets;
+using everything_timeline.UseCases.Events;
 using Microsoft.EntityFrameworkCore;
 
 namespace everything_timeline;
@@ -7,13 +9,13 @@ namespace everything_timeline;
 public interface IRepository
 {
     Task<IEnumerable<Event>> GetAllEvents();
-    Task<IEnumerable<Event>> GetEventsByDatasetId(Guid datasetId);
+    Task<EventGetResponse> GetEventsByDatasetId(Guid datasetId, Guid userId);
     Task<Event?> GetEventById(Guid id);
-    Task<IEnumerable<Event>> AddEvents(IEnumerable<Event> events);
+    Task<EventGetResponse> AddEvents(IEnumerable<EventDto> events);
     Task<Event?> UpdateEvent(Event eventToUpdate);
     Task<bool> DeleteEvent(Guid id);
     Task<int> GetEventsCountByDataset(Guid datasetId);
-    Task<IEnumerable<Dataset>> GetAllDatasets(Guid userId);
+    Task<DatasetGetResponse> GetDatasets(Guid userId);
     Task<Dataset> AddDataset(DatasetCreateRequest dataset, Guid userId);
 }
 
@@ -33,35 +35,44 @@ public class Repository : IRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Event>> GetEventsByDatasetId(Guid datasetId)
+    public async Task<EventGetResponse> GetEventsByDatasetId(Guid datasetId, Guid userId)
     {
-        return await _dbContext.Events
-            .Where(e => e.DatasetId == datasetId)
+        var events = await _dbContext.Events
+            .Include(e => e.Dataset)
+            .Where(e => e.DatasetId == datasetId && (e.Dataset.UserId == userId || e.Dataset.UserId == Guid.Empty))
+            .Select(e => new EventDto
+            {
+                Id = e.Id,
+                Date = e.Date,
+                Name = e.Name,
+                Info = e.Info,
+                DatasetId = e.DatasetId,
+            })
             .OrderBy(e => e.Date)
             .ToListAsync();
+        return new EventGetResponse { Events = events };
     }
 
     public async Task<Event> GetEventById(Guid id)
     {
-        return await _dbContext.Events
-            .FirstOrDefaultAsync(e => e.Id == id);
+        return await _dbContext.Events.FirstOrDefaultAsync(e => e.Id == id);
     }
 
-    public async Task<IEnumerable<Event>> AddEvents(IEnumerable<Event> events)
+    public async Task<EventGetResponse> AddEvents(IEnumerable<EventDto> events)
     {
         var eventsToAdd = events.Select(e => new Event
         {
-            Id = e.Id == Guid.Empty ? Guid.NewGuid() : e.Id,
-            DatasetId = e.DatasetId,
+            Id = Guid.NewGuid(),
+            Date = e.Date,
             Name = e.Name,
             Info = e.Info,
-            Date = e.Date
+            DatasetId = e.DatasetId,
         }).ToList();
 
         await _dbContext.Events.AddRangeAsync(eventsToAdd);
         await _dbContext.SaveChangesAsync();
         
-        return eventsToAdd;
+        return new EventGetResponse { Events = events.ToList() };
     }
 
     public async Task<Event?> UpdateEvent(Event eventToUpdate)
@@ -100,12 +111,21 @@ public class Repository : IRepository
             .CountAsync(e => e.DatasetId == datasetId);
     }
 
-    public async Task<IEnumerable<Dataset>> GetAllDatasets(Guid userId = default)
+    public async Task<DatasetGetResponse> GetDatasets(Guid userId = default)
     {
-        return await _dbContext.Datasets
+        var datasets = await _dbContext.Datasets
                 .Where(d => d.UserId == userId || d.UserId == Guid.Empty)
-                .OrderBy(d => d.Name)
+                .Select(d => new DatasetDto
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    Description = d.Description,
+                    CreatedBy = d.CreatedBy,
+                    CreatedAt = d.CreatedAt
+                })
+                .OrderBy(d => d.CreatedAt)
                 .ToListAsync();
+        return new DatasetGetResponse { Datasets = datasets };
     }
 
     public async Task<Dataset> AddDataset(DatasetCreateRequest request, Guid userId = default)

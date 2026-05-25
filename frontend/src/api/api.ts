@@ -67,20 +67,20 @@ export async function testFunction(method: 'get' | 'post' = 'get'): Promise<IUse
 export async function getEvents(datasetId?: string) {
     const params: Record<string, string> = {};
     if (datasetId) params.dataset = datasetId;
-    const response = await axios.get(`${BASE_URL}/GetEvents`, {
+    const response = await axios.get<{ Events: IEventResponse[] }>(`${BASE_URL}/GetEvents`, {
         params,
         headers: await authHeaders(),
     });
-    return response.data as IEventResponse[];
+    return response.data.Events ?? [];
 }
 export async function addEvents(events: IEventAddRequest[]) {
-    const response = await axios.post(`${BASE_URL}/AddEvent`, events, {
+    const response = await axios.post<{ Events: IEventResponse[] }>(`${BASE_URL}/AddEvent`, {Events: events}, {
         headers: {
             'Content-Type': 'application/json',
             ...await authHeaders(),
         },
     });
-    return response.data;
+    return response.data.Events;
 }
 export async function getPeriods(datasetId?: string) {
     const params: Record<string, string> = {};
@@ -92,10 +92,10 @@ export async function getPeriods(datasetId?: string) {
     return response.data as IPeriodResponse[];
 }
 export async function getDatasets() {
-    const response = await axios.get(`${BASE_URL}/GetDatasets`, {
+    const response = await axios.get<{ Datasets: IDatasetResponse[] }>(`${BASE_URL}/GetDatasets`, {
         headers: await authHeaders(),
     });
-    return response.data as IDatasetResponse[];
+    return response.data.Datasets
 }
 
 export async function addDataset(data: IDatasetAddRequest) {

@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.Build.Framework;
 
-namespace everything_timeline.UseCases;
+namespace everything_timeline.UseCases.Datasets;
 
 public class DatasetCreateRequest
 {
