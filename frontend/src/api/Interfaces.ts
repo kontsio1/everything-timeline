@@ -12,6 +12,16 @@ export interface IEventResponse {
     Date: number;
 }
 
+export interface IEventUpdateRequest {
+    Event: {
+        Id: string;
+        Date: number;
+        Name: string;
+        Info: string;
+        DatasetId: string;
+    };
+}
+
 export interface IDatasetAddRequest {
     Name: string;
     Description: string;

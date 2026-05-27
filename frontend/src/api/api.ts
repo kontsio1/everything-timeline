@@ -4,6 +4,7 @@ import {
     IDatasetResponse,
     IEventAddRequest,
     IEventResponse,
+    IEventUpdateRequest,
     IPeriodResponse,
     IUserResponse
 } from "./Interfaces";
@@ -81,6 +82,15 @@ export async function addEvents(events: IEventAddRequest[]) {
         },
     });
     return response.data.Events;
+}
+export async function updateEvent(request: IEventUpdateRequest) {
+    const response = await axios.post<IEventResponse>(`${BASE_URL}/UpdateEvent`, request, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...await authHeaders(),
+        },
+    });
+    return response.data;
 }
 export async function getPeriods(datasetId?: string) {
     const params: Record<string, string> = {};

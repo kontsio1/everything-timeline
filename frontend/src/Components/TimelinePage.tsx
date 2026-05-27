@@ -2,7 +2,7 @@ import {TimelineComponent, TimelineComponentHandle} from "./TimelineComponent";
 import React, {useEffect, useMemo, useRef} from "react";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import {seedPeriods} from "../Seed/DefaultEvents";
-import {getEvents, addEvents, getDatasets} from "../api/api";
+import {getEvents, addEvents, getDatasets, updateEvent} from "../api/api";
 import {Header} from "./Header";
 import {IEventAddRequest} from "../api/Interfaces";
 import {useDatasetContext} from "../context/DatasetContext";
@@ -58,7 +58,7 @@ export const TimelinePage = () => {
         setLoading(true);
         const fetchEvents = async () => {
             const events = await getEvents(selectedDataset?.Id);
-            const timelineEvents = events.map(e => new TimelineEvent(e.Id, [e.Date, 0, 0], e.Name, e.Info));
+            const timelineEvents = events.map(e => new TimelineEvent(e.Id, [e.Date, 0, 0], e.Name, e.Info, undefined, e.DatasetId, e.Date));
             setEvents(timelineEvents);
         };
         fetchEvents().then(r => setLoading(false));
@@ -112,7 +112,7 @@ export const TimelinePage = () => {
             setLoading(true);
             try {
                 const fetchedEvents = await getEvents(selectedDataset?.Id);
-                const timelineEvents = fetchedEvents.map(e => new TimelineEvent(e.Id, [e.Date, 0, 0], e.Name, e.Info));
+                const timelineEvents = fetchedEvents.map(e => new TimelineEvent(e.Id, [e.Date, 0, 0], e.Name, e.Info, undefined, e.DatasetId, e.Date));
                 setEvents(timelineEvents);
 
                 // Find the newly added event using the returned record's Name + Date
@@ -160,6 +160,27 @@ export const TimelinePage = () => {
         setScrollDetailsOnOpen(false);
     };
 
+    const handleSaveEventInfo = async (updatedInfo: string) => {
+        if (!detailsEvent || !detailsEvent.datasetId || detailsEvent.rawDate === undefined) return;
+        await updateEvent({
+            Event: {
+                Id: detailsEvent.id,
+                Date: detailsEvent.rawDate,
+                Name: detailsEvent.label,
+                Info: updatedInfo,
+                DatasetId: detailsEvent.datasetId,
+            },
+        });
+        // Update local events state
+        const updatedEvents = events.map(e =>
+            e.id === detailsEvent.id ? Object.assign(Object.create(Object.getPrototypeOf(e)), e, { info: updatedInfo }) : e
+        );
+        setEvents(updatedEvents);
+        // Update the details panel event reference
+        const updatedDetailsEvent = updatedEvents.find(e => e.id === detailsEvent.id) ?? null;
+        setDetailsEvent(updatedDetailsEvent);
+    };
+
     return (
         <>
             <Header
@@ -188,6 +209,7 @@ export const TimelinePage = () => {
                 event={detailsEvent}
                 onClose={handleCloseDetails}
                 scrollOnOpen={scrollDetailsOnOpen}
+                onSave={handleSaveEventInfo}
             />
         </>
     );

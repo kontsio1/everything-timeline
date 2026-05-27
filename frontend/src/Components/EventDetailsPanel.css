@@ -25,9 +25,7 @@
 }
 
 .event-details-panel .close-button {
-    position: absolute;
-    top: 12px;
-    right: 12px;
+    position: static;
     width: 32px;
     height: 32px;
     background: transparent;
@@ -46,6 +44,106 @@
 .event-details-panel .close-button:hover {
     background: #c45c2e;
     color: #0f0e0b;
+}
+
+.panel-top-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.event-details-panel .edit-button {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid #c45c2e;
+    border-radius: 50%;
+    color: #f5f0e8;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.event-details-panel .edit-button:hover:not(:disabled) {
+    background: #c45c2e;
+    color: #0f0e0b;
+}
+
+.event-details-panel .edit-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.event-info-textarea {
+    width: 100%;
+    background: transparent;
+    border: 1px solid #c45c2e;
+    border-radius: 6px;
+    color: #e8dfc8;
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 8px 10px;
+    resize: vertical;
+    box-sizing: border-box;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.event-info-textarea:focus {
+    border-color: #d86e3f;
+}
+
+.event-info-textarea:disabled {
+    opacity: 0.6;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.edit-actions .save-button,
+.edit-actions .cancel-button {
+    padding: 6px 18px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border: 1px solid #c45c2e;
+}
+
+.edit-actions .save-button {
+    background: #c45c2e;
+    color: #0f0e0b;
+}
+
+.edit-actions .save-button:hover:not(:disabled) {
+    background: #d86e3f;
+}
+
+.edit-actions .cancel-button {
+    background: transparent;
+    color: #f5f0e8;
+}
+
+.edit-actions .cancel-button:hover:not(:disabled) {
+    background: #c45c2e;
+    color: #0f0e0b;
+}
+
+.edit-actions .save-button:disabled,
+.edit-actions .cancel-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .event-details-content {

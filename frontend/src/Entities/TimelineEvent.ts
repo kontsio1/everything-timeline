@@ -14,6 +14,8 @@ export class TimelineEvent extends BaseEvent {
     //left edge of the box, used for tooltip positioning
     boxX: number = 0;
     info?: string;
+    datasetId?: string;
+    rawDate?: number;
     padding: number = 4;
     private _isHighlighted: boolean = false;
     private originalColour: string = "";
@@ -34,7 +36,7 @@ export class TimelineEvent extends BaseEvent {
         }
     }
     
-    constructor(id: string, date: number[], label: string, info?: string, colour?: string) { 
+    constructor(id: string, date: number[], label: string, info?: string, colour?: string, datasetId?: string, rawDate?: number) { 
         super(id, label, colour);
         this.date = new Date(0);
         this.date.setFullYear(date[0], date[1] ?? 0, date[2] ?? 0);
@@ -42,6 +44,8 @@ export class TimelineEvent extends BaseEvent {
         this.colour = colour || "#" + Math.floor(stringToUnique01(this.label, 2) * 16777215).toString(16).padStart(6, "0");
         this.originalColour = this.colour;
         this.info = info || undefined;
+        this.datasetId = datasetId;
+        this.rawDate = rawDate ?? date[0];
         this.boxWidth = this.rectWidth();
     }
     public resetStemHeight(): void {
