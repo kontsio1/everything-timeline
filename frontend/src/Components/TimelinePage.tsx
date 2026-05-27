@@ -4,7 +4,7 @@ import {TimelineEvent} from "../Entities/TimelineEvent";
 import {seedPeriods} from "../Seed/DefaultEvents";
 import {getEvents, addEvents, getDatasets} from "../api/api";
 import {Header} from "./Header";
-import {IDatasetResponse, IEventAddRequest, IEventResponse} from "../api/Interfaces";
+import {IEventAddRequest} from "../api/Interfaces";
 import {useDatasetContext} from "../context/DatasetContext";
 import {EventDetailsPanel} from "./EventDetailsPanel";
 import {pulseEventDuration, zoomToEventDuration} from "../Constants/GlobalConfigConstants";
@@ -16,11 +16,16 @@ export const TimelinePage = () => {
     const [pulseEventKey, setPulseEventKey] = React.useState<string | null>(null);
     const [scrollDetailsOnOpen, setScrollDetailsOnOpen] = React.useState(false);
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
-    const [selectedDataset, setSelectedDataset] = React.useState<IDatasetResponse | null>(null);
     const [loading, setLoading] = React.useState(false);
     const periods = seedPeriods;
     
-    const { datasets, setDatasets, isInitialized, setIsInitialized } = useDatasetContext();
+    const { datasets, setDatasets, isInitialized, setIsInitialized, selectedDatasetId, setSelectedDatasetId } = useDatasetContext();
+
+    // Resolve selected dataset from context id, fallback to null
+    const selectedDataset = React.useMemo(() => {
+        if (!selectedDatasetId) return null;
+        return datasets.find(d => d.Id === selectedDatasetId) ?? null;
+    }, [selectedDatasetId, datasets]);
 
     const getEventKey = (event: TimelineEvent) => `${event.label}-${event.date.toISOString()}`;
 
@@ -39,6 +44,15 @@ export const TimelinePage = () => {
         };
         fetchDatasets().then(r => setLoading(false));
     }, [isInitialized, datasets.length, setDatasets, setIsInitialized])
+
+    // Auto-select first dataset when datasets become available and no valid selection exists
+    useEffect(() => {
+        if (datasets.length === 0) return;
+        const isValidSelection = selectedDatasetId && datasets.some(d => d.Id === selectedDatasetId);
+        if (!isValidSelection) {
+            setSelectedDatasetId(datasets[0].Id);
+        }
+    }, [datasets]);
     
     useEffect(() => {
         setLoading(true);
@@ -83,8 +97,8 @@ export const TimelinePage = () => {
 
 
     const handleDatabaseChange = (e: React.SyntheticEvent, name: string | null) => {
-        const selectedDataset = datasets.find(d => d.Name === name) || null;
-        setSelectedDataset(selectedDataset);
+        const dataset = datasets.find(d => d.Name === name) || null;
+        setSelectedDatasetId(dataset?.Id ?? null);
     };
     
     const handleAddEvent = async (eventData: {
