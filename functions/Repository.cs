@@ -45,7 +45,7 @@ public class Repository : IRepository
             var userId = request.UserId;
             events = await _dbContext.Events
                 .Include(e => e.Dataset)
-                .Where(e => e.DatasetId == datasetId && (e.Dataset.UserId == userId))
+                .Where(e => e.DatasetId == datasetId && (e.Dataset.UserId == userId || e.Dataset.UserId == Guid.Empty))
                 .OrderBy(e => e.Date)
                 .Select(e => new EventDto(e))
                 .ToListAsync();

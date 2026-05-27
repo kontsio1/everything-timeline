@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using everything_timeline.Entities;
 
 namespace everything_timeline.UseCases.Events;
@@ -7,11 +8,23 @@ public class EventGetResponse
     public List<EventDto> Events { get; set; } = new();
 }
 
-public class EventDto(Event entity)
+public class EventDto
 {
-    public Guid? Id { get; set; } = entity.Id;
-    public int Date { get; set; } = entity.Date;
-    public string Name { get; set; } = entity.Name;
-    public string Info { get; set; } = entity.Info;
-    public Guid DatasetId { get; set; } = entity.DatasetId;
+    public Guid? Id { get; set; }
+    public int Date { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Info { get; set; } = string.Empty;
+    public Guid DatasetId { get; set; }
+
+    [JsonConstructor]
+    public EventDto() { }
+
+    public EventDto(Event entity)
+    {
+        Id = entity.Id;
+        Date = entity.Date;
+        Name = entity.Name;
+        Info = entity.Info;
+        DatasetId = entity.DatasetId;
+    }
 }

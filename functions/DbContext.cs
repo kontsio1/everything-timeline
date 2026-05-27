@@ -29,9 +29,8 @@ public class DbContext : Microsoft.EntityFrameworkCore.DbContext
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(255);
-                
-            entity.Property(e => e.Info)
-                .HasMaxLength(1000);
+
+            entity.Property(e => e.Info);
                 
             entity.Property(e => e.Date)
                 .IsRequired();
