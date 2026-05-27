@@ -44,7 +44,7 @@ export const TimelinePage = () => {
         setLoading(true);
         const fetchEvents = async () => {
             const events = await getEvents(selectedDataset?.Id);
-            const timelineEvents = events.map(e => new TimelineEvent([e.Date, 0, 0], e.Name, e.Info))
+            const timelineEvents = events.map(e => new TimelineEvent(e.Id, [e.Date, 0, 0], e.Name, e.Info));
             setEvents(timelineEvents);
         };
         fetchEvents().then(r => setLoading(false));
@@ -94,9 +94,39 @@ export const TimelinePage = () => {
     }) => {
         const newEvent = { Date: eventData.year, Name: eventData.name, Info: eventData.info, DatasetId: selectedDataset?.Id} as IEventAddRequest;
         try {
-            const result = await addEvents([newEvent]);
-            // setEvents([...events, newEvent]);   
-            // alert("AddEvents result: " + JSON.stringify(result));
+            const addedRecords = await addEvents([newEvent]);
+            setLoading(true);
+            try {
+                const fetchedEvents = await getEvents(selectedDataset?.Id);
+                const timelineEvents = fetchedEvents.map(e => new TimelineEvent(e.Id, [e.Date, 0, 0], e.Name, e.Info));
+                setEvents(timelineEvents);
+
+                // Find the newly added event using the returned record's Name + Date
+                const addedRecord = addedRecords?.[0];
+                console.log("Added record:", addedRecord);
+                console.log("Timeline events:", timelineEvents);
+                if (addedRecord) {
+                    window.setTimeout(() => {
+                        const matched = timelineEvents.find(
+                            e => e.id == addedRecord.Id
+                        );
+                        if (matched) {
+                            const eventKey = getEventKey(matched);
+                            setHighlightedEvent(matched);
+                            setDetailsEvent(matched);
+                            setScrollDetailsOnOpen(false);
+                            setPulseEventKey(eventKey);
+                            timelineRef.current?.zoomToEvent(matched);
+                            window.setTimeout(() => {
+                                setPulseEventKey(current => (current === eventKey ? null : current));
+                            }, zoomToEventDuration + pulseEventDuration);
+                        }
+                        console.log("Event found and highlighted:", matched);
+                    }, 500);
+                }
+            } finally {
+                setLoading(false);
+            }
         } catch (err) {
             alert("AddEvents error: " + err);
         }

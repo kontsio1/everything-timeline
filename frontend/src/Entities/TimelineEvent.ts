@@ -34,8 +34,8 @@ export class TimelineEvent extends BaseEvent {
         }
     }
     
-    constructor(date: number[], label: string, info?: string, colour?: string) { 
-        super(label, colour);
+    constructor(id: string, date: number[], label: string, info?: string, colour?: string) { 
+        super(id, label, colour);
         this.date = new Date(0);
         this.date.setFullYear(date[0], date[1] ?? 0, date[2] ?? 0);
         this.stemHeight = this.defaultHeight;

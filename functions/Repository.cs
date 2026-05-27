@@ -73,21 +73,20 @@ public class Repository : IRepository
         var validRequest = _dbContext.Datasets.Any(e =>
             e.Id == request.Events.First().DatasetId && (e.UserId == request.UserId || e.UserId == Guid.Empty));
         if(!validRequest) throw new Exception("Invalid request - dataset doesn't belong to the user");
-
-        var events = request.Events;
-        var eventsToAdd = events.Select(e => new Event
+        
+        var eventsToAdd = request.Events.Select(e => new Event
         {
             Id = Guid.NewGuid(),
             Date = e.Date,
             Name = e.Name,
             Info = e.Info,
             DatasetId = e.DatasetId,
-        });
+        }).ToList();
         
         await _dbContext.Events.AddRangeAsync(eventsToAdd);
         await _dbContext.SaveChangesAsync();
         
-        return new EventGetResponse { Events = events.ToList() };
+        return new EventGetResponse { Events = eventsToAdd.Select(e => new EventDto(e)).ToList() };
     }
 
     public async Task<EventUpdateResponse> UpdateEvent(EventUpdateRequest request)

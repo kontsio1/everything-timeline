@@ -16,8 +16,8 @@ export class TimelinePeriod extends BaseEvent {
     private readonly forcedPriority: number;
     overlap: number = 0;
 
-    constructor(start: number[], end: number[], label: string, forcedPriority: number = 0, colour?: string) {
-        super(label, colour)
+    constructor(id: string, start: number[], end: number[], label: string, forcedPriority: number = 0, colour?: string) {
+        super(id, label, colour)
         this.startDate = new Date(start[0], start[1]??0, start[2]??0);
         this.endDate = new Date(end[0], end[1]??0, end[2]??0);
         this.label = label;
