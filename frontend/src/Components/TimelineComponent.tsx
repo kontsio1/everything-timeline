@@ -228,7 +228,35 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
             const xScale = xScaleRef.current;
             const targetX = xScale(date);
             const centerX = timelineWidth / 2;
-            const zoomLevel = 7;
+
+            // D3 translateExtent clamps tx to: [ex0 - x1*k, ex1 - x0*k]
+            // where extent is [[50,0],[timelineWidth-50,h]] and translateExtent is [[hPad,0],[timelineWidth-hPad,0]]
+            // For the desired tx = centerX - targetX*k to be unclamped, derive min k:
+            //   tx >= ex0 - (timelineWidth - hPad)*k  →  (timelineWidth - hPad - targetX)*k >= ex0 - centerX
+            //   tx <= (timelineWidth - 50) - hPad*k   →  (targetX - hPad)*k >= centerX - (timelineWidth - 50)
+            const hPad = horizontalPaddingOfTimeline;
+            const ex0 = 50;
+            const ex1 = timelineWidth - 50;
+            const x1 = timelineWidth - hPad;
+            const x0 = hPad;
+
+            let minZoom = 7;
+
+            // Lower-bound: tx >= tx_min  →  centerX - targetX*k >= ex0 - x1*k
+            //   k*(x1 - targetX) >= ex0 - centerX  →  k >= (centerX - ex0) / (x1 - targetX)
+            const denomA = x1 - targetX;
+            if (denomA > 0) {
+                minZoom = Math.max(minZoom, (centerX - ex0) / denomA);
+            }
+
+            // Upper-bound: tx <= tx_max  →  centerX - targetX*k <= ex1 - x0*k
+            //   k*(targetX - x0) >= centerX - ex1  →  k >= (centerX - ex1) / (-(targetX - x0))
+            const denomB = targetX - x0;
+            if (denomB > 0) {
+                minZoom = Math.max(minZoom, (centerX - ex1) / (-denomB));
+            }
+
+            const zoomLevel = Math.min(Math.ceil(minZoom * 10) / 10, 1000);
             const translateX = centerX - targetX * zoomLevel;
             const targetTransform = d3.zoomIdentity.translate(translateX, 0).scale(zoomLevel);
             const svgSelection = d3.select(svgRef.current);
