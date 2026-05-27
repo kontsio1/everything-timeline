@@ -1,6 +1,5 @@
 using System.Net;
-using everything_timeline.Entities;
-using everything_timeline.UseCases;
+using everything_timeline.Extensions;
 using everything_timeline.UseCases.Datasets;
 using everything_timeline.UseCases.Events;
 using Microsoft.AspNetCore.Http;
@@ -13,35 +12,6 @@ namespace everything_timeline
 {
     public class Functions(ILogger<Functions> logger, IRepository repository)
     {
-        //TODO: This could be extension method of HttpContextExtensions
-        private static Guid GetUserId(HttpRequestData req)
-        {
-            var user = req.FunctionContext.GetHttpContext()?.User;
-            if (user?.Identity?.IsAuthenticated != true)
-                return Guid.Empty;
-
-            var id = user.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
-            return Guid.TryParse(id, out var guid) ? guid : Guid.Empty;
-        }
-
-        private static void SetCorsHeaders(HttpResponseData response)
-        {
-            response.Headers.Add("Access-Control-Allow-Origin", "*");
-            response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-            response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, x-requested-with");
-        }
-
-        [Function("Options")]
-        public HttpResponseData HandleOptions([HttpTrigger(AuthorizationLevel.Anonymous, "options", Route = "{*any}")] HttpRequestData req)
-        {
-            var response = req.CreateResponse();
-            response.StatusCode = HttpStatusCode.OK;
-
-            SetCorsHeaders(response);
-            response.Headers.Add("Access-Control-Max-Age", "86400");
-
-            return response;
-        }
 
         [Function("Test")]
         public IActionResult TestFunction(
@@ -68,34 +38,42 @@ namespace everything_timeline
             return new OkObjectResult(userInfo);
         }
         
+        [Function("Options")]
+        public HttpResponseData HandleOptions([HttpTrigger(AuthorizationLevel.Anonymous, "options", Route = "{*any}")] HttpRequestData req)
+        {
+            var response = req.CreateResponse();
+            response.StatusCode = HttpStatusCode.OK;
+
+            response.SetCorsHeaders();
+            response.Headers.Add("Access-Control-Max-Age", "86400");
+
+            return response;
+        }
+        
         [Function("GetEvents")]
         public async Task<HttpResponseData> GetEvents(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
             var response = req.CreateResponse();
-            response.Headers.Add("Content-Type", "application/json");
-            SetCorsHeaders(response);
+            response.SetJsonContentType();
+            response.SetCorsHeaders();
 
             try
             {
                 var datasetParam = req.Query["dataset"];
                 Guid.TryParse(datasetParam, out Guid datasetId);
-                
-                var userId = GetUserId(req);
-                var eventsResponse = await repository.GetEventsByDatasetId(datasetId, userId);
+
+                var userId = req.GetUserId();
+                var eventsResponse = await repository.GetEventsByDatasetId(new EventsGetRequest(datasetId, userId));
 
                 logger.LogInformation("Retrieved {Count} events for dataset {DatasetId}", eventsResponse.Events.Count, datasetId);
 
-                response.StatusCode = HttpStatusCode.OK;
-                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(eventsResponse));
-                return response;
+                return await response.OkJsonAsync(eventsResponse);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error retrieving events");
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                await response.WriteStringAsync("An error occurred while retrieving events");
-                return response;
+                return await response.InternalServerErrorAsync("An error occurred while retrieving events");
             }
         }
 
@@ -105,72 +83,70 @@ namespace everything_timeline
             HttpRequestData req)
         {
             var response = req.CreateResponse();
-            response.Headers.Add("Content-Type", "application/json");
-            SetCorsHeaders(response);
+            response.SetJsonContentType();
+            response.SetCorsHeaders();
 
             try
             {
-                // Read the request body
-                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                var (eventsRequest, isEmpty) = await req.ReadBodyAsync<EventCreateRequest>();
 
-                if (string.IsNullOrEmpty(requestBody))
-                {
-                    response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteStringAsync("Request body cannot be empty");
-                    return response;
-                }
-
-                // Deserialize the events
-                var eventsRequest = System.Text.Json.JsonSerializer.Deserialize<EventCreateRequest>(requestBody);
-                var events = eventsRequest.Events;
+                if (isEmpty || eventsRequest is null)
+                    return await response.BadRequestAsync("Request body cannot be empty");
                 
-                if (events.Count == 0)
-                {
-                    response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteStringAsync("No events provided");
-                    return response;
-                }
-
-                // Validate required fields
-                foreach (var evt in events)
-                {
-                    if (evt.DatasetId == Guid.Empty)
-                    {
-                        response.StatusCode = HttpStatusCode.BadRequest;
-                        await response.WriteStringAsync("DatasetId is required for all events");
-                        return response;
-                    }
-
-                    if (string.IsNullOrEmpty(evt.Name))
-                    {
-                        response.StatusCode = HttpStatusCode.BadRequest;
-                        await response.WriteStringAsync("Name is required for all events");
-                        return response;
-                    }
-                }
-
-                // Add events using repository
-                var addedEventsResponse = await repository.AddEvents(events);
-
+                eventsRequest.SetUser(req.GetUserId());
+                var addedEventsResponse = await repository.AddEvents(eventsRequest);
+                
                 logger.LogInformation("Added {Count} events", addedEventsResponse.Events.Count);
 
-                response.StatusCode = HttpStatusCode.Created;
-                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(addedEventsResponse));
-                return response;
+                return await response.CreatedJsonAsync(addedEventsResponse);
             }
             catch (System.Text.Json.JsonException ex)
             {
                 logger.LogError(ex, "Invalid JSON in request body");
-                response.StatusCode = HttpStatusCode.BadRequest;
-                await response.WriteStringAsync("Invalid JSON format");
-                return response;
+                return await response.BadRequestAsync("Invalid JSON format");
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error adding events");
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                await response.WriteStringAsync("An error occurred while adding events");
-                return response;
+                return await response.InternalServerErrorAsync("An error occurred while adding events");
+            }
+        }
+        
+        [Function("UpdateEvent")]
+        public async Task<HttpResponseData> UpdateEvent(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post")]
+            HttpRequestData req)
+        {
+            var response = req.CreateResponse();
+            response.SetJsonContentType();
+            response.SetCorsHeaders();
+
+            try
+            {
+                var (eventUpdateRequest, isEmpty) = await req.ReadBodyAsync<EventUpdateRequest>();
+
+                var eventDto = eventUpdateRequest.Event;
+                if (isEmpty || eventDto is null)
+                    return await response.BadRequestAsync("Request body cannot be empty");
+                
+                if (eventDto.DatasetId == Guid.Empty)
+                    return await response.BadRequestAsync("DatasetId is required for all events");
+
+                eventUpdateRequest.SetUser(req.GetUserId());
+                var updatedEventResponse = await repository.UpdateEvent(eventUpdateRequest);
+                logger.LogInformation("Updated event: {name}", updatedEventResponse);
+
+                return await response.CreatedJsonAsync(updatedEventResponse);
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                logger.LogError(ex, "Invalid JSON in request body");
+                return await response.BadRequestAsync("Invalid JSON format");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error adding events");
+                return await response.InternalServerErrorAsync("An error occurred while adding events");
             }
         }
 
@@ -179,26 +155,22 @@ namespace everything_timeline
             [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
         {
             var response = req.CreateResponse();
-            response.Headers.Add("Content-Type", "application/json");
-            SetCorsHeaders(response);
+            response.SetJsonContentType();
+            response.SetCorsHeaders();
 
             try
             {
-                var userId = GetUserId(req);
+                var userId = req.GetUserId();
                 var datasetsResponse = await repository.GetDatasets(userId);
 
                 logger.LogInformation("Retrieved {Count} datasets", datasetsResponse.Datasets.Count());
 
-                response.StatusCode = HttpStatusCode.OK;
-                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(datasetsResponse));
-                return response;
+                return await response.OkJsonAsync(datasetsResponse);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error retrieving datasets");
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                await response.WriteStringAsync("An error occurred while retrieving datasets");
-                return response;
+                return await response.InternalServerErrorAsync("An error occurred while retrieving datasets");
             }
         }
         
@@ -208,54 +180,36 @@ namespace everything_timeline
             HttpRequestData req)
         {
             var response = req.CreateResponse();
-            response.Headers.Add("Content-Type", "application/json");
-            SetCorsHeaders(response);
+            response.SetJsonContentType();
+            response.SetCorsHeaders();
 
             try
             {
-                // Read the request body
-                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-
-                if (string.IsNullOrEmpty(requestBody))
-                {
-                    response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteStringAsync("Request body cannot be empty");
-                    return response;
-                }
-
-                // Deserialize the request
                 var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var datasetCreateRequest = System.Text.Json.JsonSerializer.Deserialize<DatasetCreateRequest>(requestBody, jsonOptions);
+                var (datasetCreateRequest, isEmpty) = await req.ReadBodyAsync<DatasetCreateRequest>(jsonOptions);
 
-                // Add events using repository
-                var userId = GetUserId(req);
+                if (isEmpty || datasetCreateRequest is null)
+                    return await response.BadRequestAsync("Request body cannot be empty");
+
+                var userId = req.GetUserId();
                 if (userId == Guid.Empty)
-                {
-                    response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteStringAsync("Please login to create a dataset");
-                    return response;
-                }
-                var addedDataset = await repository.AddDataset(datasetCreateRequest, userId);
-
+                    return await response.BadRequestAsync("Please login to create a dataset");
+                datasetCreateRequest.SetUser(userId);
+                
+                var addedDataset = await repository.AddDataset(datasetCreateRequest);
                 logger.LogInformation("Added dataset: {DatasetName}", addedDataset.Name);
 
-                response.StatusCode = HttpStatusCode.Created;
-                await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(addedDataset));
-                return response;
+                return await response.CreatedJsonAsync(addedDataset);
             }
             catch (System.Text.Json.JsonException ex)
             {
                 logger.LogError(ex, "Invalid JSON in request body");
-                response.StatusCode = HttpStatusCode.BadRequest;
-                await response.WriteStringAsync("Invalid JSON format");
-                return response;
+                return await response.BadRequestAsync("Invalid JSON format");
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error adding dataset");
-                response.StatusCode = HttpStatusCode.InternalServerError;
-                await response.WriteStringAsync("An error occurred while adding dataset");
-                return response;
+                return await response.InternalServerErrorAsync("An error occurred while adding dataset");
             }
         }
     }
