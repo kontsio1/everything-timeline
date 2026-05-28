@@ -3,6 +3,7 @@ import {
     IDatasetAddRequest,
     IDatasetResponse,
     IEventAddRequest,
+    IEventDeleteRequest,
     IEventResponse,
     IEventUpdateRequest,
     IPeriodResponse,
@@ -92,6 +93,15 @@ export async function updateEvent(request: IEventUpdateRequest) {
     });
     return response.data;
 }
+export async function deleteEvent(request: IEventDeleteRequest) {
+    const response = await axios.post<{ deleted: boolean }>(`${BASE_URL}/DeleteEvent`, request, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...await authHeaders(),
+        },
+    });
+    return response.data;
+}
 export async function getPeriods(datasetId?: string) {
     const params: Record<string, string> = {};
     if (datasetId) params.dataset = datasetId;
@@ -117,4 +127,3 @@ export async function addDataset(data: IDatasetAddRequest) {
     });
     return response.data as IDatasetResponse;
 }
-

@@ -38,6 +38,13 @@ namespace everything_timeline.Extensions
             return response;
         }
 
+        public static async Task<HttpResponseData> NotFoundAsync(this HttpResponseData response, string message)
+        {
+            response.StatusCode = HttpStatusCode.NotFound;
+            await response.WriteStringAsync(message);
+            return response;
+        }
+
         public static async Task<HttpResponseData> InternalServerErrorAsync(this HttpResponseData response, string message)
         {
             response.StatusCode = HttpStatusCode.InternalServerError;
@@ -46,4 +53,3 @@ namespace everything_timeline.Extensions
         }
     }
 }
-

@@ -8,15 +8,17 @@ interface EventDetailsPanelProps {
     onClose: () => void;
     scrollOnOpen: boolean;
     onSave: (updatedInfo: string) => Promise<void>;
+    onDelete: () => Promise<void>;
 }
 
-export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({ event, onClose, scrollOnOpen, onSave }) => {
+export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({ event, onClose, scrollOnOpen, onSave, onDelete }) => {
     const isVisible = event !== null;
     const isAuthenticated = useIsAuthenticated();
     const panelRef = useRef<HTMLDivElement | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editedInfo, setEditedInfo] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Reset edit state when the selected event changes
     useEffect(() => {
@@ -52,6 +54,16 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({ event, onC
         }
     };
 
+    const handleDelete = async () => {
+        if (!window.confirm(`Are you sure you want to delete "${event?.label}"? This action cannot be undone.`)) return;
+        setIsDeleting(true);
+        try {
+            await onDelete();
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return (
         <div
             ref={panelRef}
@@ -61,11 +73,20 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({ event, onC
                 <button
                     className="edit-button"
                     onClick={handleEditToggle}
-                    disabled={!isAuthenticated || isSaving}
+                    disabled={!isAuthenticated || isSaving || isDeleting}
                     aria-label={isEditing ? 'Cancel editing' : 'Edit event info'}
                     title={!isAuthenticated ? 'Sign in to edit' : isEditing ? 'Cancel' : 'Edit'}
                 >
                     {isEditing ? '✕' : '✎'}
+                </button>
+                <button
+                    className="delete-button"
+                    onClick={handleDelete}
+                    disabled={!isAuthenticated || isSaving || isDeleting}
+                    aria-label="Delete event"
+                    title={!isAuthenticated ? 'Sign in to delete' : 'Delete event'}
+                >
+                    {isDeleting ? '…' : '🗑'}
                 </button>
                 <button
                     className="close-button"

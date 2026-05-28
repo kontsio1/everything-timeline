@@ -12,7 +12,6 @@ namespace everything_timeline
 {
     public class Functions(ILogger<Functions> logger, IRepository repository)
     {
-
         [Function("Test")]
         public IActionResult TestFunction(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
@@ -147,6 +146,47 @@ namespace everything_timeline
             {
                 logger.LogError(ex, "Error adding events");
                 return await response.InternalServerErrorAsync("An error occurred while adding events");
+            }
+        }
+
+        [Function("DeleteEvent")]
+        public async Task<HttpResponseData> DeleteEvent(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post")]
+            HttpRequestData req)
+        {
+            var response = req.CreateResponse();
+            response.SetJsonContentType();
+            response.SetCorsHeaders();
+
+            try
+            {
+                var (eventDeleteRequest, isEmpty) = await req.ReadBodyAsync<EventDeleteRequest>();
+
+                var eventDto = eventDeleteRequest?.Event;
+                if (isEmpty || eventDto is null)
+                    return await response.BadRequestAsync("Request body cannot be empty");
+
+                if (eventDto.DatasetId == Guid.Empty)
+                    return await response.BadRequestAsync("DatasetId is required");
+
+                eventDeleteRequest.SetUser(req.GetUserId());
+                var deleted = await repository.DeleteEvent(eventDeleteRequest);
+
+                if (!deleted)
+                    return await response.NotFoundAsync("Event not found");
+
+                logger.LogInformation("Deleted event: {id}", eventDto.Id);
+                return await response.OkJsonAsync(new { deleted = true });
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                logger.LogError(ex, "Invalid JSON in request body");
+                return await response.BadRequestAsync("Invalid JSON format");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error deleting event");
+                return await response.InternalServerErrorAsync("An error occurred while deleting the event");
             }
         }
 

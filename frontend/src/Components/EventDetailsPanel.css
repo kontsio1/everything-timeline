@@ -81,6 +81,33 @@
     cursor: not-allowed;
 }
 
+.event-details-panel .delete-button {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid #c45c2e;
+    border-radius: 50%;
+    color: #f5f0e8;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.event-details-panel .delete-button:hover:not(:disabled) {
+    background: #8b1a1a;
+    border-color: #8b1a1a;
+    color: #f5f0e8;
+}
+
+.event-details-panel .delete-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .event-info-textarea {
     width: 100%;
     background: transparent;
@@ -181,4 +208,3 @@
 .event-details-panel::-webkit-scrollbar-thumb:hover {
     background: #d86e3f;
 }
-

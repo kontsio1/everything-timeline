@@ -2,7 +2,7 @@ import {TimelineComponent, TimelineComponentHandle} from "./TimelineComponent";
 import React, {useEffect, useMemo, useRef} from "react";
 import {TimelineEvent} from "../Entities/TimelineEvent";
 import {seedPeriods} from "../Seed/DefaultEvents";
-import {getEvents, addEvents, getDatasets, updateEvent} from "../api/api";
+import {getEvents, addEvents, getDatasets, updateEvent, deleteEvent} from "../api/api";
 import {Header} from "./Header";
 import {IEventAddRequest} from "../api/Interfaces";
 import {useDatasetContext} from "../context/DatasetContext";
@@ -181,6 +181,23 @@ export const TimelinePage = () => {
         setDetailsEvent(updatedDetailsEvent);
     };
 
+    const handleDeleteEvent = async () => {
+        if (!detailsEvent || !detailsEvent.datasetId || detailsEvent.rawDate === undefined) return;
+        await deleteEvent({
+            Event: {
+                Id: detailsEvent.id,
+                Date: detailsEvent.rawDate,
+                Name: detailsEvent.label,
+                Info: detailsEvent.info ?? '',
+                DatasetId: detailsEvent.datasetId,
+            },
+        });
+        setEvents(prev => prev.filter(e => e.id !== detailsEvent.id));
+        setHighlightedEvent(null);
+        setDetailsEvent(null);
+        setScrollDetailsOnOpen(false);
+    };
+
     return (
         <>
             <Header
@@ -210,6 +227,7 @@ export const TimelinePage = () => {
                 onClose={handleCloseDetails}
                 scrollOnOpen={scrollDetailsOnOpen}
                 onSave={handleSaveEventInfo}
+                onDelete={handleDeleteEvent}
             />
         </>
     );

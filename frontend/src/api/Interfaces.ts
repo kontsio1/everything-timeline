@@ -22,6 +22,16 @@ export interface IEventUpdateRequest {
     };
 }
 
+export interface IEventDeleteRequest {
+    Event: {
+        Id: string;
+        Date: number;
+        Name: string;
+        Info: string;
+        DatasetId: string;
+    };
+}
+
 export interface IDatasetAddRequest {
     Name: string;
     Description: string;
