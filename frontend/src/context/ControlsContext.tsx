@@ -1,5 +1,5 @@
 import React, {createContext, useContext, useEffect, useMemo, useState} from "react";
-import {deriveDefaultEventStemHeight, defaultLaneHeightPadding} from "../Constants/GlobalConfigConstants";
+import {deriveDefaultEventStemHeight, defaultLaneHeightPadding, ticksNo as defaultTicksNo} from "../Constants/GlobalConfigConstants";
 
 const controlsStorageKey = "everythingTimeline_controls";
 
@@ -7,6 +7,7 @@ export interface ControlsState {
     hoverLineEnabled: boolean;
     visibleEventsLaneHeightPadding: number;
     defaultEventStemHeight: number;
+    ticksNo: number;
 }
 
 interface ControlsContextType {
@@ -14,12 +15,14 @@ interface ControlsContextType {
     setControls: React.Dispatch<React.SetStateAction<ControlsState>>;
     setHoverLineEnabled: (enabled: boolean) => void;
     setVisibleEventsLaneHeightPadding: (padding: number) => void;
+    setTicksNo: (ticks: number) => void;
 }
 
 const defaultControls: ControlsState = {
     hoverLineEnabled: true,
     visibleEventsLaneHeightPadding: defaultLaneHeightPadding,
     defaultEventStemHeight: deriveDefaultEventStemHeight(defaultLaneHeightPadding),
+    ticksNo: defaultTicksNo,
 };
 
 const ControlsContext = createContext<ControlsContextType | undefined>(undefined);
@@ -69,11 +72,19 @@ export const ControlsProvider: React.FC<ControlsProviderProps> = ({children}) =>
         }));
     };
 
+    const setTicksNo = (ticks: number) => {
+        setControls(prev => ({
+            ...prev,
+            ticksNo: ticks,
+        }));
+    };
+
     const value = useMemo(() => ({
         controls,
         setControls,
         setHoverLineEnabled,
         setVisibleEventsLaneHeightPadding,
+        setTicksNo,
     }), [controls]);
 
     return (

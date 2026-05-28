@@ -1,7 +1,6 @@
 import * as d3 from "d3";
 import React, {forwardRef, SyntheticEvent, useEffect, useRef, useState, useImperativeHandle} from "react";
 import {
-    ticksNo,
     timelineHeight,
     timelineInitialDomain,
     timelineWidth,
@@ -104,7 +103,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
         if (axisRef.current && xScale) {
             const axisSelection = d3.select(axisRef.current)
                 .call(d3.axisBottom(xScale)
-                    .ticks(ticksNo) 
+                    .ticks(controls.ticksNo) 
                     .tickFormat(formatTicks));
 
             axisSelection.selectAll(".domain")
@@ -118,7 +117,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
             axisSelection.selectAll(".tick line")
                 .attr("stroke", txtColor);
         }
-    }, [transform, visibleEvents, visiblePeriods, loading]);
+    }, [transform, visibleEvents, visiblePeriods, loading, controls.ticksNo]);
 
     useEffect(() => {
         setRenderEvents(prev => {

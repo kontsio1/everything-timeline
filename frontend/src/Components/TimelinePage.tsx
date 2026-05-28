@@ -192,7 +192,9 @@ export const TimelinePage = () => {
                 DatasetId: detailsEvent.datasetId,
             },
         });
-        setEvents(prev => prev.filter(e => e.id !== detailsEvent.id));
+        // this momentarily changes zoom  level?
+        // setEvents(prev => prev.filter(e => e.id !== detailsEvent.id));
+        window.location.reload(); // Temporary full refresh to ensure all state is consistent after delete, can optimize later
         setHighlightedEvent(null);
         setDetailsEvent(null);
         setScrollDetailsOnOpen(false);

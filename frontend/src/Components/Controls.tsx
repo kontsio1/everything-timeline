@@ -2,7 +2,7 @@ import {Box, FormControlLabel, Slider, Switch, Typography} from "@mui/material";
 import {useControlsContext} from "../context/ControlsContext";
 
 export const Controls = () => {
-    const {controls, setHoverLineEnabled, setVisibleEventsLaneHeightPadding} = useControlsContext();
+    const {controls, setHoverLineEnabled, setVisibleEventsLaneHeightPadding, setTicksNo} = useControlsContext();
 
     return (
         <Box className="controls-panel" sx={{display: "flex", alignItems: "center", gap: 1}}>
@@ -28,6 +28,19 @@ export const Controls = () => {
                     onChange={(_, value) => {
                         if (Array.isArray(value)) return;
                         setVisibleEventsLaneHeightPadding(110 - value);
+                    }}
+                />
+            </Box>
+            <Box className="ticks-slider" sx={{width: 140, display: "flex", flexDirection: "column", alignItems: "center"}}>
+                <Typography variant="caption">number of ticks</Typography>
+                <Slider
+                    size="small"
+                    min={2}
+                    max={20}
+                    value={controls.ticksNo}
+                    onChange={(_, value) => {
+                        if (Array.isArray(value)) return;
+                        setTicksNo(value);
                     }}
                 />
             </Box>
