@@ -8,11 +8,14 @@ public partial class Dataset
     public Guid Id { get; set; }
 
     public string? Name { get; set; }
-    
+
     public string? Description { get; set; }
 
+    public int DomainStartDate { get; set; } = -3200;
+    public int? DomainEndDate { get; set; }
+
     public string? CreatedBy { get; set; }
-    
+
     public Guid UserId { get; set; }
 
     public DateTime? CreatedAt { get; set; }

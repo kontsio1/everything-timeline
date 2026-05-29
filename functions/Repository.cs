@@ -30,9 +30,7 @@ public class Repository : IRepository
 
     public async Task<IEnumerable<Event>> GetAllEvents()
     {
-        return await _dbContext.Events
-            .OrderBy(e => e.Date)
-            .ToListAsync();
+        return await _dbContext.Events.OrderBy(e => e.Date).ToListAsync();
     }
 
     public async Task<EventGetResponse> GetEventsByDatasetId(EventsGetRequest request)
@@ -43,23 +41,26 @@ public class Repository : IRepository
         if (request.IsAuthenticated())
         {
             var userId = request.UserId;
-            events = await _dbContext.Events
-                .Include(e => e.Dataset)
-                .Where(e => e.DatasetId == datasetId && (e.Dataset.UserId == userId || e.Dataset.UserId == Guid.Empty))
+            events = await _dbContext
+                .Events.Include(e => e.Dataset)
+                .Where(e =>
+                    e.DatasetId == datasetId
+                    && (e.Dataset.UserId == userId || e.Dataset.UserId == Guid.Empty)
+                )
                 .OrderBy(e => e.Date)
                 .Select(e => new EventDto(e))
                 .ToListAsync();
         }
         else
         {
-            events = await _dbContext.Events
-                .Include(e => e.Dataset)
+            events = await _dbContext
+                .Events.Include(e => e.Dataset)
                 .Where(e => e.Dataset.UserId == Guid.Empty)
                 .OrderBy(e => e.Date)
                 .Select(e => new EventDto(e))
                 .ToListAsync();
         }
-        
+
         return new EventGetResponse { Events = events };
     }
 
@@ -71,33 +72,42 @@ public class Repository : IRepository
     public async Task<EventGetResponse> AddEvents(EventCreateRequest request)
     {
         var validRequest = _dbContext.Datasets.Any(e =>
-            e.Id == request.Events.First().DatasetId && (e.UserId == request.UserId || e.UserId == Guid.Empty));
-        if(!validRequest) throw new Exception("Invalid request - dataset doesn't belong to the user");
-        
-        var eventsToAdd = request.Events.Select(e => new Event
-        {
-            Id = Guid.NewGuid(),
-            Date = e.Date,
-            Name = e.Name,
-            Info = e.Info,
-            DatasetId = e.DatasetId,
-        }).ToList();
-        
+            e.Id == request.Events.First().DatasetId
+            && (e.UserId == request.UserId || e.UserId == Guid.Empty)
+        );
+        if (!validRequest)
+            throw new Exception("Invalid request - dataset doesn't belong to the user");
+
+        var eventsToAdd = request
+            .Events.Select(e => new Event
+            {
+                Id = Guid.NewGuid(),
+                Date = e.Date,
+                Name = e.Name,
+                Info = e.Info,
+                DatasetId = e.DatasetId,
+            })
+            .ToList();
+
         await _dbContext.Events.AddRangeAsync(eventsToAdd);
         await _dbContext.SaveChangesAsync();
-        
+
         return new EventGetResponse { Events = eventsToAdd.Select(e => new EventDto(e)).ToList() };
     }
 
     public async Task<EventUpdateResponse> UpdateEvent(EventUpdateRequest request)
     {
         var validRequest = _dbContext.Datasets.Any(e =>
-            e.Id == request.Event.DatasetId && (e.UserId == request.UserId || e.UserId == Guid.Empty));
-        if(!validRequest) throw new Exception("Invalid request - dataset doesn't belong to the user");
-        
+            e.Id == request.Event.DatasetId
+            && (e.UserId == request.UserId || e.UserId == Guid.Empty)
+        );
+        if (!validRequest)
+            throw new Exception("Invalid request - dataset doesn't belong to the user");
+
         var eventToUpdate = request.Event;
-        var existingEvent = await _dbContext.Events
-            .FirstOrDefaultAsync(e => e.Id == eventToUpdate.Id);
+        var existingEvent = await _dbContext.Events.FirstOrDefaultAsync(e =>
+            e.Id == eventToUpdate.Id
+        );
 
         if (existingEvent == null)
             return null;
@@ -114,11 +124,15 @@ public class Repository : IRepository
     public async Task<bool> DeleteEvent(EventDeleteRequest request)
     {
         var validRequest = _dbContext.Datasets.Any(e =>
-            e.Id == request.Event.DatasetId && (e.UserId == request.UserId || e.UserId == Guid.Empty));
-        if(!validRequest) throw new Exception("Invalid request - dataset doesn't belong to the user");
-        
-        var eventToDelete = await _dbContext.Events
-            .FirstOrDefaultAsync(e => e.Id == request.Event.Id);
+            e.Id == request.Event.DatasetId
+            && (e.UserId == request.UserId || e.UserId == Guid.Empty)
+        );
+        if (!validRequest)
+            throw new Exception("Invalid request - dataset doesn't belong to the user");
+
+        var eventToDelete = await _dbContext.Events.FirstOrDefaultAsync(e =>
+            e.Id == request.Event.Id
+        );
 
         if (eventToDelete == null)
             return false;
@@ -130,24 +144,23 @@ public class Repository : IRepository
 
     public async Task<int> GetEventsCountByDataset(Guid datasetId)
     {
-        return await _dbContext.Events
-            .CountAsync(e => e.DatasetId == datasetId);
+        return await _dbContext.Events.CountAsync(e => e.DatasetId == datasetId);
     }
 
     public async Task<DatasetGetResponse> GetDatasets(Guid userId = default)
     {
-        var datasets = await _dbContext.Datasets
-                .Where(d => d.UserId == userId || d.UserId == Guid.Empty)
-                .Select(d => new DatasetDto
-                {
-                    Id = d.Id,
-                    Name = d.Name,
-                    Description = d.Description,
-                    CreatedBy = d.CreatedBy,
-                    CreatedAt = d.CreatedAt
-                })
-                .OrderBy(d => d.CreatedAt)
-                .ToListAsync();
+        var datasets = await _dbContext
+            .Datasets.Where(d => d.UserId == userId || d.UserId == Guid.Empty)
+            .Select(d => new DatasetDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                CreatedBy = d.CreatedBy,
+                CreatedAt = d.CreatedAt,
+            })
+            .OrderBy(d => d.CreatedAt)
+            .ToListAsync();
         return new DatasetGetResponse { Datasets = datasets };
     }
 
@@ -159,8 +172,10 @@ public class Repository : IRepository
             Name = request.Name,
             Description = request.Description,
             CreatedAt = DateTime.UtcNow,
+            DomainStartDate = request.DomainStartDate,
+            DomainEndDate = request.DomainEndDate,
             Events = new List<Event>(),
-            Periods = new List<Period>()
+            Periods = new List<Period>(),
         };
 
         await _dbContext.Datasets.AddRangeAsync(dataset);
