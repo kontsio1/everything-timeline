@@ -45,7 +45,7 @@ public class Repository : IRepository
             var userId = request.UserId;
             events = await _dbContext.Events
                 .Include(e => e.Dataset)
-                .Where(e => e.DatasetId == datasetId && (e.Dataset.UserId == userId || e.Dataset.UserId == Guid.Empty))
+                .Where(e => e.DatasetId == datasetId && (e.Dataset.OwnerId == userId || e.Dataset.OwnerId == Guid.Empty))
                 .Where(e => e.Date >= e.Dataset.DomainStart && e.Date <= (e.Dataset.DomainEnd ?? DateTime.Now.Year))
                 .OrderBy(e => e.Date)
                 .Select(e => new EventDto(e))
@@ -55,7 +55,7 @@ public class Repository : IRepository
         {
             events = await _dbContext.Events
                 .Include(e => e.Dataset)
-                .Where(e => e.Dataset.UserId == Guid.Empty)
+                .Where(e => e.Dataset.OwnerId == Guid.Empty)
                 .Where(e => e.Date >= e.Dataset.DomainStart && e.Date <= (e.Dataset.DomainEnd ?? DateTime.Now.Year))
                 .OrderBy(e => e.Date)
                 .Select(e => new EventDto(e))
@@ -73,7 +73,7 @@ public class Repository : IRepository
     public async Task<EventGetResponse> AddEvents(EventCreateRequest request)
     {
         var validRequest = _dbContext.Datasets.Any(e =>
-            e.Id == request.Events.First().DatasetId && (e.UserId == request.UserId || e.UserId == Guid.Empty));
+            e.Id == request.Events.First().DatasetId && (e.OwnerId == request.UserId || e.OwnerId == Guid.Empty));
         if(!validRequest) throw new Exception("Invalid request - dataset doesn't belong to the user");
         
         var eventsToAdd = request.Events.Select(e => new Event
@@ -94,7 +94,7 @@ public class Repository : IRepository
     public async Task<EventUpdateResponse> UpdateEvent(EventUpdateRequest request)
     {
         var validRequest = _dbContext.Datasets.Any(e =>
-            e.Id == request.Event.DatasetId && (e.UserId == request.UserId || e.UserId == Guid.Empty));
+            e.Id == request.Event.DatasetId && (e.OwnerId == request.UserId || e.OwnerId == Guid.Empty));
         if(!validRequest) throw new Exception("Invalid request - dataset doesn't belong to the user");
         
         var eventToUpdate = request.Event;
@@ -116,7 +116,7 @@ public class Repository : IRepository
     public async Task<bool> DeleteEvent(EventDeleteRequest request)
     {
         var validRequest = _dbContext.Datasets.Any(e =>
-            e.Id == request.Event.DatasetId && (e.UserId == request.UserId || e.UserId == Guid.Empty));
+            e.Id == request.Event.DatasetId && (e.OwnerId == request.UserId || e.OwnerId == Guid.Empty));
         if(!validRequest) throw new Exception("Invalid request - dataset doesn't belong to the user");
         
         var eventToDelete = await _dbContext.Events
@@ -139,7 +139,7 @@ public class Repository : IRepository
     public async Task<DatasetGetResponse> GetDatasets(Guid userId = default)
     {
         var datasets = await _dbContext.Datasets
-                .Where(d => d.UserId == userId || d.UserId == Guid.Empty)
+                .Where(d => d.OwnerId == userId || d.IsPublic)
                 .Select(d => new DatasetDto
                 {
                     Id = d.Id,
@@ -159,12 +159,13 @@ public class Repository : IRepository
     {
         var dataset = new Dataset
         {
-            UserId = request.UserId,
+            OwnerId = request.UserId,
             Name = request.Name,
             Description = request.Description,
             CreatedAt = DateTime.UtcNow,
             DomainStart = request.DomainStart,
             DomainEnd = request.DomainEnd,
+            IsPublic = request.IsPublic,
             Events = new List<Event>(),
             Periods = new List<Period>()
         };

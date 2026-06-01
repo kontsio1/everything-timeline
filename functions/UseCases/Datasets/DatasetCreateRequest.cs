@@ -15,6 +15,7 @@ public class DatasetCreateRequest : BaseRequest
     public int DomainStart { get; set; } = -3200;
     [JsonPropertyName("domainEnd")]
     public int? DomainEnd { get; set; } = null;
-    // public bool IsPublic { get; set; }
+    [JsonPropertyName("isPublic")]
+    public bool IsPublic { get; set; } = false;
     // public bool IsSeeded { get; set; }
 }

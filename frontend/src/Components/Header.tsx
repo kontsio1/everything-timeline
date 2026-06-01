@@ -77,12 +77,14 @@ export const Header = ({
         description: string;
         domainStart: number;
         domainEnd: number | null;
+        isPublic: boolean;
     }) => {
         const newDataset = await addDataset({
             Name: data.name,
             Description: data.description,
             DomainStart: data.domainStart,
             DomainEnd: data.domainEnd,
+            IsPublic: data.isPublic,
         });
         // Refresh the dataset list then switch to the new one
         const updatedDatasets = await getDatasets();

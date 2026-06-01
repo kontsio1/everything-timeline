@@ -5,6 +5,8 @@ import {
   TextField,
   Button,
   Autocomplete,
+  Checkbox,
+  FormControlLabel,
   CircularProgress,
 } from "@mui/material";
 import { formatYear, generateYearOptions } from "../Helpers/DateHelperFunctions";
@@ -21,6 +23,7 @@ interface AddDatasetModalProps {
     description: string;
     domainStart: number;
     domainEnd: number | null;
+    isPublic: boolean;
   }) => Promise<void>;
 }
 
@@ -33,6 +36,7 @@ export const AddDatasetModal: React.FC<AddDatasetModalProps> = ({
   const [description, setDescription] = useState("");
   const [domainStart, setDomainStart] = useState<number>(-3200);
   const [domainEnd, setDomainEnd] = useState<number | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const startYearOptions = generateYearOptions(DOMAIN_MIN_YEAR, DOMAIN_MAX_YEAR);
@@ -52,11 +56,13 @@ export const AddDatasetModal: React.FC<AddDatasetModalProps> = ({
         description: description.trim(),
         domainStart,
         domainEnd,
+        isPublic,
       });
       setName("");
       setDescription("");
       setDomainStart(-3200);
       setDomainEnd(null);
+      setIsPublic(false);
     } catch (error) {
       console.error("Error creating dataset:", error);
     } finally {
@@ -69,6 +75,7 @@ export const AddDatasetModal: React.FC<AddDatasetModalProps> = ({
     setDescription("");
     setDomainStart(-3200);
     setDomainEnd(null);
+    setIsPublic(false);
     onClose();
   };
 
@@ -155,6 +162,28 @@ export const AddDatasetModal: React.FC<AddDatasetModalProps> = ({
               slotProps={{ paper: { className: "modal-autocomplete-paper" } }}
             />
           </div>
+        </div>
+
+        {/* Make Public Checkbox */}
+        <div className="modal-field">
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                sx={{
+                  color: "rgba(255,255,255,0.3)",
+                  "&.Mui-checked": { color: "#c45c2e" },
+                }}
+              />
+            }
+            label="Make public"
+            sx={{
+              color: "#e8dfc8",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 14,
+            }}
+          />
         </div>
 
         {/* Action Buttons */}

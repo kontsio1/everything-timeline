@@ -37,6 +37,7 @@ export interface IDatasetAddRequest {
     Description: string;
     DomainStart: number;
     DomainEnd: number | null;
+    IsPublic: boolean;
 }
 export interface IDatasetResponse {
     Id: string;
