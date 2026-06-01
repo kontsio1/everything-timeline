@@ -95,7 +95,7 @@ export const seedPeriods = [
     new TimelinePeriod("7", [1760], [1914], "Industrial Era"),
     // new TimelinePeriod([1815], [1914], "Pax Britannica"),
     // new TimelinePeriod([1840], [1914], "Second Industrial Revolution"),
-    new TimelinePeriod("8", [1880], [1914], "Belle Époque"),
+    // new TimelinePeriod("8", [1880], [1914], "Belle Époque"),
     new TimelinePeriod("9", [1914], [1918], "World War I"),
     new TimelinePeriod("10", [1929], [1939], "Great Depression"),
     new TimelinePeriod("11", [1939], [1945], "World War II"),
