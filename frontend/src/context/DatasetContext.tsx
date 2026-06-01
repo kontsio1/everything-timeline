@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
 import { IDatasetResponse } from '../api/Interfaces';
+import { timelineInitialDomain } from '../Constants/GlobalConfigConstants';
 
 const SELECTED_DATASET_KEY = 'everythingTimeline_selectedDatasetId';
 
@@ -10,6 +11,7 @@ interface DatasetContextType {
     setIsInitialized: (initialized: boolean) => void;
     selectedDatasetId: string | null;
     setSelectedDatasetId: (id: string | null) => void;
+    activeDomain: [Date, Date];
 }
 
 const DatasetContext = createContext<DatasetContextType | undefined>(undefined);
@@ -34,8 +36,14 @@ export const DatasetProvider: React.FC<DatasetProviderProps> = ({ children }) =>
         }
     };
 
+    const activeDomain = useMemo<[Date, Date]>(() => {
+        const dataset = selectedDatasetId ? datasets.find(d => d.Id === selectedDatasetId) : null;
+        if (!dataset) return timelineInitialDomain as [Date, Date];
+        return [new Date(dataset.DomainStart, 0, 1), new Date(dataset.DomainEnd+1, 0, 1)];
+    }, [selectedDatasetId, datasets]);
+
     return (
-        <DatasetContext.Provider value={{ datasets, setDatasets, isInitialized, setIsInitialized, selectedDatasetId, setSelectedDatasetId }}>
+        <DatasetContext.Provider value={{ datasets, setDatasets, isInitialized, setIsInitialized, selectedDatasetId, setSelectedDatasetId, activeDomain }}>
             {children}
         </DatasetContext.Provider>
     );

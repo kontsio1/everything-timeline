@@ -7,7 +7,8 @@ import {
   Autocomplete,
   CircularProgress,
 } from "@mui/material";
-import { timelineInitialDomain } from "../Constants/GlobalConfigConstants";
+import { formatYear, generateYearOptions } from "../Helpers/DateHelperFunctions";
+import { useDatasetContext } from "../context/DatasetContext";
 import "./AddEventModal.css";
 
 interface AddEventModalProps {
@@ -32,23 +33,12 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   const [eventInfo, setEventInfo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Generate year options from timelineInitialDomain
-  const startYear = timelineInitialDomain[0].getFullYear();
-  const endYear = timelineInitialDomain[1].getFullYear();
-  const yearOptions = Array.from(
-    { length: endYear - startYear + 1 },
-    (_, i) => startYear + i
-  );
-  
-  const formatYear = (year: number): string => {
-    if (year < 0) {
-      return `${Math.abs(year)} BCE`;
-    } else if (year > 0 && year <= 1299) {
-      return `${year} AD`;
-    } else {
-      return year.toString();
-    }
-  };
+  const { activeDomain } = useDatasetContext();
+
+  // Generate year options from the active dataset's domain
+  const startYear = activeDomain[0].getFullYear();
+  const endYear = activeDomain[1].getFullYear();
+  const yearOptions = generateYearOptions(startYear, endYear);
 
   const handleSubmit = async () => {
     if (!eventName || selectedYear === null) {
@@ -180,4 +170,3 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     </Modal>
   );
 };
-

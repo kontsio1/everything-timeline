@@ -46,6 +46,7 @@ public class Repository : IRepository
             events = await _dbContext.Events
                 .Include(e => e.Dataset)
                 .Where(e => e.DatasetId == datasetId && (e.Dataset.UserId == userId || e.Dataset.UserId == Guid.Empty))
+                .Where(e => e.Date >= e.Dataset.DomainStart && e.Date <= (e.Dataset.DomainEnd ?? DateTime.Now.Year))
                 .OrderBy(e => e.Date)
                 .Select(e => new EventDto(e))
                 .ToListAsync();
@@ -55,6 +56,7 @@ public class Repository : IRepository
             events = await _dbContext.Events
                 .Include(e => e.Dataset)
                 .Where(e => e.Dataset.UserId == Guid.Empty)
+                .Where(e => e.Date >= e.Dataset.DomainStart && e.Date <= (e.Dataset.DomainEnd ?? DateTime.Now.Year))
                 .OrderBy(e => e.Date)
                 .Select(e => new EventDto(e))
                 .ToListAsync();
@@ -143,6 +145,8 @@ public class Repository : IRepository
                     Id = d.Id,
                     Name = d.Name,
                     Description = d.Description,
+                    DomainStart = d.DomainStart,
+                    DomainEnd = d.DomainEnd ?? DateTime.Now.Year,
                     CreatedBy = d.CreatedBy,
                     CreatedAt = d.CreatedAt
                 })
@@ -159,6 +163,8 @@ public class Repository : IRepository
             Name = request.Name,
             Description = request.Description,
             CreatedAt = DateTime.UtcNow,
+            DomainStart = request.DomainStart,
+            DomainEnd = request.DomainEnd,
             Events = new List<Event>(),
             Periods = new List<Period>()
         };

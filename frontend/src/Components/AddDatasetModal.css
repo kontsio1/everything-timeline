@@ -17,3 +17,20 @@
   line-height: 1.6;
 }
 
+/* Domain start/end pickers side by side */
+.modal-domain-row {
+  display: flex;
+  gap: 16px;
+}
+
+.modal-domain-field {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .modal-domain-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}

@@ -35,6 +35,8 @@ export interface IEventDeleteRequest {
 export interface IDatasetAddRequest {
     Name: string;
     Description: string;
+    DomainStart: number;
+    DomainEnd: number | null;
 }
 export interface IDatasetResponse {
     Id: string;
@@ -42,6 +44,8 @@ export interface IDatasetResponse {
     Description: string;
     CreatedBy: string;
     CreatedAt: Date;
+    DomainStart: number;
+    DomainEnd: number;
 }
 
 export interface IPeriodResponse {

@@ -36,7 +36,7 @@ export const Controls = () => {
                 <Slider
                     size="small"
                     min={2}
-                    max={20}
+                    max={17}
                     value={controls.ticksNo}
                     onChange={(_, value) => {
                         if (Array.isArray(value)) return;

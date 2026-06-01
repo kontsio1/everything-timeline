@@ -10,5 +10,7 @@ public class DatasetDto
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
     public string CreatedBy { get; set; } = "";
+    public int DomainStart { get; set; } = -3200;
+    public int DomainEnd { get; set; } = new DateTime().Year;
     public DateTime? CreatedAt { get; set; }
 }

@@ -45,7 +45,7 @@ export const Header = ({
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
     const [isDatasetModalOpen, setIsDatasetModalOpen] = useState(false);
 
-    const { setDatasets } = useDatasetContext();
+    const { setDatasets, setSelectedDatasetId } = useDatasetContext();
 
     useEffect(() => {
         setLocalSelectedEvent(selectedEvent);
@@ -72,11 +72,24 @@ export const Header = ({
         setIsDatasetModalOpen(false);
     };
 
-    const handleSubmitDataset = async (data: { name: string; description: string }) => {
-        await addDataset({value: 0, ...data} as any);
-        // Refresh the dataset list
+    const handleSubmitDataset = async (data: {
+        name: string;
+        description: string;
+        domainStart: number;
+        domainEnd: number | null;
+    }) => {
+        const newDataset = await addDataset({
+            Name: data.name,
+            Description: data.description,
+            DomainStart: data.domainStart,
+            DomainEnd: data.domainEnd,
+        });
+        // Refresh the dataset list then switch to the new one
         const updatedDatasets = await getDatasets();
         setDatasets(updatedDatasets);
+        if (newDataset?.Id) {
+            setSelectedDatasetId(newDataset.Id);
+        }
         setIsDatasetModalOpen(false);
     };
 

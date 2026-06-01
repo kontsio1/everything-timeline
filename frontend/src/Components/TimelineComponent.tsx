@@ -2,7 +2,6 @@ import * as d3 from "d3";
 import React, {forwardRef, SyntheticEvent, useEffect, useRef, useState, useImperativeHandle} from "react";
 import {
     timelineHeight,
-    timelineInitialDomain,
     timelineWidth,
     noOfVisiblePeriods, horizontalPaddingOfTimeline, bgColor, txtColor, zoomToEventDuration
 } from "../Constants/GlobalConfigConstants";
@@ -33,6 +32,7 @@ const useStyles = makeStyles({
 export interface TimelineComponentProps {
     events: TimelineEvent[];
     periods: TimelinePeriod[];
+    domain: [Date, Date];
     selectedDatabase: string | null;
     highlightedEventKey: string | null;
     pulseEventKey: string | null;
@@ -49,7 +49,7 @@ export interface TimelineComponentHandle {
 export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineComponentProps>(function TimelineComponent(props, ref) {
     const classes = useStyles();
     const {controls} = useControlsContext();
-    const {events, periods, loading, onEventSelect} = props;
+    const {events, periods, domain, loading, onEventSelect} = props;
     const svgRef = useRef<SVGSVGElement>(null); // SVG ref for React-managed SVG
     const axisRef = useRef<SVGGElement>(null);
     const xScaleRef = useRef<d3.ScaleTime<number, number, never> | null>(null);
@@ -75,7 +75,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
     // Create initial scale
     useEffect(() => {
         const x = d3.scaleTime()
-            .domain(timelineInitialDomain)
+            .domain(domain)
             //horizontal distance between the left edge of the timeline rectangle (SVG) and the start of the timeline
             .range([horizontalPaddingOfTimeline, timelineWidth - horizontalPaddingOfTimeline])
             .clamp(true);
@@ -95,7 +95,7 @@ export const TimelineComponent = forwardRef<TimelineComponentHandle, TimelineCom
                 updateEvents(newX);
             });
         d3.select(svgRef.current).call(zoom);
-    }, [events]);
+    }, [events, domain]);
 
     // Update axis ticks on transform/scale change
     useEffect(() => {

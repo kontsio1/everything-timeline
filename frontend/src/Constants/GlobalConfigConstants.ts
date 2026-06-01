@@ -1,4 +1,4 @@
-export const timelineInitialDomain = [new Date(-3200, 0, 1), new Date()]
+export const timelineInitialDomain = [new Date(-3200, 0, 1), new Date(new Date().getFullYear()+1, 0, 1)]
 export const logScaleExponent = 6 // Exponent for logarithmic scale normalization
 // export const colourSeed = 12.9898
 export const colourSeed = 2.9898 //not used

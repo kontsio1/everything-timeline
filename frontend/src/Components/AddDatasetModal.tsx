@@ -4,14 +4,24 @@ import {
   Box,
   TextField,
   Button,
+  Autocomplete,
   CircularProgress,
 } from "@mui/material";
+import { formatYear, generateYearOptions } from "../Helpers/DateHelperFunctions";
 import "./AddDatasetModal.css";
+
+const DOMAIN_MIN_YEAR = -10000;
+const DOMAIN_MAX_YEAR = new Date().getFullYear() + 1;
 
 interface AddDatasetModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string; description: string }) => Promise<void>;
+  onSubmit: (data: {
+    name: string;
+    description: string;
+    domainStart: number;
+    domainEnd: number | null;
+  }) => Promise<void>;
 }
 
 export const AddDatasetModal: React.FC<AddDatasetModalProps> = ({
@@ -21,16 +31,32 @@ export const AddDatasetModal: React.FC<AddDatasetModalProps> = ({
 }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [domainStart, setDomainStart] = useState<number>(-3200);
+  const [domainEnd, setDomainEnd] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const startYearOptions = generateYearOptions(DOMAIN_MIN_YEAR, DOMAIN_MAX_YEAR);
+  // End year options: null ("Present") + years after domainStart
+  const endYearOptions: (number | null)[] = [
+    null,
+    ...generateYearOptions(domainStart + 1, DOMAIN_MAX_YEAR),
+  ];
 
   const handleSubmit = async () => {
     if (!name.trim()) return;
 
     setIsSubmitting(true);
     try {
-      await onSubmit({ name: name.trim(), description: description.trim() });
+      await onSubmit({
+        name: name.trim(),
+        description: description.trim(),
+        domainStart,
+        domainEnd,
+      });
       setName("");
       setDescription("");
+      setDomainStart(-3200);
+      setDomainEnd(null);
     } catch (error) {
       console.error("Error creating dataset:", error);
     } finally {
@@ -41,6 +67,8 @@ export const AddDatasetModal: React.FC<AddDatasetModalProps> = ({
   const handleCancel = () => {
     setName("");
     setDescription("");
+    setDomainStart(-3200);
+    setDomainEnd(null);
     onClose();
   };
 
@@ -76,9 +104,57 @@ export const AddDatasetModal: React.FC<AddDatasetModalProps> = ({
             onChange={(e) => setDescription(e.target.value)}
             fullWidth
             multiline
-            rows={4}
+            rows={3}
             className="modal-input"
           />
+        </div>
+
+        {/* Domain Start + End on the same row */}
+        <div className="modal-domain-row">
+          <div className="modal-field modal-domain-field">
+            <Autocomplete
+              options={startYearOptions}
+              value={domainStart}
+              onChange={(_, newValue) => {
+                if (newValue === null) return;
+                setDomainStart(newValue);
+                if (domainEnd !== null && domainEnd <= newValue) {
+                  setDomainEnd(null);
+                }
+              }}
+              getOptionLabel={(option) => formatYear(option)}
+              isOptionEqualToValue={(o, v) => o === v}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Timeline Start Year"
+                  className="modal-input"
+                  required
+                />
+              )}
+              slotProps={{ paper: { className: "modal-autocomplete-paper" } }}
+            />
+          </div>
+
+          <div className="modal-field modal-domain-field">
+            <Autocomplete<number | null>
+              options={endYearOptions}
+              value={domainEnd}
+              onChange={(_, newValue) => setDomainEnd(newValue ?? null)}
+              getOptionLabel={(option) => formatYear(option)}
+              isOptionEqualToValue={(o, v) => o === v}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Timeline End Year"
+                  className="modal-input"
+                  helperText='Leave as empty to set to the "Present". It will always extend to today'
+                  slotProps={{ formHelperText: { style: { color: "#c4bba8" } } }}
+                />
+              )}
+              slotProps={{ paper: { className: "modal-autocomplete-paper" } }}
+            />
+          </div>
         </div>
 
         {/* Action Buttons */}
@@ -104,4 +180,3 @@ export const AddDatasetModal: React.FC<AddDatasetModalProps> = ({
     </Modal>
   );
 };
-

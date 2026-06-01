@@ -19,7 +19,7 @@ export const TimelinePage = () => {
     const [loading, setLoading] = React.useState(false);
     const periods = seedPeriods;
     
-    const { datasets, setDatasets, isInitialized, setIsInitialized, selectedDatasetId, setSelectedDatasetId } = useDatasetContext();
+    const { datasets, setDatasets, isInitialized, setIsInitialized, selectedDatasetId, setSelectedDatasetId, activeDomain } = useDatasetContext();
 
     // Resolve selected dataset from context id, fallback to null
     const selectedDataset = React.useMemo(() => {
@@ -216,6 +216,7 @@ export const TimelinePage = () => {
                 ref={timelineRef}
                 events={events}
                 periods={periods}
+                domain={activeDomain}
                 selectedDatabase={selectedDataset?.Name ?? null}
                 highlightedEventKey={highlightedEvent ? getEventKey(highlightedEvent) : null}
                 pulseEventKey={pulseEventKey}
