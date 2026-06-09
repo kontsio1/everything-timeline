@@ -4,6 +4,9 @@ import './App.css';
 import { TimelinePage } from "./Components/TimelinePage";
 import { WelcomePage } from "./Components/WelcomePage";
 import { DatasetProvider, useDatasetContext } from "./context/DatasetContext";
+import Alert from '@mui/material/Alert';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 // Component to handle the root route redirect logic
 const RootRedirect: React.FC = () => {
@@ -31,17 +34,22 @@ function App() {
             <Router>
                 <div className="App">
                     {showDevBanner && (
-                        <div className="dev-banner" role="status" aria-live="polite">
-                            <span>This application is still under development.</span>
-                            <button
-                                className="dev-banner-close"
-                                type="button"
-                                onClick={handleDismissBanner}
-                                aria-label="Dismiss development notice"
-                            >
-                                Close
-                            </button>
-                        </div>
+                        <Alert
+                            severity="warning"
+                            role="status"
+                            aria-live="polite"
+                            action={
+                                <IconButton
+                                    aria-label="Dismiss development notice"
+                                    size="small"
+                                    onClick={handleDismissBanner}
+                                >
+                                    <CloseIcon fontSize="inherit" />
+                                </IconButton>
+                            }
+                        >
+                            This application is still under development.
+                        </Alert>
                     )}
                     <Routes>
                         <Route path="/welcome" element={<WelcomePage />} />

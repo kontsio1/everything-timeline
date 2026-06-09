@@ -17,7 +17,6 @@ import {makeStyles} from "@mui/styles";
 import TimelinePeriodMarker from "./TimelinePeriodMarker";
 import EventComponent from "./EventComponent";
 import TimelineHoverLine from "./TimelineHoverLine";
-import './Header.css';
 import {useControlsContext} from "../context/ControlsContext";
 
 const useStyles = makeStyles({

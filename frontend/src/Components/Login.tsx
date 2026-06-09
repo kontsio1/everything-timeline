@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, MenuItem, Divider, CircularProgress } from "@mui/material";
+import { Menu, MenuItem, Divider, CircularProgress, Tooltip } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../api/authConfig";
@@ -17,38 +17,21 @@ export const Login = () => {
       : ((activeAccount.idTokenClaims as any)?.email ?? "User")
     : null;
 
-  const handleOpenMenu = (event: React.MouseEvent<HTMLDivElement>) => {
-    setMenuAnchor(event.currentTarget);
+  const handleOpenMenu = (event: React.MouseEvent<SVGSVGElement>) => {
+    setMenuAnchor(event.currentTarget as unknown as HTMLElement);
   };
-
-  const handleCloseMenu = () => {
-    setMenuAnchor(null);
-  };
+  const handleCloseMenu = () => setMenuAnchor(null);
 
   const handleRedirect = async () => {
     setLoading(true);
-    instance
-      .loginRedirect({
-        ...loginRequest,
-        prompt: "select_account",
-      })
-      .catch((error) => {
-        console.error(
-          "%c loginRedirect() threw an error:",
-          "color: red; font-weight: bold;",
-          error,
-        );
-        setLoading(false);
-      });
+    instance.loginRedirect({ ...loginRequest, prompt: "select_account" })
+      .catch((error) => { console.error("loginRedirect() error:", error); setLoading(false); });
     handleCloseMenu();
   };
 
   const handleLogout = () => {
     setLoading(true);
-    instance.logoutRedirect().catch((error) => {
-      console.error("logoutRedirect error:", error);
-      setLoading(false);
-    });
+    instance.logoutRedirect().catch((error) => { console.error("logoutRedirect error:", error); setLoading(false); });
     handleCloseMenu();
   };
 
@@ -58,82 +41,40 @@ export const Login = () => {
     }
   }, [accounts, instance]);
 
-  //   const tokenResponse = await instance.acquireTokenSilent(request);
-
-  //   // Attach this to your fetch/axios call
-  //   const response = await fetch("https://azurewebsites.net", {
-  //     headers: {
-  //       Authorization: `Bearer ${tokenResponse.accessToken}`,
-  //     },
-  //   });
-
   return (
-    <div
-      onMouseEnter={handleOpenMenu}
-      onMouseLeave={handleCloseMenu}
-      style={{ display: "inline-flex" }}
-    >
-      <AccountCircleIcon className="user-icon" sx={{ fontSize: 48 }} />
+    <>
+      <Tooltip title={activeAccount ? displayName ?? "Account" : "Sign in"}>
+        <AccountCircleIcon
+          onMouseEnter={handleOpenMenu}
+          sx={{ fontSize: 48, color: 'primary.main', cursor: 'pointer' }}
+        />
+      </Tooltip>
       <Menu
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={handleCloseMenu}
         slotProps={{
-          paper: {
-            className: "user-menu-paper",
-            onMouseLeave: handleCloseMenu,
-          },
+          paper: { onMouseLeave: handleCloseMenu },
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         disableAutoFocus
         disableEnforceFocus
       >
-        {activeAccount
-          ? [
-              <MenuItem
-                key="name"
-                disabled
-                sx={{
-                  opacity: "1 !important",
-                  fontFamily: "DM Sans, sans-serif",
-                  fontSize: 13,
-                }}
-              >
-                {displayName}
-              </MenuItem>,
-              <Divider
-                key="divider"
-                sx={{ borderColor: "rgba(255,255,255,0.15)" }}
-              />,
-              <MenuItem
-                key="logout"
-                onClick={handleLogout}
-                disabled={loading}
-                sx={{ fontFamily: "DM Sans, sans-serif", fontSize: 13 }}
-              >
-                {loading ? (
-                  <CircularProgress size={16} sx={{ color: "white" }} />
-                ) : (
-                  "Log Out"
-                )}
-              </MenuItem>,
-            ]
-          : [
-              <MenuItem
-                key="login"
-                onClick={handleRedirect}
-                disabled={loading}
-                sx={{ fontFamily: "DM Sans, sans-serif", fontSize: 13 }}
-              >
-                {loading ? (
-                  <CircularProgress size={16} sx={{ color: "white" }} />
-                ) : (
-                  "Log In"
-                )}
-              </MenuItem>,
-            ]}
+        {activeAccount ? [
+          <MenuItem key="name" disabled sx={{ opacity: '1 !important' }}>
+            {displayName}
+          </MenuItem>,
+          <Divider key="divider" />,
+          <MenuItem key="logout" onClick={handleLogout} disabled={loading}>
+            {loading ? <CircularProgress size={16} color="inherit" /> : "Log Out"}
+          </MenuItem>,
+        ] : [
+          <MenuItem key="login" onClick={handleRedirect} disabled={loading}>
+            {loading ? <CircularProgress size={16} color="inherit" /> : "Log In"}
+          </MenuItem>,
+        ]}
       </Menu>
-    </div>
+    </>
   );
 };

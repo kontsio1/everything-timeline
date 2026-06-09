@@ -1,25 +1,29 @@
-import {Box, FormControlLabel, Slider, Switch, Typography} from "@mui/material";
-import {useControlsContext} from "../context/ControlsContext";
+import { Box, FormControlLabel, Slider, Switch, Typography } from "@mui/material";
+import { useControlsContext } from "../context/ControlsContext";
 
 export const Controls = () => {
-    const {controls, setHoverLineEnabled, setVisibleEventsLaneHeightPadding, setTicksNo} = useControlsContext();
+    const { controls, setHoverLineEnabled, setVisibleEventsLaneHeightPadding, setTicksNo } = useControlsContext();
 
     return (
-        <Box className="controls-panel" sx={{display: "flex", alignItems: "center", gap: 1}}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <FormControlLabel
-                className="hover-line-toggle"
-                control={(
+                control={
                     <Switch
                         size="small"
                         checked={controls.hoverLineEnabled}
                         onChange={(event) => setHoverLineEnabled(event.target.checked)}
                     />
-                )}
-                label="Hover line"
+                }
+                label={
+                    <Typography variant="caption" color="text.secondary">
+                        Hover line
+                    </Typography>
+                }
                 labelPlacement="bottom"
+                sx={{ mx: 0 }}
             />
-            <Box className="visible-events-slider" sx={{width: 140, display: "flex", flexDirection: "column", alignItems: "center"}}>
-                <Typography variant="caption">visible events</Typography>
+            <Box sx={{ width: 120, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <Typography variant="caption" color="text.secondary">visible events</Typography>
                 <Slider
                     size="small"
                     min={50}
@@ -31,8 +35,8 @@ export const Controls = () => {
                     }}
                 />
             </Box>
-            <Box className="ticks-slider" sx={{width: 140, display: "flex", flexDirection: "column", alignItems: "center"}}>
-                <Typography variant="caption">number of ticks</Typography>
+            <Box sx={{ width: 120, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <Typography variant="caption" color="text.secondary">number of ticks</Typography>
                 <Slider
                     size="small"
                     min={2}

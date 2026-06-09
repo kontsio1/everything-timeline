@@ -7,6 +7,9 @@ import {ControlsProvider} from "./context/ControlsContext";
 import { EventType } from '@azure/msal-browser';
 import {MsalProvider} from "@azure/msal-react";
 import { msalInstance } from "./api/msalInstance";
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme/theme';
 
 // Initialize MSAL before using the instance
 msalInstance.initialize().then(() => {
@@ -29,11 +32,14 @@ msalInstance.initialize().then(() => {
     );
     root.render(
         <React.StrictMode>
-            <MsalProvider instance={msalInstance}>
-                <ControlsProvider>
-                    <App/>
-                </ControlsProvider>
-            </MsalProvider>
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <MsalProvider instance={msalInstance}>
+                    <ControlsProvider>
+                        <App/>
+                    </ControlsProvider>
+                </MsalProvider>
+            </ThemeProvider>
         </React.StrictMode>
     );
 });

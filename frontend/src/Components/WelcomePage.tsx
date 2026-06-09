@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Typography, LinearProgress, CircularProgress } from '@mui/material';
 import { getDatasets } from '../api/api';
 import { useDatasetContext } from '../context/DatasetContext';
-import { btnColor, bgColor, txtColor, txtColor2 } from '../Constants/GlobalConfigConstants';
 import { LoadingMessages } from '../Constants/LoadingMessages';
 
 const RETRY_INTERVAL = 5000; // 5 seconds
@@ -95,7 +94,7 @@ export const WelcomePage: React.FC = () => {
         <Box
             sx={{
                 minHeight: '100vh',
-                backgroundColor: bgColor,
+                backgroundColor: 'background.default',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -125,7 +124,7 @@ export const WelcomePage: React.FC = () => {
                 variant="h3"
                 component="h1"
                 sx={{
-                    color: txtColor,
+                    color: 'text.primary',
                     fontWeight: 'bold',
                     marginBottom: 2,
                     textAlign: 'center',
@@ -139,7 +138,7 @@ export const WelcomePage: React.FC = () => {
             <Typography
                 variant="h6"
                 sx={{
-                    color: txtColor2,
+                    color: 'text.secondary',
                     marginBottom: 4,
                     textAlign: 'center',
                     fontStyle: 'italic',
@@ -150,62 +149,22 @@ export const WelcomePage: React.FC = () => {
                 "Explore history through an interactive timeline spanning the ages."
             </Typography>
 
-            {/* Loading Bar Container */}
-            <Box
-                sx={{
-                    width: '100%',
-                    maxWidth: '400px',
-                    marginBottom: 2,
-                }}
-            >
-                <LinearProgress
-                    sx={{
-                        height: 6,
-                        borderRadius: 3,
-                        bgcolor: 'rgba(196, 92, 46, 0.2)',
-                        '& .MuiLinearProgress-bar': {
-                            bgcolor: btnColor,
-                            borderRadius: 3,
-                        },
-                    }}
-                />
+            {/* Loading Bar */}
+            <Box sx={{ width: '100%', maxWidth: '400px', marginBottom: 2 }}>
+                <LinearProgress />
             </Box>
 
             {/* Loading Status */}
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                }}
-            >
-                <CircularProgress
-                    size={16}
-                    sx={{
-                        color: btnColor,
-                    }}
-                />
-                <Typography
-                    variant="body1"
-                    sx={{
-                        color: txtColor2,
-                        textAlign: 'center',
-                    }}
-                >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={16} />
+                <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
                     {loadingStatus}
                 </Typography>
             </Box>
 
-            {/* Retry Count (only show if retrying) */}
+            {/* Retry Count */}
             {retryCount > 0 && (
-                <Typography
-                    variant="body2"
-                    sx={{
-                        color: 'rgba(245, 240, 232, 0.5)',
-                        marginTop: 2,
-                        textAlign: 'center',
-                    }}
-                >
+                <Typography variant="body2" sx={{ color: 'text.disabled', marginTop: 2, textAlign: 'center' }}>
                     Retry attempt: {retryCount}
                 </Typography>
             )}
