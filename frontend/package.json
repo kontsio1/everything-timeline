@@ -9,7 +9,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.x.x",
     "@mui/material": "^9.0.1",
-    "@mui/styled-engine-sc": "^7.3.2",
+    "@mui/styled-engine-sc": "^9.0.1",
     "@mui/styles": "^6.4.8",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
