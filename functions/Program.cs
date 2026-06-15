@@ -54,7 +54,6 @@ builder.Services.AddDbContext<DbContext>(options =>
 
 // Services
 builder.Services.AddScoped<IRepository, Repository>();
-builder.Services.ConfigureFunctionsApplicationInsights();
 
 var host = builder.Build();
 
