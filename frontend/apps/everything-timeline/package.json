@@ -1,0 +1,8 @@
+{
+  "name": "@everything-timeline/everything-timeline",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "@mui/material": "^9.1.1"
+  }
+}
