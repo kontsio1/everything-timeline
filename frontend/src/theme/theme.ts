@@ -1,7 +1,7 @@
 import { createTheme, alpha } from '@mui/material/styles';
 
-// ── Design tokens ────────────────────────────────────────────────────────────
-export const tokens = {
+// ── Design tokens - Dark Theme ────────────────────────────────────────────────
+export const tokensDark = {
   ink: '#0f0e0b',
   ink2: 'rgba(55, 31, 3, 0.9)',
   parchment: '#f5f0e8',
@@ -16,41 +16,81 @@ export const tokens = {
   crimson: '#8b1a1a',
 } as const;
 
-// Re-exported for legacy use in GlobalConfigConstants / D3 code
-export const bgColor = tokens.ink;
-export const txtColor = tokens.parchment;
-export const txtColor2 = tokens.aged;
-export const btnColor = tokens.rust;
-export const highlightColor = tokens.rust;
+// ── Design tokens - Light Theme ────────────────────────────────────────────────
+export const tokensLight = {
+  ink: '#faf8f3',
+  ink2: '#f0ebe0',
+  parchment: '#2a2622',
+  aged: '#3d3a34',
+  muted: '#8b8680',
+  rust: '#d97f4d',
+  rustLight: '#e8935c',
+  rustDark: '#c46a3a',
+  gold: '#a88c3a',
+  slate: '#6b7a8c',
+  mist: '#5a7a92',
+  crimson: '#c42e2e',
+} as const;
 
-// ── Theme ──────────────────────────���─────────────────────────────────────────
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: tokens.rust,
-      light: tokens.rustLight,
-      dark: tokens.rustDark,
-      contrastText: tokens.parchment,
+// ── Legacy exports (dark theme) for backward compatibility ────────────────────
+export const tokens = tokensDark;
+export let bgColor: string = tokensDark.ink;
+export let txtColor: string = tokensDark.parchment;
+export let txtColor2: string = tokensDark.aged;
+export let btnColor: string = tokensDark.rust;
+export let highlightColor: string = tokensDark.rust;
+
+/**
+ * Update legacy color exports based on theme mode
+ * Called by createAppTheme when theme changes
+ */
+export const updateColorExports = (mode: 'light' | 'dark') => {
+  const selectedTokens = mode === 'light' ? tokensLight : tokensDark;
+  bgColor = selectedTokens.ink;
+  txtColor = selectedTokens.parchment;
+  txtColor2 = selectedTokens.aged;
+  btnColor = selectedTokens.rust;
+  highlightColor = selectedTokens.rust;
+};
+
+// ── Theme ──────────────────────────────────────────────────────────────────────
+/**
+ * Create theme for either light or dark mode
+ */
+export const createAppTheme = (mode: 'light' | 'dark' = 'dark') => {
+  const selectedTokens = mode === 'light' ? tokensLight : tokensDark;
+  const isDark = mode === 'dark';
+
+  // Update legacy exports
+  updateColorExports(mode);
+
+  return createTheme({
+    palette: {
+      mode,
+      primary: {
+        main: selectedTokens.rust,
+        light: selectedTokens.rustLight,
+        dark: selectedTokens.rustDark,
+        contrastText: selectedTokens.parchment,
+      },
+      secondary: {
+        main: selectedTokens.gold,
+        contrastText: selectedTokens.ink,
+      },
+      background: {
+        default: selectedTokens.ink,
+        paper: selectedTokens.ink2,
+      },
+      text: {
+        primary: selectedTokens.parchment,
+        secondary: selectedTokens.aged,
+        disabled: selectedTokens.muted,
+      },
+      error: {
+        main: selectedTokens.crimson,
+      },
+      divider: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
     },
-    secondary: {
-      main: tokens.gold,
-      contrastText: tokens.ink,
-    },
-    background: {
-      default: tokens.ink,
-      paper: tokens.ink2,
-    },
-    text: {
-      primary: tokens.parchment,
-      secondary: tokens.aged,
-      disabled: tokens.muted,
-    },
-    error: {
-      main: tokens.crimson,
-    },
-    divider: 'rgba(255,255,255,0.12)',
-  },
 
   typography: {
     fontFamily: "'DM Sans', sans-serif",
@@ -74,7 +114,7 @@ const theme = createTheme({
     },
     body1: { fontFamily: "'DM Sans', sans-serif", fontSize: '1rem' },
     body2: { fontFamily: "'DM Sans', sans-serif", fontSize: '0.875rem' },
-    caption: { fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', color: tokens.aged },
+    caption: { fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', color: selectedTokens.aged },
     button: {
       fontFamily: "'DM Sans', sans-serif",
       fontWeight: 500,
@@ -91,15 +131,15 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         'html, body': {
-          backgroundColor: tokens.ink,
-          color: tokens.parchment,
-          scrollbarColor: `${tokens.rust} transparent`,
+          backgroundColor: selectedTokens.ink,
+          color: selectedTokens.parchment,
+          scrollbarColor: `${selectedTokens.rust} transparent`,
           '&::-webkit-scrollbar': { width: 8 },
           '&::-webkit-scrollbar-track': { background: 'transparent' },
           '&::-webkit-scrollbar-thumb': {
-            background: tokens.rust,
+            background: selectedTokens.rust,
             borderRadius: 4,
-            '&:hover': { background: tokens.rustLight },
+            '&:hover': { background: selectedTokens.rustLight },
           },
         },
       },
@@ -114,20 +154,20 @@ const theme = createTheme({
           fontFamily: "'DM Sans', sans-serif",
           fontWeight: 500,
           '&.MuiButton-containedPrimary': {
-            backgroundColor: tokens.rust,
+            backgroundColor: selectedTokens.rust,
             color: '#fff',
-            '&:hover': { backgroundColor: tokens.rustLight },
+            '&:hover': { backgroundColor: selectedTokens.rustLight },
             '&.Mui-disabled': {
-              backgroundColor: alpha(tokens.rust, 0.3),
+              backgroundColor: alpha(selectedTokens.rust, 0.3),
               color: 'rgba(255,255,255,0.3)',
             },
           },
           '&.MuiButton-outlinedPrimary': {
-            borderColor: 'rgba(255,255,255,0.2)',
-            color: tokens.parchment,
+            borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+            color: selectedTokens.parchment,
             '&:hover': {
-              borderColor: 'rgba(255,255,255,0.35)',
-              backgroundColor: 'rgba(255,255,255,0.05)',
+              borderColor: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
             },
           },
         },
@@ -138,8 +178,8 @@ const theme = createTheme({
     MuiIconButton: {
       styleOverrides: {
         root: {
-          color: tokens.parchment,
-          '&:hover': { backgroundColor: alpha(tokens.rust, 0.15) },
+          color: selectedTokens.parchment,
+          '&:hover': { backgroundColor: alpha(selectedTokens.rust, 0.15) },
         },
       },
     },
@@ -153,28 +193,28 @@ const theme = createTheme({
         root: {
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 13,
-          color: tokens.parchment,
-          backgroundColor: 'rgba(255,255,255,0.05)',
+          color: selectedTokens.parchment,
+          backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'rgba(255,255,255,0.12)',
+            borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'rgba(255,255,255,0.25)',
+            borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: tokens.rust,
+            borderColor: selectedTokens.rust,
           },
           '&.Mui-disabled': {
-            backgroundColor: 'rgba(255,255,255,0.02)',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
             '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: 'rgba(255,255,255,0.06)',
+              borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
             },
           },
         },
         input: {
           '&.Mui-disabled': {
-            color: alpha(tokens.parchment, 0.5),
-            WebkitTextFillColor: alpha(tokens.parchment, 0.5),
+            color: alpha(selectedTokens.parchment, 0.5),
+            WebkitTextFillColor: alpha(selectedTokens.parchment, 0.5),
           },
         },
       },
@@ -183,39 +223,39 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontFamily: "'DM Sans', sans-serif",
-          color: tokens.aged,
-          '&.Mui-focused': { color: tokens.aged },
-          '&.Mui-disabled': { color: alpha(tokens.aged, 0.5) },
+          color: selectedTokens.aged,
+          '&.Mui-focused': { color: selectedTokens.aged },
+          '&.Mui-disabled': { color: alpha(selectedTokens.aged, 0.5) },
         },
       },
     },
     MuiFormHelperText: {
       styleOverrides: {
-        root: { color: tokens.muted },
+        root: { color: selectedTokens.muted },
       },
     },
 
     // ── Autocomplete ─────────────────────────────────────────────────────────
     MuiAutocomplete: {
       styleOverrides: {
-        clearIndicator: { color: tokens.aged },
+        clearIndicator: { color: selectedTokens.aged },
         popupIndicator: { display: 'none' },
         noOptions: {
           fontFamily: "'DM Sans', sans-serif",
-          color: tokens.aged,
+          color: selectedTokens.aged,
         },
         option: {
           fontFamily: "'DM Sans', sans-serif",
-          color: tokens.aged,
-          '&:hover': { backgroundColor: `${alpha(tokens.rust, 0.2)} !important` },
+          color: selectedTokens.aged,
+          '&:hover': { backgroundColor: `${alpha(selectedTokens.rust, 0.2)} !important` },
           '&[aria-selected="true"]': {
-            backgroundColor: `${alpha(tokens.rust, 0.3)} !important`,
+            backgroundColor: `${alpha(selectedTokens.rust, 0.3)} !important`,
           },
         },
         paper: {
-          backgroundColor: tokens.ink2,
-          color: tokens.parchment,
-          border: '1px solid rgba(255,255,255,0.12)',
+          backgroundColor: selectedTokens.ink2,
+          color: selectedTokens.parchment,
+          border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.12)',
         },
       },
     },
@@ -225,21 +265,21 @@ const theme = createTheme({
       styleOverrides: {
         switchBase: {
           '&.Mui-checked': {
-            color: tokens.rust,
-            '& + .MuiSwitch-track': { backgroundColor: tokens.rust },
+            color: selectedTokens.rust,
+            '& + .MuiSwitch-track': { backgroundColor: selectedTokens.rust },
           },
         },
-        track: { backgroundColor: 'rgba(255,255,255,0.2)' },
+        track: { backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
       },
     },
 
-    // ── Slider ───────────────────────────────────────────────────────────────
+    // ── Slider ───────────────────────────────────────────────────────────
     MuiSlider: {
       styleOverrides: {
-        root: { color: tokens.rust },
-        thumb: { '&:hover, &.Mui-focusVisible': { boxShadow: `0 0 0 8px ${alpha(tokens.rust, 0.16)}` } },
-        track: { backgroundColor: tokens.rust },
-        rail: { backgroundColor: 'rgba(255,255,255,0.2)' },
+        root: { color: selectedTokens.rust },
+        thumb: { '&:hover, &.Mui-focusVisible': { boxShadow: `0 0 0 8px ${alpha(selectedTokens.rust, 0.16)}` } },
+        track: { backgroundColor: selectedTokens.rust },
+        rail: { backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
       },
     },
 
@@ -247,9 +287,11 @@ const theme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: {
-          backgroundColor: alpha(tokens.ink2.replace('rgba(55, 31, 3, 0.9)', 'rgb(55,31,3)'), 0.95),
-          color: tokens.parchment,
-          border: '1px solid rgba(255,255,255,0.12)',
+          backgroundColor: mode === 'light' 
+            ? alpha(selectedTokens.ink2, 0.95)
+            : alpha(selectedTokens.ink2.replace('rgba(55, 31, 3, 0.9)', 'rgb(55,31,3)'), 0.95),
+          color: selectedTokens.parchment,
+          border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.12)',
           minWidth: 160,
         },
       },
@@ -259,15 +301,15 @@ const theme = createTheme({
         root: {
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 13,
-          color: tokens.parchment,
-          '&:hover': { backgroundColor: alpha(tokens.rust, 0.2) },
-          '&.Mui-disabled': { opacity: 1, color: tokens.parchment },
+          color: selectedTokens.parchment,
+          '&:hover': { backgroundColor: alpha(selectedTokens.rust, 0.2) },
+          '&.Mui-disabled': { opacity: 1, color: selectedTokens.parchment },
         },
       },
     },
     MuiDivider: {
       styleOverrides: {
-        root: { borderColor: 'rgba(255,255,255,0.15)' },
+        root: { borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)' },
       },
     },
 
@@ -277,10 +319,10 @@ const theme = createTheme({
         root: {
           height: 6,
           borderRadius: 3,
-          backgroundColor: alpha(tokens.rust, 0.2),
+          backgroundColor: alpha(selectedTokens.rust, 0.2),
         },
         bar: {
-          backgroundColor: tokens.rust,
+          backgroundColor: selectedTokens.rust,
           borderRadius: 3,
         },
       },
@@ -288,7 +330,7 @@ const theme = createTheme({
 
     // ── CircularProgress ─────────────────────────────────────────────────────
     MuiCircularProgress: {
-      defaultProps: { style: { color: tokens.rust } },
+      defaultProps: { style: { color: selectedTokens.rust } },
     },
 
     // ── Alert (dev banner) ───────────────────────────────────────────────────
@@ -299,10 +341,10 @@ const theme = createTheme({
           fontSize: 13,
           borderRadius: 0,
           ...(ownerState.severity === 'warning' && ownerState.variant === 'standard' && {
-            backgroundColor: alpha(tokens.rust, 0.15),
-            color: tokens.parchment,
-            borderBottom: `1px solid ${alpha(tokens.rust, 0.4)}`,
-            '& .MuiAlert-icon': { color: tokens.rust },
+            backgroundColor: alpha(selectedTokens.rust, 0.15),
+            color: selectedTokens.parchment,
+            borderBottom: `1px solid ${alpha(selectedTokens.rust, 0.4)}`,
+            '& .MuiAlert-icon': { color: selectedTokens.rust },
           }),
         }),
       },
@@ -313,7 +355,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          backgroundColor: tokens.ink2,
+          backgroundColor: selectedTokens.ink2,
         },
       },
     },
@@ -322,8 +364,8 @@ const theme = createTheme({
     MuiCheckbox: {
       styleOverrides: {
         root: {
-          color: 'rgba(255,255,255,0.3)',
-          '&.Mui-checked': { color: tokens.rust },
+          color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+          '&.Mui-checked': { color: selectedTokens.rust },
         },
       },
     },
@@ -334,12 +376,13 @@ const theme = createTheme({
         label: {
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 14,
-          color: tokens.aged,
+          color: selectedTokens.aged,
         },
       },
     },
   },
 });
+};
 
-export default theme;
+export default createAppTheme();
 

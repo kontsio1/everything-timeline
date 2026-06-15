@@ -9,7 +9,8 @@ import {MsalProvider} from "@azure/msal-react";
 import { msalInstance } from "./api/msalInstance";
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from './theme/theme';
+import { ThemeProvider as AppThemeProvider, useThemeContext } from './context/ThemeContext';
+import { createAppTheme } from './theme/theme';
 
 // Initialize MSAL before using the instance
 msalInstance.initialize().then(() => {
@@ -27,12 +28,13 @@ msalInstance.initialize().then(() => {
         }
     });
 
-    const root = ReactDOM.createRoot(
-        document.getElementById('root') as HTMLElement
-    );
-    root.render(
-        <React.StrictMode>
-            <ThemeProvider theme={theme}>
+    // Inner component that uses theme context
+    const AppWithTheme: React.FC = () => {
+        const { mode } = useThemeContext();
+        const muiTheme = createAppTheme(mode);
+
+        return (
+            <ThemeProvider theme={muiTheme}>
                 <CssBaseline />
                 <MsalProvider instance={msalInstance}>
                     <ControlsProvider>
@@ -40,6 +42,17 @@ msalInstance.initialize().then(() => {
                     </ControlsProvider>
                 </MsalProvider>
             </ThemeProvider>
+        );
+    };
+
+    const root = ReactDOM.createRoot(
+        document.getElementById('root') as HTMLElement
+    );
+    root.render(
+        <React.StrictMode>
+            <AppThemeProvider>
+                <AppWithTheme />
+            </AppThemeProvider>
         </React.StrictMode>
     );
 });

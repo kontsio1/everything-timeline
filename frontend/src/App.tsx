@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import { TimelinePage } from "./Components/TimelinePage";
 import { WelcomePage } from "./Components/WelcomePage";
 import { DatasetProvider, useDatasetContext } from "./context/DatasetContext";
+import { useThemeContext } from "./context/ThemeContext";
 import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
@@ -23,6 +24,12 @@ function App() {
     const [showDevBanner, setShowDevBanner] = useState(
         () => sessionStorage.getItem('everythingTimeline_devBannerDismissed') !== 'true'
     );
+    const { mode } = useThemeContext();
+
+    // Update root element data-theme attribute for CSS variables
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', mode);
+    }, [mode]);
 
     const handleDismissBanner = () => {
         setShowDevBanner(false);

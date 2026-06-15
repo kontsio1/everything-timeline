@@ -1,14 +1,14 @@
 .timeline-hover-line-stroke {
-    stroke: #f5f0e8;
+    stroke: var(--parchment);
     stroke-width: 0.5;
     opacity: 0.9;
 }
 
 .timeline-hover-label {
-    fill: #ffffff;
-    stroke: #f5f0e8;
+    fill: var(--ink);
+    stroke: var(--parchment);
     stroke-width: 0.5;
-    opacity: 0.5;
+    opacity: 0.7;
 }
 
 .timeline-hover-label-text {
@@ -16,5 +16,6 @@
     font-size: 12px;
     font-weight: bold;
     pointer-events: none;
+    fill: var(--parchment);
 }
 

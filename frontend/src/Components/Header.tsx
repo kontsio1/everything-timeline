@@ -6,6 +6,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { TimelineEvent } from "../Entities/TimelineEvent";
 import React, { useState, useEffect } from "react";
 import { AddEventModal } from "./AddEventModal";
@@ -14,6 +16,7 @@ import { Controls } from "./Controls";
 import { Login } from "./Login";
 import { testFunction, addDataset, getDatasets } from "../api/api";
 import { useDatasetContext } from "../context/DatasetContext";
+import { useThemeContext } from "../context/ThemeContext";
 
 interface HeaderProps {
     databaseOptions: string[];
@@ -42,6 +45,7 @@ export const Header = ({
     const [isEventModalOpen, setIsEventModalOpen] = useState(false);
     const [isDatasetModalOpen, setIsDatasetModalOpen] = useState(false);
     const { setDatasets, setSelectedDatasetId } = useDatasetContext();
+    const { mode, toggleTheme } = useThemeContext();
 
     useEffect(() => { setLocalSelectedEvent(selectedEvent); }, [selectedEvent]);
 
@@ -147,6 +151,12 @@ export const Header = ({
 
                 {/* Right: user controls */}
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.75 }}>
+                    <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
+                        <IconButton size="small" onClick={toggleTheme}
+                            sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.light' }, width: 36, height: 36 }}>
+                            {mode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                        </IconButton>
+                    </Tooltip>
                     <Login />
                     <Tooltip title="Debug user info">
                         <IconButton size="small" onClick={handleDebugUser}
