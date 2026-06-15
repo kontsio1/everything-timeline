@@ -18,7 +18,7 @@ export const TimelinePage = () => {
     const [events, setEvents] = React.useState<TimelineEvent[]>([]);
     const [loading, setLoading] = React.useState(false);
     const periods = seedPeriods;
-    
+
     const { datasets, setDatasets, isInitialized, setIsInitialized, selectedDatasetId, setSelectedDatasetId, activeDomain } = useDatasetContext();
 
     // Resolve selected dataset from context id, fallback to null
@@ -34,7 +34,7 @@ export const TimelinePage = () => {
         if (isInitialized && datasets.length > 0) {
             return;
         }
-        
+
         setLoading(true);
         const fetchDatasets = async () => {
             var fetchedDatasets = await getDatasets();
@@ -53,17 +53,17 @@ export const TimelinePage = () => {
             setSelectedDatasetId(datasets[0].Id);
         }
     }, [datasets]);
-    
+
     useEffect(() => {
         setLoading(true);
         const fetchEvents = async () => {
             const events = await getEvents(selectedDataset?.Id);
-            const timelineEvents = events.map(e => new TimelineEvent(e.Id, [e.Date, 0, 0], e.Name, e.Info, undefined, e.DatasetId, e.Date));
+            const timelineEvents = events.map(e => new TimelineEvent(e.Id, [e.Date, 0, 1], e.Name, e.Info, undefined, e.DatasetId, e.Date));
             setEvents(timelineEvents);
         };
         fetchEvents().then(r => setLoading(false));
     }, [selectedDataset]);
-    
+
     useEffect(() => {
         const handleOutsideClick = (event: MouseEvent) => {
             const target = event.target as HTMLElement | null;
@@ -100,7 +100,7 @@ export const TimelinePage = () => {
         const dataset = datasets.find(d => d.Name === name) || null;
         setSelectedDatasetId(dataset?.Id ?? null);
     };
-    
+
     const handleAddEvent = async (eventData: {
         name: string;
         year: number;
@@ -112,7 +112,7 @@ export const TimelinePage = () => {
             setLoading(true);
             try {
                 const fetchedEvents = await getEvents(selectedDataset?.Id);
-                const timelineEvents = fetchedEvents.map(e => new TimelineEvent(e.Id, [e.Date, 0, 0], e.Name, e.Info, undefined, e.DatasetId, e.Date));
+                const timelineEvents = fetchedEvents.map(e => new TimelineEvent(e.Id, [e.Date, 0, 1], e.Name, e.Info, undefined, e.DatasetId, e.Date));
                 setEvents(timelineEvents);
 
                 // Find the newly added event using the returned record's Name + Date

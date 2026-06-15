@@ -19,7 +19,7 @@ export class TimelineEvent extends BaseEvent {
     padding: number = 4;
     private _isHighlighted: boolean = false;
     private originalColour: string = "";
-    
+
     get isHighlighted(): boolean {
         return this._isHighlighted;
     }
@@ -35,11 +35,11 @@ export class TimelineEvent extends BaseEvent {
             this.colour = this.originalColour;
         }
     }
-    
-    constructor(id: string, date: number[], label: string, info?: string, colour?: string, datasetId?: string, rawDate?: number) { 
+
+    constructor(id: string, date: number[], label: string, info?: string, colour?: string, datasetId?: string, rawDate?: number) {
         super(id, label, colour);
         this.date = new Date(0);
-        this.date.setFullYear(date[0], date[1] ?? 0, date[2] ?? 0);
+        this.date.setFullYear(date[0], date[1] ?? 0, date[2] ?? 1); // day defaults to 1; day=0 is last day of prior month in JS
         this.stemHeight = this.defaultHeight;
         this.colour = colour || "#" + Math.floor(stringToUnique01(this.label, 2) * 16777215).toString(16).padStart(6, "0");
         this.originalColour = this.colour;
