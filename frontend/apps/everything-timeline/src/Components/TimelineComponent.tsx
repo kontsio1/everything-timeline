@@ -31,8 +31,11 @@ import TimelineHoverLine from './TimelineHoverLine';
 import TimelineAxisWave, {
   WAVE_HALF_WIDTH,
   MAX_AMPLITUDE,
+  WaveParams,
+  computeWaveOffset,
 } from './TimelineAxisWave';
 import { useControlsContext } from '../context/ControlsContext';
+import { useThemeContext } from '../context/ThemeContext';
 
 const useStyles = makeStyles({
   timelineContainer: {
@@ -69,6 +72,7 @@ export const TimelineComponent = forwardRef<
 >(function TimelineComponent(props, ref) {
   const classes = useStyles();
   const { controls } = useControlsContext();
+  const { mode } = useThemeContext();
   const { events, periods, domain, loading, onEventSelect } = props;
   const svgRef = useRef<SVGSVGElement>(null); // SVG ref for React-managed SVG
   const axisRef = useRef<SVGGElement>(null);
@@ -79,6 +83,11 @@ export const TimelineComponent = forwardRef<
   const defaultEventStemHeightRef = useRef<number>(
     controls.defaultEventStemHeight,
   );
+
+  /** Shared wave params written every rAF frame by TimelineAxisWave */
+  const waveParamsRef = useRef<WaveParams | null>(null);
+  /** Live DOM refs to every rendered event group, keyed by event key */
+  const eventGroupRefsMap = useRef<Map<string, SVGGElement>>(new Map());
 
   const [visibleEvents, setVisibleEvents] = useState<TimelineEvent[]>([]);
   const [visiblePeriods, setVisiblePeriods] = useState<TimelinePeriod[]>([]);
@@ -167,7 +176,7 @@ export const TimelineComponent = forwardRef<
         .attr('dy', '1.71em');
       axisSelection.selectAll('.tick line').attr('stroke', txtColor);
     }
-  }, [transform, visibleEvents, visiblePeriods, loading, controls.ticksNo]);
+  }, [transform, visibleEvents, visiblePeriods, loading, controls.ticksNo, mode]);
 
   useEffect(() => {
     setRenderEvents((prev) => {
@@ -288,6 +297,60 @@ export const TimelineComponent = forwardRef<
   const handleTimelineMouseLeave = () => {
     setIsHoveringTimeline(false);
   };
+
+  // rAF loop: move event groups vertically to ride the wave
+  const circleWaveFrameRef = useRef<number | null>(null);
+  const isWaveActive = isHoveringTimeline && !loading && controls.hoverLineEnabled;
+
+  useEffect(() => {
+    if (!isWaveActive) {
+      eventGroupRefsMap.current.forEach((group) => {
+        group.setAttribute('transform', '');
+      });
+      if (circleWaveFrameRef.current != null) {
+        cancelAnimationFrame(circleWaveFrameRef.current);
+        circleWaveFrameRef.current = null;
+      }
+      return;
+    }
+
+    const tick = () => {
+      const params = waveParamsRef.current;
+      const xScale = getTransformedXScale();
+
+      eventGroupRefsMap.current.forEach((group, key) => {
+        const event = visibleEvents.find((e) => getEventKey(e) === key);
+
+        let target = 0;
+        if (event && xScale && params) {
+          const dist = xScale(event.date) - params.hoverX;
+          if (Math.abs(dist) < WAVE_HALF_WIDTH) {
+            target = computeWaveOffset(dist, params);
+          }
+        }
+
+        if (Math.abs(target) < 0.01) {
+          group.setAttribute('transform', '');
+        } else {
+          group.setAttribute('transform', `translate(0,${target.toFixed(2)})`);
+        }
+      });
+
+      circleWaveFrameRef.current = requestAnimationFrame(tick);
+    };
+
+    circleWaveFrameRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (circleWaveFrameRef.current != null) {
+        cancelAnimationFrame(circleWaveFrameRef.current);
+        circleWaveFrameRef.current = null;
+      }
+      eventGroupRefsMap.current.forEach((group) => {
+        group.setAttribute('transform', '');
+      });
+    };
+  }, [isWaveActive, visibleEvents]);
 
   // Expose zoomToEvent via ref
   useImperativeHandle(ref, () => ({
@@ -433,7 +496,7 @@ export const TimelineComponent = forwardRef<
                 fill="white"
               />
               {/* Hide domain line in the wave region (local y=0 is the axis) */}
-              {isHoveringTimeline && !loading && hoverX != null && (
+              {isHoveringTimeline && !loading && hoverX != null && controls.hoverLineEnabled && (
                 <rect
                   x={hoverX - WAVE_HALF_WIDTH}
                   y={-(MAX_AMPLITUDE + 3)}
@@ -455,10 +518,13 @@ export const TimelineComponent = forwardRef<
               />
             </mask>
           </defs>
-          <TimelineAxisWave
-            hoverX={hoverX}
-            isActive={isHoveringTimeline && !loading}
-          />
+          <g mask={`url(#${periodMaskId})`}>
+            <TimelineAxisWave
+              hoverX={hoverX}
+              isActive={isHoveringTimeline && !loading && controls.hoverLineEnabled}
+              waveParamsRef={waveParamsRef}
+            />
+          </g>
           {/* Render markers/periods first, then axis to bring axis forward in z-order */}
           <g mask={`url(#${periodMaskId})`}>
             {visiblePeriods.map((period) => (
@@ -481,6 +547,14 @@ export const TimelineComponent = forwardRef<
                   getEventKey(item.event) === props.highlightedEventKey
                 }
                 shouldPulse={getEventKey(item.event) === props.pulseEventKey}
+                groupRef={(el) => {
+                  const key = getEventKey(item.event);
+                  if (el) {
+                    eventGroupRefsMap.current.set(key, el);
+                  } else {
+                    eventGroupRefsMap.current.delete(key);
+                  }
+                }}
               />
             ))}
           </g>

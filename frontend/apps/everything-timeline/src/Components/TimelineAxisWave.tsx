@@ -7,6 +7,12 @@ interface TimelineAxisWaveProps {
   hoverX: number | null;
   /** Whether the animation should be running (hovering + not loading) */
   isActive: boolean;
+  /**
+   * Optional ref whose `.current` is kept in sync with the wave params on
+   * every animation frame (null when inactive). Consumers can read this to
+   * apply the same displacement to other SVG elements without extra re-renders.
+   */
+  waveParamsRef?: React.MutableRefObject<WaveParams | null>;
 }
 
 /** Half-width of the wave region around the cursor, in px */
@@ -30,8 +36,35 @@ const VELOCITY_SMOOTHING = 0.82;
 /** Phase change per pixel of horizontal cursor movement, rad/px */
 const MOVEMENT_SPEED = 0.03;
 
+/** Parameters that fully describe the wave at a given animation frame */
+export interface WaveParams {
+  hoverX: number;
+  phase: number;
+  spatialFreq: number;
+  amplitude: number;
+}
+
 /**
- * Renders a ripple-wave that visually lifts the timeline axis at the cursor
+ * Returns the vertical offset (in px, negative = upward) that the wave
+ * produces at `dist` pixels from the cursor centre.
+ * Shared by TimelineAxisWave and any consumers that need to "ride" the wave.
+ */
+export function computeWaveOffset(
+  dist: number,
+  { phase, spatialFreq, amplitude }: WaveParams,
+): number {
+  const envelope =
+    Math.abs(dist) >= WAVE_HALF_WIDTH
+      ? 0
+      : 0.5 * (1 + Math.cos((Math.PI * dist) / WAVE_HALF_WIDTH));
+  const wave =
+    Math.sin(spatialFreq * Math.abs(dist) - phase) +
+    0.3 * Math.sin(2 * spatialFreq * Math.abs(dist) - 2 * phase);
+  return -amplitude * envelope * wave;
+}
+
+/**
+ * that visually lifts the timeline axis at the cursor
  * intersection point.
  *
  * A `requestAnimationFrame` loop mutates the SVG `<path>` element directly
@@ -58,6 +91,7 @@ const MOVEMENT_SPEED = 0.03;
 const TimelineAxisWave: React.FC<TimelineAxisWaveProps> = ({
   hoverX,
   isActive,
+  waveParamsRef,
 }) => {
   const pathRef = useRef<SVGPathElement>(null);
   const frameRef = useRef<number | null>(null);
@@ -84,6 +118,7 @@ const TimelineAxisWave: React.FC<TimelineAxisWaveProps> = ({
       }
       prevHoverXRef.current = null;
       velocityRef.current = 0;
+      if (waveParamsRef) waveParamsRef.current = null;
       return;
     }
 
@@ -121,23 +156,29 @@ const TimelineAxisWave: React.FC<TimelineAxisWaveProps> = ({
         BASE_AMPLITUDE + AMPLITUDE_VELOCITY_SCALE * velocityRef.current,
         MAX_AMPLITUDE,
       );
+
+      // Publish current params for external consumers (e.g. riding circles)
+      if (waveParamsRef) {
+        waveParamsRef.current = {
+          hoverX: currentX,
+          phase,
+          spatialFreq,
+          amplitude,
+        };
+      }
+
       const pts: string[] = [];
 
       for (let i = 0; i <= NUM_POINTS; i++) {
         const t = i / NUM_POINTS;
         const x = currentX - WAVE_HALF_WIDTH + t * WAVE_HALF_WIDTH * 2;
         const dist = x - currentX;
-
-        //Function to calculate the envelope of the wave at a given distance from the cursor
-        // Cosine envelope: peaks at cursor (dist=0), tapers to 0 at ±WAVE_HALF_WIDTH
-        const envelope =
-          0.5 * (1 + Math.cos((Math.PI * dist) / WAVE_HALF_WIDTH));
-
-        const wave =
-          Math.sin(spatialFreq * Math.abs(dist) - phase) +
-          0.3 * Math.sin(2 * spatialFreq * Math.abs(dist) - 2 * phase);
-        const yOffset = -amplitude * envelope * wave;
-
+        const yOffset = computeWaveOffset(dist, {
+          hoverX: currentX,
+          phase,
+          spatialFreq,
+          amplitude,
+        });
         pts.push(`${x.toFixed(1)},${(axisY + yOffset).toFixed(2)}`);
       }
 
@@ -154,6 +195,7 @@ const TimelineAxisWave: React.FC<TimelineAxisWaveProps> = ({
       }
       prevHoverXRef.current = null;
       velocityRef.current = 0;
+      if (waveParamsRef) waveParamsRef.current = null;
     };
   }, [isActive, axisY]);
 

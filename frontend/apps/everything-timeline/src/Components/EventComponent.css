@@ -1,6 +1,6 @@
 .event-fade {
     opacity: 1;
-    transition: opacity 2500ms ease;
+    transition: opacity 2500ms ease, transform 220ms ease-out;
 }
 
 .event-fade-enter {
