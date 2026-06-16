@@ -1,0 +1,22 @@
+.timeline-axis-wave-group {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.timeline-axis-wave-group.active {
+    opacity: 1;
+}
+
+/* Covers the straight D3 axis line in the wave region so the lift looks genuine */
+.timeline-axis-wave-cover {
+    fill: var(--ink);
+}
+
+/* Animated sinusoidal wave path — matches the axis gradient colour and weight exactly */
+.timeline-axis-wave-path {
+    stroke: var(--parchment);
+    stroke-width: 3;
+    stroke-opacity: 0.15;
+    stroke-linejoin: round;
+}
+
