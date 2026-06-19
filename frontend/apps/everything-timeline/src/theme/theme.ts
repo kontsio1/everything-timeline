@@ -92,297 +92,357 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'dark') => {
       divider: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
     },
 
-  typography: {
-    fontFamily: "'DM Sans', sans-serif",
-    h1: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
-    h2: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
-    h3: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
-    h4: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
-    h5: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
-    h6: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
-    // logo variants
-    subtitle1: {
-      fontFamily: "'Playfair Display', serif",
-      fontWeight: 700,
-      letterSpacing: '-0.5px',
-    },
-    subtitle2: {
-      fontFamily: "'DM Mono', monospace",
-      letterSpacing: '2px',
-      textTransform: 'uppercase' as const,
-      fontSize: '0.75rem',
-    },
-    body1: { fontFamily: "'DM Sans', sans-serif", fontSize: '1rem' },
-    body2: { fontFamily: "'DM Sans', sans-serif", fontSize: '0.875rem' },
-    caption: { fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', color: selectedTokens.aged },
-    button: {
+    typography: {
       fontFamily: "'DM Sans', sans-serif",
-      fontWeight: 500,
-      textTransform: 'none' as const,
-    },
-  },
-
-  shape: {
-    borderRadius: 4,
-  },
-
-  components: {
-    // ── CssBaseline ──────────────────────────────────────────────────────────
-    MuiCssBaseline: {
-      styleOverrides: {
-        'html, body': {
-          backgroundColor: selectedTokens.ink,
-          color: selectedTokens.parchment,
-          scrollbarColor: `${selectedTokens.rust} transparent`,
-          '&::-webkit-scrollbar': { width: 8 },
-          '&::-webkit-scrollbar-track': { background: 'transparent' },
-          '&::-webkit-scrollbar-thumb': {
-            background: selectedTokens.rust,
-            borderRadius: 4,
-            '&:hover': { background: selectedTokens.rustLight },
-          },
-        },
+      h1: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
+      h2: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
+      h3: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
+      h4: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
+      h5: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
+      h6: { fontFamily: "'Playfair Display', serif", fontWeight: 700 },
+      // logo variants
+      subtitle1: {
+        fontFamily: "'Playfair Display', serif",
+        fontWeight: 700,
+        letterSpacing: '-0.5px',
+      },
+      subtitle2: {
+        fontFamily: "'DM Mono', monospace",
+        letterSpacing: '2px',
+        textTransform: 'uppercase' as const,
+        fontSize: '0.75rem',
+      },
+      body1: { fontFamily: "'DM Sans', sans-serif", fontSize: '1rem' },
+      body2: { fontFamily: "'DM Sans', sans-serif", fontSize: '0.875rem' },
+      caption: {
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: '0.75rem',
+        color: selectedTokens.aged,
+      },
+      button: {
+        fontFamily: "'DM Sans', sans-serif",
+        fontWeight: 500,
+        textTransform: 'none' as const,
       },
     },
 
-    // ── Button ───────────────────────────────────────────────────────────────
-    MuiButton: {
-      defaultProps: { disableElevation: true },
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          fontFamily: "'DM Sans', sans-serif",
-          fontWeight: 500,
-          '&.MuiButton-containedPrimary': {
-            backgroundColor: selectedTokens.rust,
-            color: '#fff',
-            '&:hover': { backgroundColor: selectedTokens.rustLight },
-            '&.Mui-disabled': {
-              backgroundColor: alpha(selectedTokens.rust, 0.3),
-              color: 'rgba(255,255,255,0.3)',
-            },
-          },
-          '&.MuiButton-outlinedPrimary': {
-            borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+    shape: {
+      borderRadius: 4,
+    },
+
+    components: {
+      // ── CssBaseline ──────────────────────────────────────────────────────────
+      MuiCssBaseline: {
+        styleOverrides: {
+          'html, body': {
+            backgroundColor: selectedTokens.ink,
             color: selectedTokens.parchment,
-            '&:hover': {
-              borderColor: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)',
-              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+            scrollbarColor: `${selectedTokens.rust} transparent`,
+            '&::-webkit-scrollbar': { width: 8 },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
+            '&::-webkit-scrollbar-thumb': {
+              background: selectedTokens.rust,
+              borderRadius: 4,
+              '&:hover': { background: selectedTokens.rustLight },
             },
           },
         },
       },
-    },
 
-    // ── IconButton ───────────────────────────────────────────────────────────
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          color: selectedTokens.parchment,
-          '&:hover': { backgroundColor: alpha(selectedTokens.rust, 0.15) },
+      // ── Button ───────────────────────────────────────────────────────────────
+      MuiButton: {
+        defaultProps: { disableElevation: true },
+        styleOverrides: {
+          root: {
+            textTransform: 'none',
+            fontFamily: "'DM Sans', sans-serif",
+            fontWeight: 500,
+            '&.MuiButton-containedPrimary': {
+              backgroundColor: selectedTokens.rust,
+              color: '#fff',
+              '&:hover': { backgroundColor: selectedTokens.rustLight },
+              '&.Mui-disabled': {
+                backgroundColor: alpha(selectedTokens.rust, 0.3),
+                color: 'rgba(255,255,255,0.3)',
+              },
+            },
+            '&.MuiButton-outlinedPrimary': {
+              borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+              color: selectedTokens.parchment,
+              '&:hover': {
+                borderColor: isDark
+                  ? 'rgba(255,255,255,0.35)'
+                  : 'rgba(0,0,0,0.35)',
+                backgroundColor: isDark
+                  ? 'rgba(255,255,255,0.05)'
+                  : 'rgba(0,0,0,0.05)',
+              },
+            },
+          },
         },
       },
-    },
 
-    // ── TextField / OutlinedInput ────────────────────────────────────────────
-    MuiTextField: {
-      defaultProps: { variant: 'outlined' as const },
-    },
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 13,
-          color: selectedTokens.parchment,
-          backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
+      // ── IconButton ───────────────────────────────────────────────────────────
+      MuiIconButton: {
+        styleOverrides: {
+          root: {
+            color: selectedTokens.parchment,
+            '&:hover': { backgroundColor: alpha(selectedTokens.rust, 0.15) },
           },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: selectedTokens.rust,
-          },
-          '&.Mui-disabled': {
-            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+        },
+      },
+
+      // ── TextField / OutlinedInput ────────────────────────────────────────────
+      MuiTextField: {
+        defaultProps: { variant: 'outlined' as const },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 13,
+            color: selectedTokens.parchment,
+            backgroundColor: isDark
+              ? 'rgba(255,255,255,0.05)'
+              : 'rgba(0,0,0,0.05)',
             '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+              borderColor: isDark
+                ? 'rgba(255,255,255,0.12)'
+                : 'rgba(0,0,0,0.12)',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: isDark
+                ? 'rgba(255,255,255,0.25)'
+                : 'rgba(0,0,0,0.25)',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: selectedTokens.rust,
+            },
+            '&.Mui-disabled': {
+              backgroundColor: isDark
+                ? 'rgba(255,255,255,0.02)'
+                : 'rgba(0,0,0,0.02)',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: isDark
+                  ? 'rgba(255,255,255,0.06)'
+                  : 'rgba(0,0,0,0.06)',
+              },
+            },
+          },
+          input: {
+            '&.Mui-disabled': {
+              color: alpha(selectedTokens.parchment, 0.5),
+              WebkitTextFillColor: alpha(selectedTokens.parchment, 0.5),
             },
           },
         },
-        input: {
-          '&.Mui-disabled': {
-            color: alpha(selectedTokens.parchment, 0.5),
-            WebkitTextFillColor: alpha(selectedTokens.parchment, 0.5),
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontFamily: "'DM Sans', sans-serif",
+            color: selectedTokens.aged,
+            '&.Mui-focused': { color: selectedTokens.aged },
+            '&.Mui-disabled': { color: alpha(selectedTokens.aged, 0.5) },
           },
         },
       },
-    },
-    MuiInputLabel: {
-      styleOverrides: {
-        root: {
-          fontFamily: "'DM Sans', sans-serif",
-          color: selectedTokens.aged,
-          '&.Mui-focused': { color: selectedTokens.aged },
-          '&.Mui-disabled': { color: alpha(selectedTokens.aged, 0.5) },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: { color: selectedTokens.muted },
         },
       },
-    },
-    MuiFormHelperText: {
-      styleOverrides: {
-        root: { color: selectedTokens.muted },
-      },
-    },
 
-    // ── Autocomplete ─────────────────────────────────────────────────────────
-    MuiAutocomplete: {
-      styleOverrides: {
-        clearIndicator: { color: selectedTokens.aged },
-        popupIndicator: { display: 'none' },
-        noOptions: {
-          fontFamily: "'DM Sans', sans-serif",
-          color: selectedTokens.aged,
-        },
-        option: {
-          fontFamily: "'DM Sans', sans-serif",
-          color: selectedTokens.aged,
-          '&:hover': { backgroundColor: `${alpha(selectedTokens.rust, 0.2)} !important` },
-          '&[aria-selected="true"]': {
-            backgroundColor: `${alpha(selectedTokens.rust, 0.3)} !important`,
+      // ── Autocomplete ─────────────────────────────────────────────────────────
+      MuiAutocomplete: {
+        styleOverrides: {
+          clearIndicator: { color: selectedTokens.aged },
+          popupIndicator: { display: 'none' },
+          noOptions: {
+            fontFamily: "'DM Sans', sans-serif",
+            color: selectedTokens.aged,
           },
-        },
-        paper: {
-          backgroundColor: selectedTokens.ink2,
-          color: selectedTokens.parchment,
-          border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.12)',
-        },
-      },
-    },
-
-    // ── Switch ───────────────────────────────────────────────────────────────
-    MuiSwitch: {
-      styleOverrides: {
-        switchBase: {
-          '&.Mui-checked': {
-            color: selectedTokens.rust,
-            '& + .MuiSwitch-track': { backgroundColor: selectedTokens.rust },
+          option: {
+            fontFamily: "'DM Sans', sans-serif",
+            color: selectedTokens.aged,
+            '&:hover': {
+              backgroundColor: `${alpha(selectedTokens.rust, 0.2)} !important`,
+            },
+            '&[aria-selected="true"]': {
+              backgroundColor: `${alpha(selectedTokens.rust, 0.3)} !important`,
+            },
           },
-        },
-        track: { backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
-      },
-    },
-
-    // ── Slider ───────────────────────────────────────────────────────────
-    MuiSlider: {
-      styleOverrides: {
-        root: { color: selectedTokens.rust },
-        thumb: { '&:hover, &.Mui-focusVisible': { boxShadow: `0 0 0 8px ${alpha(selectedTokens.rust, 0.16)}` } },
-        track: { backgroundColor: selectedTokens.rust },
-        rail: { backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
-      },
-    },
-
-    // ── Menu / MenuItem ──────────────────────────────────────────────────────
-    MuiMenu: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: mode === 'light' 
-            ? alpha(selectedTokens.ink2, 0.95)
-            : alpha(selectedTokens.ink2.replace('rgba(55, 31, 3, 0.9)', 'rgb(55,31,3)'), 0.95),
-          color: selectedTokens.parchment,
-          border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.12)',
-          minWidth: 160,
-        },
-      },
-    },
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 13,
-          color: selectedTokens.parchment,
-          '&:hover': { backgroundColor: alpha(selectedTokens.rust, 0.2) },
-          '&.Mui-disabled': { opacity: 1, color: selectedTokens.parchment },
-        },
-      },
-    },
-    MuiDivider: {
-      styleOverrides: {
-        root: { borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)' },
-      },
-    },
-
-    // ── LinearProgress ───────────────────────────────────────────────────────
-    MuiLinearProgress: {
-      styleOverrides: {
-        root: {
-          height: 6,
-          borderRadius: 3,
-          backgroundColor: alpha(selectedTokens.rust, 0.2),
-        },
-        bar: {
-          backgroundColor: selectedTokens.rust,
-          borderRadius: 3,
-        },
-      },
-    },
-
-    // ── CircularProgress ─────────────────────────────────────────────────────
-    MuiCircularProgress: {
-      defaultProps: { style: { color: selectedTokens.rust } },
-    },
-
-    // ── Alert (dev banner) ───────────────────────────────────────────────────
-    MuiAlert: {
-      styleOverrides: {
-        root: ({ ownerState }: { ownerState: any }) => ({
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 13,
-          borderRadius: 0,
-          ...(ownerState.severity === 'warning' && ownerState.variant === 'standard' && {
-            backgroundColor: alpha(selectedTokens.rust, 0.15),
+          paper: {
+            backgroundColor: selectedTokens.ink2,
             color: selectedTokens.parchment,
-            borderBottom: `1px solid ${alpha(selectedTokens.rust, 0.4)}`,
-            '& .MuiAlert-icon': { color: selectedTokens.rust },
+            border: isDark
+              ? '1px solid rgba(255,255,255,0.12)'
+              : '1px solid rgba(0,0,0,0.12)',
+          },
+        },
+      },
+
+      // ── Switch ───────────────────────────────────────────────────────────────
+      MuiSwitch: {
+        styleOverrides: {
+          switchBase: {
+            '&.Mui-checked': {
+              color: selectedTokens.rust,
+              '& + .MuiSwitch-track': { backgroundColor: selectedTokens.rust },
+            },
+          },
+          track: {
+            backgroundColor: isDark
+              ? 'rgba(255,255,255,0.2)'
+              : 'rgba(0,0,0,0.2)',
+          },
+        },
+      },
+
+      // ── Slider ───────────────────────────────────────────────────────────
+      MuiSlider: {
+        styleOverrides: {
+          root: { color: selectedTokens.rust },
+          thumb: {
+            '&:hover, &.Mui-focusVisible': {
+              boxShadow: `0 0 0 8px ${alpha(selectedTokens.rust, 0.16)}`,
+            },
+          },
+          track: { backgroundColor: selectedTokens.rust },
+          rail: {
+            backgroundColor: isDark
+              ? 'rgba(255,255,255,0.2)'
+              : 'rgba(0,0,0,0.2)',
+          },
+        },
+      },
+
+      // ── Menu / MenuItem ──────────────────────────────────────────────────────
+      MuiMenu: {
+        styleOverrides: {
+          paper: {
+            backgroundColor:
+              mode === 'light'
+                ? alpha(selectedTokens.ink2, 0.95)
+                : alpha(
+                    selectedTokens.ink2.replace(
+                      'rgba(55, 31, 3, 0.9)',
+                      'rgb(55,31,3)',
+                    ),
+                    0.95,
+                  ),
+            color: selectedTokens.parchment,
+            border: isDark
+              ? '1px solid rgba(255,255,255,0.12)'
+              : '1px solid rgba(0,0,0,0.12)',
+            minWidth: 160,
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 13,
+            color: selectedTokens.parchment,
+            '&:hover': { backgroundColor: alpha(selectedTokens.rust, 0.2) },
+            '&.Mui-disabled': { opacity: 1, color: selectedTokens.parchment },
+          },
+        },
+      },
+      MuiDivider: {
+        styleOverrides: {
+          root: {
+            borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
+          },
+        },
+      },
+
+      // ── LinearProgress ───────────────────────────────────────────────────────
+      MuiLinearProgress: {
+        styleOverrides: {
+          root: {
+            height: 6,
+            borderRadius: 3,
+            backgroundColor: alpha(selectedTokens.rust, 0.2),
+          },
+          bar: {
+            backgroundColor: selectedTokens.rust,
+            borderRadius: 3,
+          },
+        },
+      },
+
+      // ── CircularProgress ─────────────────────────────────────────────────────
+      MuiCircularProgress: {
+        defaultProps: { style: { color: selectedTokens.rust } },
+      },
+
+      // ── Alert (dev banner) ───────────────────────────────────────────────────
+      MuiAlert: {
+        styleOverrides: {
+          root: ({ ownerState }: { ownerState: any }) => ({
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 13,
+            borderRadius: 0,
+            ...(ownerState.severity === 'warning' &&
+              ownerState.variant === 'standard' && {
+                backgroundColor: alpha(selectedTokens.rust, 0.15),
+                color: selectedTokens.parchment,
+                borderBottom: `1px solid ${alpha(selectedTokens.rust, 0.4)}`,
+                '& .MuiAlert-icon': { color: selectedTokens.rust },
+              }),
           }),
-        }),
+        },
       },
-    },
 
-    // ── Paper ────────────────────────────────────────────────────────────────
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-          backgroundColor: selectedTokens.ink2,
+      // ── Paper ────────────────────────────────────────────────────────────────
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+            backgroundColor: selectedTokens.ink2,
+          },
+        },
+      },
+
+      // ── Checkbox ─────────────────────────────────────────────────────────────
+      MuiCheckbox: {
+        styleOverrides: {
+          root: {
+            color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+            '&.Mui-checked': { color: selectedTokens.rust },
+          },
+        },
+      },
+
+      // ── Tooltip ──────────────────────────────────────────────────────────────
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 12,
+            border: isDark
+              ? '1px solid rgba(255,255,255,0.12)'
+              : '1px solid rgba(0,0,0,0.12)',
+            borderRadius: 4,
+            padding: '6px 10px',
+          },
+        },
+      },
+
+      // ── FormControlLabel ─────────────────────────────────────────────────────
+      MuiFormControlLabel: {
+        styleOverrides: {
+          label: {
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 14,
+            color: selectedTokens.aged,
+          },
         },
       },
     },
-
-    // ── Checkbox ─────────────────────────────────────────────────────────────
-    MuiCheckbox: {
-      styleOverrides: {
-        root: {
-          color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
-          '&.Mui-checked': { color: selectedTokens.rust },
-        },
-      },
-    },
-
-    // ── FormControlLabel ─────────────────────────────────────────────────────
-    MuiFormControlLabel: {
-      styleOverrides: {
-        label: {
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 14,
-          color: selectedTokens.aged,
-        },
-      },
-    },
-  },
-});
+  });
 };
 
 export default createAppTheme();
-

@@ -178,12 +178,14 @@ export const TimelinePage = () => {
     name: string;
     year: number;
     info: string;
+    wikiPageTitle?: string;
   }) => {
     const newEvent = {
       Date: eventData.year,
       Name: eventData.name,
       Info: eventData.info,
       DatasetId: selectedDataset?.Id,
+      WikiPageTitle: eventData.wikiPageTitle,
     } as IEventAddRequest;
     try {
       const addedRecords = await addEvents([newEvent]);

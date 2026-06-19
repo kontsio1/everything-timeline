@@ -8,6 +8,8 @@ import {
   IEventUpdateRequest,
   IPeriodResponse,
   IUserResponse,
+  IWikiSearchPage,
+  IWikiSearchResponse,
 } from './Interfaces';
 import { msalInstance, msalReady } from './msalInstance';
 import { loginRequest } from './authConfig';
@@ -126,3 +128,15 @@ export async function addDataset(data: IDatasetAddRequest) {
   });
   return response.data as IDatasetResponse;
 }
+
+export async function wikiSearchAutoComplete(query: string): Promise<IWikiSearchPage[]> {
+  const response = await axios.get<IWikiSearchResponse>(
+    `${BASE_URL}/WikiSearchAutoComplete`,
+    {
+      params: { query },
+      headers: await authHeaders(),
+    },
+  );
+  return response.data.pages ?? [];
+}
+

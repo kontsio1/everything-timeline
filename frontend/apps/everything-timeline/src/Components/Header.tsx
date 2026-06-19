@@ -30,6 +30,7 @@ interface HeaderProps {
     name: string;
     year: number;
     info: string;
+    wikiPageTitle?: string;
   }) => Promise<void>;
   selectedDatabase: string | null;
   selectedEvent: TimelineEvent | null;
@@ -91,6 +92,7 @@ export const Header = ({
     name: string;
     year: number;
     info: string;
+    wikiPageTitle?: string;
   }) => {
     if (onSubmitEvent) await onSubmitEvent(eventData);
     setIsEventModalOpen(false);
