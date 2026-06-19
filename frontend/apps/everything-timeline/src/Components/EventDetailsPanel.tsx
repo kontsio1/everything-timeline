@@ -101,8 +101,7 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
         borderColor: 'primary.main',
         borderRadius: 2,
         color: 'text.primary',
-        maxHeight: 300,
-        overflowY: 'auto',
+
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0)' : 'translateY(-10px)',
         visibility: isVisible ? 'visible' : 'hidden',
@@ -202,7 +201,7 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
       </Stack>
 
       {/* Content */}
-      <Box sx={{ pr: 14 }}>
+      <Box sx={{ pt: 0, px: '50px' }}>
         {event && (
           <>
             <Typography
@@ -253,7 +252,7 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
               <Typography
                 variant="body1"
                 color="text.secondary"
-                sx={{ lineHeight: 1.7 }}
+                sx={{ lineHeight: 1.7, textAlign: 'justify' }}
               >
                 {event.info ||
                   'No additional information available for this event.'}

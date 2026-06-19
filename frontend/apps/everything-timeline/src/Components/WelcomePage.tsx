@@ -39,15 +39,15 @@ export const WelcomePage: React.FC = () => {
 
     useEffect(() => {
         isMountedRef.current = true;
-        
+
         const fetchAndInitialize = async () => {
             try {
                 setIsError(false);
                 const fetchedDatasets = await getDatasets();
-                
+
                 if (!isMountedRef.current) return;
-                
-                if (fetchedDatasets && fetchedDatasets.length > 0) {
+
+                if (fetchedDatasets) {
                     setDatasets(fetchedDatasets);
                     setIsInitialized(true);
                     sessionStorage.setItem('everythingTimeline_initialized', 'true');
@@ -60,7 +60,7 @@ export const WelcomePage: React.FC = () => {
                 }
             } catch (error) {
                 if (!isMountedRef.current) return;
-                
+
                 console.error('Failed to fetch datasets:', error);
                 setIsError(true);
                 setLoadingStatus('Connection failed. Retrying...');
