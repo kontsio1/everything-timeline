@@ -16,6 +16,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { alpha } from '@mui/material/styles';
 import { tokens } from '../theme/theme';
 import { formatYear } from '../Helpers/DateHelperFunctions';
+import SaveIcon from '@mui/icons-material/Save';
 
 interface EventDetailsPanelProps {
   event: TimelineEvent | null;
@@ -35,6 +36,7 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
   const isVisible = event !== null;
   const isAuthenticated = useIsAuthenticated();
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const editFieldRef = useRef<HTMLTextAreaElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedInfo, setEditedInfo] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -54,6 +56,10 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
   const handleEditToggle = () => {
     if (!isEditing) setEditedInfo(event?.info ?? '');
     setIsEditing((prev) => !prev);
+    // Focus without scrolling after state update
+    if (!isEditing) {
+      setTimeout(() => editFieldRef.current?.focus({ preventScroll: true }), 0);
+    }
   };
 
   const handleCancel = () => {
@@ -154,6 +160,32 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
             </IconButton>
           </span>
         </Tooltip>
+        <Tooltip title={!isAuthenticated ? 'Sign in to edit' : 'Save'}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={handleSave}
+              disabled={
+                !isAuthenticated || isSaving || isDeleting || !isEditing
+              }
+              aria-label={'Save event info'}
+              sx={{
+                border: '1px solid',
+                borderColor: 'primary.main',
+                borderRadius: '50%',
+                width: 32,
+                height: 32,
+                '&:hover': { bgcolor: alpha(tokens.rust, 0.15) },
+              }}
+            >
+              {isSaving ? (
+                <CircularProgress size={14} color="inherit" />
+              ) : (
+                <SaveIcon fontSize="small" />
+              )}
+            </IconButton>
+          </span>
+        </Tooltip>
         <Tooltip
           title={!isAuthenticated ? 'Sign in to delete' : 'Delete event'}
         >
@@ -215,14 +247,21 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
             {isEditing ? (
               <>
                 <TextField
+                  inputRef={editFieldRef}
                   value={editedInfo}
                   onChange={(e) => setEditedInfo(e.target.value)}
                   multiline
                   minRows={3}
                   fullWidth
                   disabled={isSaving}
-                  autoFocus
                   size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-input': {
+                      fontSize: '1rem',
+                      lineHeight: 2,
+                      textAlign: 'justify',
+                    },
+                  }}
                 />
                 <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
                   <Button
@@ -249,14 +288,32 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
                 </Stack>
               </>
             ) : (
-              <Typography
-                variant="body1"
-                color="text.secondary"
-                sx={{ lineHeight: 1.7, textAlign: 'justify' }}
-              >
-                {event.info ||
-                  'No additional information available for this event.'}
-              </Typography>
+              <TextField
+                contentEditable={false}
+                multiline
+                minRows={3}
+                fullWidth
+                focused={false}
+                value={
+                  event.info ||
+                  'No additional information available for this event.'
+                }
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    bgcolor: 'background.default',
+                    cursor: 'default',
+                  },
+                  '& .MuiOutlinedInput-input': {
+                    cursor: 'default',
+                    fontSize: '1rem',
+                    lineHeight: 2,
+                    textAlign: 'justify',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    border: 'none',
+                  },
+                }}
+              />
             )}
           </>
         )}
