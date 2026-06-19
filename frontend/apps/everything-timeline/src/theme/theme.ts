@@ -396,6 +396,17 @@ export const createAppTheme = (mode: 'light' | 'dark' = 'dark') => {
         },
       },
 
+      // ── AppBar ───────────────────────────────────────────────────────────────
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+            backgroundColor: selectedTokens.ink2,
+            color: selectedTokens.parchment,
+          },
+        },
+      },
+
       // ── Paper ────────────────────────────────────────────────────────────────
       MuiPaper: {
         styleOverrides: {

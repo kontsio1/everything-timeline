@@ -13,6 +13,7 @@ import {
   deleteEvent,
 } from '../api/api';
 import { Header } from './Header';
+import { SearchEventHero } from './SearchEventHero';
 import { IEventAddRequest } from '../api/Interfaces';
 import { useDatasetContext } from '../context/DatasetContext';
 import { EventDetailsPanel } from './EventDetailsPanel';
@@ -310,13 +311,17 @@ export const TimelinePage = () => {
     <>
       <Header
         databaseOptions={datasets.map((s) => s.Name)}
-        events={events}
         onDatabaseChange={handleDatabaseChange}
+        selectedDatabase={selectedDataset?.Name ?? null}
+        loading={loading}
+      />
+      <SearchEventHero
+        events={events}
+        selectedEvent={detailsEvent}
+        selectedDatabase={selectedDataset?.Name ?? null}
+        loading={loading}
         onEventSearch={handleEventSearch}
         onSubmitEvent={handleAddEvent}
-        selectedDatabase={selectedDataset?.Name ?? null}
-        selectedEvent={detailsEvent}
-        loading={loading}
       />
       <TimelineComponent
         ref={timelineRef}

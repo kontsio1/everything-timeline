@@ -7,7 +7,7 @@ import {
   Tooltip,
   IconButton,
 } from '@mui/material';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PersonIcon from '@mui/icons-material/Person';
 import { useMsal } from '@azure/msal-react';
 import { loginRequest } from '../api/authConfig';
 
@@ -57,9 +57,8 @@ export const Login = () => {
 
   return (
     <>
-      <Tooltip title={activeAccount ? (displayName ?? 'Account') : 'Sign in'}>
+      <Tooltip title="Account">
         <IconButton
-          size="small"
           onClick={handleOpenMenu}
           sx={{
             bgcolor: 'primary.main',
@@ -69,7 +68,7 @@ export const Login = () => {
             height: 36,
           }}
         >
-          <AccountCircleIcon fontSize="small" />
+          <PersonIcon fontSize="medium" />
         </IconButton>
       </Tooltip>
       <Menu
@@ -100,7 +99,7 @@ export const Login = () => {
                 {loading ? (
                   <CircularProgress size={16} color="inherit" />
                 ) : (
-                  'Log In'
+                  'Sign In'
                 )}
               </MenuItem>,
             ]}

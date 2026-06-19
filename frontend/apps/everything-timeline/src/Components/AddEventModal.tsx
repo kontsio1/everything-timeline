@@ -12,6 +12,8 @@ import {
   Switch,
   Tooltip,
   FormControlLabel,
+  Typography,
+  Box,
 } from '@mui/material';
 import {
   formatYear,
@@ -147,7 +149,28 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
       <DialogContent>
         <Stack spacing={2.5} sx={{ mt: 1 }}>
-          {/* Disabled dataset indicator */}
+          <Box
+            sx={{
+              borderLeft: '3px solid',
+              borderColor: 'primary.main',
+              borderRadius: '0 4px 4px 0',
+              bgcolor: 'rgba(255,255,255,0.04)',
+              px: 1.75,
+              py: 1.25,
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.disabled"
+              sx={{ fontStyle: 'italic' }}
+            >
+              Events are the central element of the Timeline of Everything. You
+              can create multiple events to any dataset you own and explore them
+              in your timeline. Each event can be set to any year within a
+              dataset's selected domain.
+            </Typography>
+          </Box>
+
           <Autocomplete
             options={[]}
             value={selectedDatabase}
