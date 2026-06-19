@@ -39,7 +39,14 @@ export const DatasetProvider: React.FC<DatasetProviderProps> = ({ children }) =>
     const activeDomain = useMemo<[Date, Date]>(() => {
         const dataset = selectedDatasetId ? datasets.find(d => d.Id === selectedDatasetId) : null;
         if (!dataset) return timelineInitialDomain as [Date, Date];
-        return [new Date(dataset.DomainStart, 0, 1), new Date(dataset.DomainEnd+1, 0, 1)];
+        // Use setFullYear() instead of new Date(year, ...) to correctly handle years 0–99.
+        // The Date(year, month, day) constructor treats 0–99 as 1900+year (e.g. year 1 → 1901).
+        const makeYear = (year: number): Date => {
+            const d = new Date(0);
+            d.setFullYear(year, 0, 1);
+            return d;
+        };
+        return [makeYear(dataset.DomainStart), makeYear(dataset.DomainEnd + 1)];
     }, [selectedDatasetId, datasets]);
 
     return (

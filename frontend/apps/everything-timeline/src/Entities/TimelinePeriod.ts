@@ -18,8 +18,9 @@ export class TimelinePeriod extends BaseEvent {
 
     constructor(id: string, start: number[], end: number[], label: string, forcedPriority: number = 0, colour?: string) {
         super(id, label, colour)
-        this.startDate = new Date(start[0], start[1]??0, start[2]??0);
-        this.endDate = new Date(end[0], end[1]??0, end[2]??0);
+        // Use setFullYear() to avoid the JS Date(year,m,d) quirk where years 0–99 map to 1900+year.
+        this.startDate = new Date(0); this.startDate.setFullYear(start[0], start[1] ?? 0, start[2] ?? 1);
+        this.endDate = new Date(0); this.endDate.setFullYear(end[0], end[1] ?? 0, end[2] ?? 1);
         this.label = label;
         this.colour = colour || "#" + Math.floor(stringToUnique01(this.label, 1) * 16777215).toString(16).padStart(6, "0");
         this.duration = this.endDate.getTime() - this.startDate.getTime();
@@ -66,11 +67,11 @@ export class TimelinePeriod extends BaseEvent {
         return this.forcedPriority;
     }
     updateDuration(domain: Date[]): void {
-        const domainStartDate = domain[0].getTime(); 
-        const domainEndDate = domain[1].getTime(); 
-        const periodStart = this.startDate.getTime(); 
+        const domainStartDate = domain[0].getTime();
+        const domainEndDate = domain[1].getTime();
+        const periodStart = this.startDate.getTime();
         const periodEnd = this.endDate.getTime();
-        
+
         const startInDomain = Math.max(periodStart, domainStartDate);
         const endInDomain = Math.min(periodEnd, domainEndDate);
         const delta = endInDomain - startInDomain;
