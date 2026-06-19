@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using everything_timeline;
+using everything_timeline.WikiSearch;
 using Microsoft.Extensions.Configuration;
 using DbContext = everything_timeline.DbContext;
 
@@ -54,6 +55,7 @@ builder.Services.AddDbContext<DbContext>(options =>
 
 // Services
 builder.Services.AddScoped<IRepository, Repository>();
+builder.Services.AddSingleton<IWikiHttpClient>(new WikiHttpClient(new HttpClient()));
 
 var host = builder.Build();
 

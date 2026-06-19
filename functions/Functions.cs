@@ -2,6 +2,7 @@ using System.Net;
 using everything_timeline.Extensions;
 using everything_timeline.UseCases.Datasets;
 using everything_timeline.UseCases.Events;
+using everything_timeline.WikiSearch;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace everything_timeline
 {
-    public class Functions(ILogger<Functions> logger, IRepository repository)
+    public class Functions(ILogger<Functions> logger, IRepository repository, IWikiHttpClient wikiHttpClient)
     {
         [Function("Test")]
         public IActionResult TestFunction(
@@ -250,6 +251,35 @@ namespace everything_timeline
             {
                 logger.LogError(ex, "Error adding dataset");
                 return await response.InternalServerErrorAsync("An error occurred while adding dataset");
+            }
+        }
+        [Function("WikiSearchAutoComplete")]
+        public async Task<HttpResponseData> WikiSearchAutoComplete(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
+        {
+            var response = req.CreateResponse();
+            response.SetJsonContentType();
+            response.SetCorsHeaders();
+
+            try
+            {
+                var query = req.Query["query"];
+                if (string.IsNullOrWhiteSpace(query))
+                {
+                    return await response.BadRequestAsync("Query is required");
+                }
+                
+                var searchResult = await wikiHttpClient.SearchTitlesAsync(query, CancellationToken.None);
+                // var searchResult = await wikiHttpClient.GetPageExtractAsync(query, CancellationToken.None);
+
+                logger.LogInformation("Searched for events using query {query}", query);
+
+                return await response.OkJsonAsync(searchResult);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error retrieving wiki search results");
+                return await response.InternalServerErrorAsync("An error occurred while retrieving wiki search results");
             }
         }
     }
