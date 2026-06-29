@@ -54,7 +54,7 @@ docker compose up --build  # Full stack via compose.yaml
 
 ## Environment Configuration
 
-- **Frontend API URL**: Set `REACT_APP_API_URL` or defaults to Azure production endpoint
+- **Frontend API URL**: Set `VITE_API_URL` or defaults to Azure production endpoint
 - **Backend DB**: `SqlConnectionString` in `local.settings.json` or environment variable
 
 ## API Endpoints (Azure Functions)

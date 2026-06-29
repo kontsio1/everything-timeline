@@ -1,0 +1,40 @@
+:root {
+  --ink: #0f0e0b;
+  --ink2: rgba(55, 31, 3, 0.8);
+  --parchment: #f5f0e8;
+  --aged: #e8dfc8;
+  --rust: #c45c2e;
+  --gold: #b8963e;
+  --slate: #4a5568;
+  --mist: #9aa5b4;
+  --era-1: #2d4a3e;
+  --era-2: #4a3728;
+  --era-3: #2a3d52;
+  --era-4: #3d2a4a;
+}
+
+/* Light theme overrides */
+[data-theme="light"] {
+  --ink: #faf8f3;
+  --ink2: #f0ebe0;
+  --parchment: #2a2622;
+  --aged: #3d3a34;
+  --rust: #d97f4d;
+  --gold: #a88c3a;
+  --slate: #6b7a8c;
+  --mist: #5a7a92;
+}
+
+.App {
+  text-align: center;
+  background-color: var(--ink);
+  min-height: 100vh;
+  width: 100vw;
+  overflow: auto;
+}
+
+/* Ensure scroll background is always theme-aware */
+html, body {
+  background-color: var(--ink);
+  overflow: auto;
+}

@@ -1,61 +1,62 @@
 {
-  "name": "everything_timeline",
-  "version": "0.1.0",
+  "name": "@everything-timeline/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "nx serve everything-timeline",
+    "build": "nx build everything-timeline",
+    "test": "nx test everything-timeline",
+    "lint": "nx lint everything-timeline"
+  },
   "private": true,
   "dependencies": {
-    "@azure/msal-browser": "^5.8.0",
-    "@azure/msal-react": "^5.3.1",
+    "@azure/msal-react": "^5.4.4",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.7",
-    "@mui/material": "^7.3.2",
-    "@mui/styled-engine-sc": "^7.3.2",
-    "@mui/styles": "^6.4.8",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.126",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@types/react-router-dom": "^5.3.3",
-    "axios": "^1.13.5",
+    "@mui/icons-material": "^9.1.1",
+    "@mui/styled-engine": "^9.1.1",
+    "@mui/styles": "^6.5.0",
     "d3": "^7.9.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.2.5",
-    "react-router-dom": "^7.13.2",
-    "react-scripts": "^5.0.1",
-    "styled-components": "^6.1.19",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^6.30.4"
   },
   "devDependencies": {
-    "@types/axios": "^0.9.36",
-    "@types/d3": "^7.4.3"
-  }
+    "@eslint/js": "^9.8.0",
+    "@nx/eslint": "^22.6.5",
+    "@nx/eslint-plugin": "^22.6.5",
+    "@nx/js": "^22.6.5",
+    "@nx/react": "^22.6.5",
+    "@nx/vite": "^22.6.5",
+    "@nx/web": "^22.6.5",
+    "@nx/workspace": "^22.6.5",
+    "@swc-node/register": "~1.11.1",
+    "@swc/cli": "~0.8.0",
+    "@swc/core": "~1.15.5",
+    "@swc/helpers": "~0.5.18",
+    "@types/d3": "^7.4.3",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "@vitest/ui": "~4.1.0",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-jsx-a11y": "6.10.1",
+    "eslint-plugin-react": "7.35.0",
+    "eslint-plugin-react-hooks": "5.0.0",
+    "jiti": "2.4.2",
+    "jsdom": "~22.1.0",
+    "nx": "^22.6.5",
+    "prettier": "~3.6.2",
+    "tslib": "^2.3.0",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.40.0",
+    "vite": "^8.0.0",
+    "vitest": "~4.1.0"
+  },
+  "workspaces": [
+    "apps/*"
+  ]
 }

@@ -1,0 +1,130 @@
+import React from 'react';
+import { TimelineEvent } from '../Entities/TimelineEvent';
+import {
+  bgColor,
+  timelineHeight,
+  txtColor2,
+} from '../Constants/GlobalConfigConstants';
+import './EventComponent.css';
+
+interface EventMarkerProps {
+  event: TimelineEvent;
+  x: (date: Date) => number;
+  onSelect?: (event: TimelineEvent) => void;
+  fadeState?: 'enter' | 'stable';
+  isHighlighted: boolean;
+  shouldPulse: boolean;
+  /** Callback to expose the group DOM node to the parent for wave riding */
+  groupRef?: (el: SVGGElement | null) => void;
+}
+
+const EventComponent: React.FC<EventMarkerProps> = ({
+  event,
+  x,
+  onSelect,
+  fadeState = 'stable',
+  isHighlighted,
+  shouldPulse,
+  groupRef,
+}) => {
+  const timelineX = x(event.date);
+  const baseY = timelineHeight / 2;
+
+  const stem = { top: baseY - event.stemHeight, bottom: baseY - event.radius }; //minus goes up
+
+  const textY = baseY - event.stemHeight - 8;
+  const padding = 4;
+  const fontSize = 12; //also eq to text height
+  // Estimate text width (for simplicity, use label length * font size * factor)
+  const textWidth = event.label.length * fontSize * 0.6;
+
+  const rectWidth = textWidth + padding * 2;
+  const rectHeight = fontSize + padding * 2;
+  const rectX = timelineX - textWidth / 2 - padding;
+  const rectY = textY - padding * 3;
+
+  event.boxWidth = rectWidth;
+  event.boxHeight = rectHeight;
+  //left edge of the box, used for tooltip positioning
+  event.boxX = rectX;
+
+  const handleClick = () => {
+    onSelect?.(event);
+  };
+
+  const gradientId = `event-stem-gradient-${event.date.getTime()}`;
+  const stemHeight = Math.abs(stem.bottom - stem.top);
+  const strokeWidth = isHighlighted ? 5 : 1;
+
+  return (
+    <g
+      ref={groupRef}
+      onClick={handleClick}
+      className={`timeline-event event-fade event-fade-${fadeState} ${shouldPulse ? 'event-pulse' : ''}`}
+      data-event-key={`${event.label}-${event.date.toISOString()}`}
+      style={{ cursor: 'pointer' }}
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="transparent" />
+          <stop offset="100%" stopColor={txtColor2} />
+        </linearGradient>
+      </defs>
+      //actually draw the stem as a thin rectangle with the gradient fill,
+      instead of a line, to allow for the gradient effect
+      <rect
+        x={timelineX + 0.25}
+        y={stem.top}
+        height={stemHeight}
+        width="0.5"
+        fill={`url(#${gradientId})`}
+        z={-10}
+      />
+      <circle
+        className="event-circle"
+        cx={timelineX}
+        cy={baseY}
+        r={event.radius}
+        fill={event.colour}
+        fillOpacity={0.2}
+        stroke={txtColor2}
+        strokeOpacity={event.opacity}
+        strokeWidth={strokeWidth}
+        z={100}
+      />
+      <line
+        x1={timelineX}
+        y1={stem.top}
+        x2={timelineX}
+        y2={stem.bottom}
+        opacity={0}
+        strokeWidth={0}
+      />
+      <rect
+        className="event-label"
+        width={rectWidth}
+        height={rectHeight}
+        x={rectX}
+        y={rectY}
+        fill={bgColor}
+        strokeOpacity={event.opacity}
+        stroke={event.colour}
+        strokeWidth={strokeWidth}
+        rx={8}
+        ry={8}
+      />
+      <text
+        x={timelineX}
+        y={textY}
+        textAnchor="middle"
+        fontSize={fontSize}
+        alignmentBaseline="middle"
+        fill={txtColor2}
+      >
+        {event.label}
+      </text>
+    </g>
+  );
+};
+
+export default EventComponent;

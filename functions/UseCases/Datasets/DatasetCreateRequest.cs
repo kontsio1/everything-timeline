@@ -9,13 +9,13 @@ public class DatasetCreateRequest : BaseRequest
     [Required]
     [JsonPropertyName("name")]
     public string Name { get; set; }
-
     [JsonPropertyName("description")]
     public string? Description { get; set; }
-
-    [JsonPropertyName("domainStartDate")]
-    public int DomainStartDate { get; set; }
-
-    [JsonPropertyName("domainEndDate")]
-    public int? DomainEndDate { get; set; }
+    [JsonPropertyName("domainStart")]
+    public int DomainStart { get; set; } = -3200;
+    [JsonPropertyName("domainEnd")]
+    public int? DomainEnd { get; set; } = null;
+    [JsonPropertyName("isPublic")]
+    public bool IsPublic { get; set; } = false;
+    // public bool IsSeeded { get; set; }
 }
