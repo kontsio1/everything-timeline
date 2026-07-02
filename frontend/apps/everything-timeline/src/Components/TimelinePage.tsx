@@ -322,6 +322,10 @@ export const TimelinePage = () => {
         loading={loading}
         onEventSearch={handleEventSearch}
         onSubmitEvent={handleAddEvent}
+        onZoomIn={() => timelineRef.current?.zoomIn()}
+        onZoomOut={() => timelineRef.current?.zoomOut()}
+        onPanLeft={() => timelineRef.current?.panLeft()}
+        onPanRight={() => timelineRef.current?.panRight()}
       />
       <TimelineComponent
         ref={timelineRef}

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
@@ -8,11 +7,23 @@ import TextField from '@mui/material/TextField';
 import TodayIcon from '@mui/icons-material/Today';
 import TuneIcon from '@mui/icons-material/Tune';
 import DateRangeIcon from '@mui/icons-material/DateRange';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { TimelineEvent } from '../Entities/TimelineEvent';
 import { AddEventModal } from './AddEventModal';
 import { AddDatasetModal } from './AddDatasetModal';
 import { addDataset, getDatasets } from '../api/api';
 import { useDatasetContext } from '../context/DatasetContext';
+import {
+  Autocomplete,
+  Button,
+  ButtonGroup,
+  IconButton,
+  Stack,
+  Tooltip,
+} from '@mui/material';
 
 interface SearchEventHeroProps {
   events: TimelineEvent[];
@@ -29,6 +40,10 @@ interface SearchEventHeroProps {
     info: string;
     wikiPageTitle?: string;
   }) => Promise<void>;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onPanLeft: () => void;
+  onPanRight: () => void;
 }
 
 export const SearchEventHero = ({
@@ -38,6 +53,10 @@ export const SearchEventHero = ({
   loading,
   onEventSearch,
   onSubmitEvent,
+  onZoomIn,
+  onZoomOut,
+  onPanLeft,
+  onPanRight,
 }: SearchEventHeroProps) => {
   const [localSelectedEvent, setLocalSelectedEvent] =
     useState<TimelineEvent | null>(selectedEvent);
@@ -88,6 +107,7 @@ export const SearchEventHero = ({
   };
 
   const isDbSelected = !!selectedDatabase && selectedDatabase !== '';
+  const areTimelineControlsDisabled = !isDbSelected || loading;
 
   const speedDialActions = [
     {
@@ -105,84 +125,150 @@ export const SearchEventHero = ({
     {
       icon: <TuneIcon />,
       name: 'Timeline settings',
-      onClick: () => {},
+      onClick: () => undefined,
       disabled: false,
     },
   ];
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          px: { xs: 2, sm: 6 },
-          py: 1.5,
-        }}
-      >
+      <Stack direction="column" sx={{ maxWidth: '60%', margin: '0 auto' }}>
         <Box
           sx={{
-            transform: 'translateX(+10%)',
             display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            width: '100%',
-            maxWidth: 500,
-            marginTop: 5,
+            justifyContent: 'center',
+            px: { xs: 2, sm: 6 },
+            py: 1.5,
           }}
         >
-          {/* Search field */}
           <Box
             sx={{
-              flex: 1,
+              transform: 'translateX(+5%)',
               display: 'flex',
               alignItems: 'center',
+              gap: 1,
+              width: '100%',
+              maxWidth: 600,
+              marginTop: 5,
             }}
           >
-            <Autocomplete
-              options={events}
-              value={localSelectedEvent}
-              onChange={handleSelectEvent}
-              popupIcon={null}
-              noOptionsText="Select a dataset to load events"
-              sx={{ flex: 1 }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Search for an event"
-                  size="small"
-                />
-              )}
-            />
-          </Box>
+            {/* Search field */}
+            <Stack direction="row" spacing={0.5}>
+              <Tooltip title="Zoom in">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={onZoomIn}
+                    disabled={areTimelineControlsDisabled}
+                    aria-label="Zoom in timeline"
+                  >
+                    <ZoomInIcon fontSize="small" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Tooltip title="Zoom out">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={onZoomOut}
+                    disabled={areTimelineControlsDisabled}
+                    aria-label="Zoom out timeline"
+                  >
+                    <ZoomOutIcon fontSize="small" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Tooltip title="Pan left">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={onPanLeft}
+                    disabled={areTimelineControlsDisabled}
+                    aria-label="Pan timeline left"
+                  >
+                    <KeyboardArrowLeftIcon fontSize="small" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Tooltip title="Pan right">
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={onPanRight}
+                    disabled={areTimelineControlsDisabled}
+                    aria-label="Pan timeline right"
+                  >
+                    <KeyboardArrowRightIcon fontSize="small" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </Stack>
 
-          {/* Speed dial */}
-          <SpeedDial
-            ariaLabel="timeline actions"
-            direction="right"
-            icon={<SpeedDialIcon />}
-            sx={{
-              '& .MuiSpeedDial-fab': {
-                width: 36,
-                height: 36,
-                minHeight: 36,
-                bgcolor: 'primary.main',
-                color: '#fff',
-                boxShadow: 'none',
-                '&:hover': { bgcolor: 'primary.light' },
-              },
-            }}
-          >
-            {speedDialActions.map((action) => (
-              <SpeedDialAction
-                key={action.name}
-                icon={action.icon}
-                onClick={action.onClick}
+            <Box
+              sx={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                marginRight: 0,
+              }}
+            >
+              <Autocomplete
+                options={events}
+                value={localSelectedEvent}
+                onChange={handleSelectEvent}
+                popupIcon={null}
+                noOptionsText="Select a dataset to load events"
+                sx={{ flex: 1 }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Search for an event"
+                    size="small"
+                  />
+                )}
               />
-            ))}
-          </SpeedDial>
+            </Box>
+
+            {/* Speed dial */}
+            <SpeedDial
+              ariaLabel="timeline actions"
+              direction="right"
+              icon={<SpeedDialIcon />}
+              sx={{
+                '& .MuiSpeedDial-fab': {
+                  width: 36,
+                  height: 36,
+                  minHeight: 36,
+                  bgcolor: 'primary.main',
+                  color: '#fff',
+                  boxShadow: 'none',
+                  '&:hover': { bgcolor: 'primary.light' },
+                },
+              }}
+            >
+              {speedDialActions.map((action) => (
+                <SpeedDialAction
+                  key={action.name}
+                  icon={action.icon}
+                  onClick={action.onClick}
+                />
+              ))}
+            </SpeedDial>
+          </Box>
         </Box>
-      </Box>
+        <ButtonGroup
+          variant="text"
+          aria-label="Basic button group"
+          size="large"
+          sx={{ justifyContent: 'center' }}
+          fullWidth
+        >
+          <Button>Conflicts</Button>
+          <Button>Discoveries</Button>
+          <Button>Religion</Button>
+          <Button>Politics</Button>
+        </ButtonGroup>
+      </Stack>
 
       <AddEventModal
         open={isEventModalOpen}

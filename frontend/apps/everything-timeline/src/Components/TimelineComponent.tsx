@@ -3,6 +3,7 @@ import React, {
   forwardRef,
   SyntheticEvent,
   useEffect,
+  useMemo,
   useRef,
   useState,
   useImperativeHandle,
@@ -64,18 +65,37 @@ export interface TimelineComponentProps {
 
 export interface TimelineComponentHandle {
   zoomToEvent: (event?: TimelineEvent) => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  panLeft: () => void;
+  panRight: () => void;
 }
 
 export const TimelineComponent = forwardRef<
   TimelineComponentHandle,
   TimelineComponentProps
 >(function TimelineComponent(props, ref) {
+  //#region Context/props
   const classes = useStyles();
   const { controls } = useControlsContext();
   const { mode } = useThemeContext();
   const { events, periods, domain, loading, onEventSelect } = props;
+
+  //#endregion
+
+  //#region Refs
   const svgRef = useRef<SVGSVGElement>(null); // SVG ref for React-managed SVG
   const axisRef = useRef<SVGGElement>(null);
+  const svgSelectionRef = useRef<d3.Selection<
+    SVGSVGElement,
+    unknown,
+    null,
+    undefined
+  > | null>(null);
+  const zoomBehaviorRef = useRef<d3.ZoomBehavior<
+    SVGSVGElement,
+    unknown
+  > | null>(null);
   const xScaleRef = useRef<d3.ScaleTime<number, number, never> | null>(null);
   const laneHeightPaddingRef = useRef<number>(
     controls.visibleEventsLaneHeightPadding,
@@ -88,7 +108,11 @@ export const TimelineComponent = forwardRef<
   const waveParamsRef = useRef<WaveParams | null>(null);
   /** Live DOM refs to every rendered event group, keyed by event key */
   const eventGroupRefsMap = useRef<Map<string, SVGGElement>>(new Map());
+  const circleWaveFrameRef = useRef<number | null>(null);
 
+  //#endregion
+
+  //#region State
   const [visibleEvents, setVisibleEvents] = useState<TimelineEvent[]>([]);
   const [visiblePeriods, setVisiblePeriods] = useState<TimelinePeriod[]>([]);
   const [transform, setTransform] = useState<{ x: number; k: number }>({
@@ -102,6 +126,19 @@ export const TimelineComponent = forwardRef<
   const [hoverY, setHoverY] = useState<number | null>(null);
   const [isHoveringTimeline, setIsHoveringTimeline] = useState(false);
 
+  //#endregion
+
+  //#region Constants
+
+  const timelineControlAnimationDuration = 500;
+  const axisGradientId = 'axis-bar-gradient';
+  const periodMaskId = 'period-edge-fade-mask';
+  const periodMaskGradientId = 'period-mask-gradient';
+
+  //#endregion
+
+  //#region Pure helpers
+
   const getEventKey = (event: TimelineEvent) =>
     `${event.label}-${event.date.toISOString()}`;
 
@@ -112,98 +149,6 @@ export const TimelineComponent = forwardRef<
     return getYearLabel(year);
   };
 
-  // Create initial scale
-  useEffect(() => {
-    const x = d3
-      .scaleTime()
-      .domain(domain)
-      //horizontal distance between the left edge of the timeline rectangle (SVG) and the start of the timeline
-      .range([
-        horizontalPaddingOfTimeline,
-        timelineWidth - horizontalPaddingOfTimeline,
-      ])
-      .clamp(true);
-    xScaleRef.current = x;
-    setTransform({ x: 0, k: 1 });
-    updatePeriods(x);
-    updateEvents(x);
-    if (!svgRef.current) return;
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 1000])
-      .translateExtent([
-        [horizontalPaddingOfTimeline, 0],
-        [timelineWidth - horizontalPaddingOfTimeline, 0],
-      ])
-      .extent([
-        [50, 0],
-        [timelineWidth - 50, timelineHeight],
-      ])
-      .on(
-        'zoom',
-        (event: {
-          transform: { x: any; k: any; rescaleX: (arg0: any) => any };
-        }) => {
-          setTransform({ x: event.transform.x, k: event.transform.k });
-          const newX = event.transform.rescaleX(xScaleRef.current!);
-          updatePeriods(newX);
-          updateEvents(newX);
-        },
-      );
-    d3.select(svgRef.current).call(zoom);
-  }, [events, domain]);
-
-  // Update axis ticks on transform/scale change
-  useEffect(() => {
-    const xScale = getTransformedXScale();
-    if (axisRef.current && xScale) {
-      const axisSelection = d3
-        .select(axisRef.current)
-        .call(
-          d3.axisBottom(xScale).ticks(controls.ticksNo).tickFormat(formatTicks),
-        );
-
-      axisSelection
-        .selectAll('.domain')
-        .attr('stroke', `url(#${axisGradientId})`)
-        .attr('stroke-width', 5)
-        .attr('mask', 'url(#axis-wave-mask)');
-
-      // Keep tick styling consistent
-      axisSelection
-        .selectAll('.tick text')
-        .attr('fill', txtColor)
-        .attr('dy', '1.71em');
-      axisSelection.selectAll('.tick line').attr('stroke', txtColor);
-    }
-  }, [transform, visibleEvents, visiblePeriods, loading, controls.ticksNo, mode]);
-
-  useEffect(() => {
-    setRenderEvents((prev) => {
-      const prevByKey = new Map(
-        prev.map((item) => [getEventKey(item.event), item]),
-      );
-      return visibleEvents.map((event) => {
-        const key = getEventKey(event);
-        const previous = prevByKey.get(key);
-        return { event, fade: previous ? 'stable' : 'enter' };
-      });
-    });
-  }, [visibleEvents]);
-
-  useEffect(() => {
-    const hasEntering = renderEvents.some((item) => item.fade === 'enter');
-    if (!hasEntering) return;
-    const rafId = window.requestAnimationFrame(() => {
-      setRenderEvents((prev) =>
-        prev.map((item) =>
-          item.fade === 'enter' ? { ...item, fade: 'stable' } : item,
-        ),
-      );
-    });
-    return () => window.cancelAnimationFrame(rafId);
-  }, [renderEvents]);
-
   const getTransformedXScale = () => {
     const baseScale = xScaleRef.current;
     if (!baseScale) return null;
@@ -212,8 +157,6 @@ export const TimelineComponent = forwardRef<
       .scale(transform.k);
     return d3Transform.rescaleX(baseScale);
   };
-
-  computeRelativePeriodOverlaps(periods);
 
   // Helper to recalculate boxX/boxWidth for all events
   const recalculateEventBoxes = (
@@ -246,9 +189,10 @@ export const TimelineComponent = forwardRef<
       laneHeightPaddingRef.current,
       defaultEventStemHeightRef.current,
     );
-    let filteredEvents = eventsInDomain.filter((e) => e.stemHeight != -1);
+    const filteredEvents = eventsInDomain.filter((e) => e.stemHeight != -1);
     setVisibleEvents(filteredEvents);
   };
+
   const updatePeriods = (newX: d3.ScaleTime<number, number, never>) => {
     const [domainStart, domainEnd] = newX.domain();
     const periodsInDomain = periods.filter(
@@ -267,6 +211,101 @@ export const TimelineComponent = forwardRef<
     setVisiblePeriods(periodsByStartDate);
   };
 
+  //#endregion
+
+  //#region Effects
+
+  // Initialize scale/zoom only when domain changes to preserve current zoom when events refresh.
+  useEffect(() => {
+    const x = d3
+      .scaleTime()
+      .domain(domain)
+      //horizontal distance between the left edge of the timeline rectangle (SVG) and the start of the timeline
+      .range([
+        horizontalPaddingOfTimeline,
+        timelineWidth - horizontalPaddingOfTimeline,
+      ])
+      .clamp(true);
+    xScaleRef.current = x;
+    setTransform({ x: 0, k: 1 });
+    updatePeriods(x);
+    updateEvents(x);
+    if (!svgRef.current) return;
+    const svgSelection = d3.select(svgRef.current);
+    const zoomBehavior = createZoomBehavior();
+    svgSelectionRef.current = svgSelection;
+    zoomBehaviorRef.current = zoomBehavior;
+    svgSelection.call(zoomBehavior);
+  }, [domain]);
+
+  // Keep visible items in sync when event/period collections change.
+  useEffect(() => {
+    const xScale = getTransformedXScale();
+    if (!xScale) return;
+    updatePeriods(xScale);
+    updateEvents(xScale);
+  }, [events, periods]);
+
+  // Update axis ticks on transform/scale change
+  useEffect(() => {
+    const xScale = getTransformedXScale();
+    if (axisRef.current && xScale) {
+      const axisSelection = d3
+        .select(axisRef.current)
+        .call(
+          d3.axisBottom(xScale).ticks(controls.ticksNo).tickFormat(formatTicks),
+        );
+
+      axisSelection
+        .selectAll('.domain')
+        .attr('stroke', `url(#${axisGradientId})`)
+        .attr('stroke-width', 5)
+        .attr('mask', 'url(#axis-wave-mask)');
+
+      // Keep tick styling consistent
+      axisSelection
+        .selectAll('.tick text')
+        .attr('fill', txtColor)
+        .attr('dy', '1.71em');
+      axisSelection.selectAll('.tick line').attr('stroke', txtColor);
+    }
+  }, [
+    transform,
+    visibleEvents,
+    visiblePeriods,
+    loading,
+    controls.ticksNo,
+    mode,
+  ]);
+
+  useEffect(() => {
+    setRenderEvents((prev) => {
+      const prevByKey = new Map(
+        prev.map((item) => [getEventKey(item.event), item]),
+      );
+      return visibleEvents.map((event) => {
+        const key = getEventKey(event);
+        const previous = prevByKey.get(key);
+        return { event, fade: previous ? 'stable' : 'enter' };
+      });
+    });
+  }, [visibleEvents]);
+
+  useEffect(() => {
+    const hasEntering = renderEvents.some((item) => item.fade === 'enter');
+    if (!hasEntering) return;
+    const rafId = window.requestAnimationFrame(() => {
+      setRenderEvents((prev) =>
+        prev.map((item) =>
+          item.fade === 'enter' ? { ...item, fade: 'stable' } : item,
+        ),
+      );
+    });
+    return () => window.cancelAnimationFrame(rafId);
+  }, [renderEvents]);
+
+  computeRelativePeriodOverlaps(periods);
+
   useEffect(() => {
     laneHeightPaddingRef.current = controls.visibleEventsLaneHeightPadding;
     defaultEventStemHeightRef.current = controls.defaultEventStemHeight;
@@ -281,11 +320,9 @@ export const TimelineComponent = forwardRef<
     controls.defaultEventStemHeight,
   ]);
 
-  // Add gradient definition for tick stems and axis line
-  const axisGradientId = 'axis-bar-gradient';
-  const periodMaskId = 'period-edge-fade-mask';
-  const periodMaskGradientId = 'period-mask-gradient';
+  //#endregion
 
+  //#region UI interaction handlers
   const handleTimelineMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
     if (!svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
@@ -297,10 +334,140 @@ export const TimelineComponent = forwardRef<
   const handleTimelineMouseLeave = () => {
     setIsHoveringTimeline(false);
   };
+  //#endregion
 
-  // rAF loop: move event groups vertically to ride the wave
-  const circleWaveFrameRef = useRef<number | null>(null);
-  const isWaveActive = isHoveringTimeline && !loading && controls.hoverLineEnabled;
+  const transformedXScale = useMemo(
+    () => getTransformedXScale(),
+    [domain, transform.x, transform.k],
+  );
+
+  //#region Zoom behavior
+
+  const handleZoom = (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
+    setTransform({ x: event.transform.x, k: event.transform.k });
+    const newX = event.transform.rescaleX(xScaleRef.current!);
+    updatePeriods(newX);
+    updateEvents(newX);
+  };
+  const createZoomBehavior = () =>
+    d3
+      .zoom<SVGSVGElement, unknown>()
+      .scaleExtent([1, 1000])
+      .translateExtent([
+        [horizontalPaddingOfTimeline, 0],
+        [timelineWidth - horizontalPaddingOfTimeline, 0],
+      ])
+      .extent([
+        [50, 0],
+        [timelineWidth - 50, timelineHeight],
+      ])
+      .on('zoom', handleZoom);
+
+  const getAdaptiveZoomFactor = () => {
+    const zoomLevel = Math.max(transform.k, 1);
+    //currently 1
+    const dynamicStep = Math.max(0.5, 1 / Math.sqrt(zoomLevel));
+    return 1 + dynamicStep;
+  };
+  const getAdaptivePanDelta = () => {
+    const zoomLevel = Math.max(transform.k, 1);
+    const viewportStepPx = timelineWidth * 0.12;
+    // translateBy multiplies by current scale; normalize so the on-screen pan stays consistent.
+    return viewportStepPx / zoomLevel;
+  };
+
+  // Expose zoomToEvent via ref
+  useImperativeHandle(ref, () => ({
+    zoomToEvent(event?: TimelineEvent) {
+      const date = event?.date;
+      if (!date || !xScaleRef.current || !svgRef.current) return;
+      const xScale = xScaleRef.current;
+      const targetX = xScale(date);
+      const centerX = timelineWidth / 2;
+
+      // D3 translateExtent clamps tx to: [ex0 - x1*k, ex1 - x0*k]
+      // where extent is [[50,0],[timelineWidth-50,h]] and translateExtent is [[hPad,0],[timelineWidth-hPad,0]]
+      // For the desired tx = centerX - targetX*k to be unclamped, derive min k:
+      //   tx >= ex0 - (timelineWidth - hPad)*k  →  (timelineWidth - hPad - targetX)*k >= ex0 - centerX
+      //   tx <= (timelineWidth - 50) - hPad*k   →  (targetX - hPad)*k >= centerX - (timelineWidth - 50)
+      const hPad = horizontalPaddingOfTimeline;
+      const ex0 = 50;
+      const ex1 = timelineWidth - 50;
+      const x1 = timelineWidth - hPad;
+      const x0 = hPad;
+
+      let minZoom = 7;
+
+      // Lower-bound: tx >= tx_min  →  centerX - targetX*k >= ex0 - x1*k
+      //   k*(x1 - targetX) >= ex0 - centerX  →  k >= (centerX - ex0) / (x1 - targetX)
+      const denomA = x1 - targetX;
+      if (denomA > 0) {
+        minZoom = Math.max(minZoom, (centerX - ex0) / denomA);
+      }
+
+      // Upper-bound: tx <= tx_max  →  centerX - targetX*k <= ex1 - x0*k
+      //   k*(targetX - x0) >= centerX - ex1  →  k >= (centerX - ex1) / (-(targetX - x0))
+      const denomB = targetX - x0;
+      if (denomB > 0) {
+        minZoom = Math.max(minZoom, (centerX - ex1) / -denomB);
+      }
+
+      const zoomLevel = Math.min(Math.ceil(minZoom * 10) / 10, 1000);
+      const translateX = centerX - targetX * zoomLevel;
+      const targetTransform = d3.zoomIdentity
+        .translate(translateX, 0)
+        .scale(zoomLevel);
+      const svgSelection = svgSelectionRef.current;
+      const zoomBehavior = zoomBehaviorRef.current;
+      if (!svgSelection || !zoomBehavior) return;
+      svgSelection.call(zoomBehavior);
+      svgSelection
+        .transition()
+        .duration(zoomToEventDuration)
+        .call(zoomBehavior.transform, targetTransform);
+    },
+    zoomIn() {
+      const svgSelection = svgSelectionRef.current;
+      const zoomBehavior = zoomBehaviorRef.current;
+      if (!svgSelection || !zoomBehavior) return;
+      svgSelection
+        .transition()
+        .duration(timelineControlAnimationDuration)
+        .call(zoomBehavior.scaleBy, getAdaptiveZoomFactor());
+    },
+    zoomOut() {
+      const svgSelection = svgSelectionRef.current;
+      const zoomBehavior = zoomBehaviorRef.current;
+      if (!svgSelection || !zoomBehavior) return;
+      svgSelection
+        .transition()
+        .duration(timelineControlAnimationDuration)
+        .call(zoomBehavior.scaleBy, 1 / getAdaptiveZoomFactor());
+    },
+    panLeft() {
+      const svgSelection = svgSelectionRef.current;
+      const zoomBehavior = zoomBehaviorRef.current;
+      if (!svgSelection || !zoomBehavior) return;
+      svgSelection
+        .transition()
+        .duration(timelineControlAnimationDuration)
+        .call(zoomBehavior.translateBy, getAdaptivePanDelta(), 0);
+    },
+    panRight() {
+      const svgSelection = svgSelectionRef.current;
+      const zoomBehavior = zoomBehaviorRef.current;
+      if (!svgSelection || !zoomBehavior) return;
+      svgSelection
+        .transition()
+        .duration(timelineControlAnimationDuration)
+        .call(zoomBehavior.translateBy, -getAdaptivePanDelta(), 0);
+    },
+  }));
+  //#endregion
+
+  //#region Wave animation
+  const isWaveActive =
+    isHoveringTimeline && !loading && controls.hoverLineEnabled;
 
   useEffect(() => {
     if (!isWaveActive) {
@@ -352,77 +519,7 @@ export const TimelineComponent = forwardRef<
     };
   }, [isWaveActive, visibleEvents]);
 
-  // Expose zoomToEvent via ref
-  useImperativeHandle(ref, () => ({
-    zoomToEvent(event?: TimelineEvent) {
-      const date = event?.date;
-      if (!date || !xScaleRef.current || !svgRef.current) return;
-      const xScale = xScaleRef.current;
-      const targetX = xScale(date);
-      const centerX = timelineWidth / 2;
-
-      // D3 translateExtent clamps tx to: [ex0 - x1*k, ex1 - x0*k]
-      // where extent is [[50,0],[timelineWidth-50,h]] and translateExtent is [[hPad,0],[timelineWidth-hPad,0]]
-      // For the desired tx = centerX - targetX*k to be unclamped, derive min k:
-      //   tx >= ex0 - (timelineWidth - hPad)*k  →  (timelineWidth - hPad - targetX)*k >= ex0 - centerX
-      //   tx <= (timelineWidth - 50) - hPad*k   →  (targetX - hPad)*k >= centerX - (timelineWidth - 50)
-      const hPad = horizontalPaddingOfTimeline;
-      const ex0 = 50;
-      const ex1 = timelineWidth - 50;
-      const x1 = timelineWidth - hPad;
-      const x0 = hPad;
-
-      let minZoom = 7;
-
-      // Lower-bound: tx >= tx_min  →  centerX - targetX*k >= ex0 - x1*k
-      //   k*(x1 - targetX) >= ex0 - centerX  →  k >= (centerX - ex0) / (x1 - targetX)
-      const denomA = x1 - targetX;
-      if (denomA > 0) {
-        minZoom = Math.max(minZoom, (centerX - ex0) / denomA);
-      }
-
-      // Upper-bound: tx <= tx_max  →  centerX - targetX*k <= ex1 - x0*k
-      //   k*(targetX - x0) >= centerX - ex1  →  k >= (centerX - ex1) / (-(targetX - x0))
-      const denomB = targetX - x0;
-      if (denomB > 0) {
-        minZoom = Math.max(minZoom, (centerX - ex1) / -denomB);
-      }
-
-      const zoomLevel = Math.min(Math.ceil(minZoom * 10) / 10, 1000);
-      const translateX = centerX - targetX * zoomLevel;
-      const targetTransform = d3.zoomIdentity
-        .translate(translateX, 0)
-        .scale(zoomLevel);
-      const svgSelection = d3.select(svgRef.current);
-      const zoomBehavior = d3
-        .zoom<SVGSVGElement, unknown>()
-        .scaleExtent([1, 1000])
-        .translateExtent([
-          [horizontalPaddingOfTimeline, 0],
-          [timelineWidth - horizontalPaddingOfTimeline, 0],
-        ])
-        .extent([
-          [50, 0],
-          [timelineWidth - 50, timelineHeight],
-        ])
-        .on(
-          'zoom',
-          (event: {
-            transform: { x: any; k: any; rescaleX: (arg0: any) => any };
-          }) => {
-            setTransform({ x: event.transform.x, k: event.transform.k });
-            const newX = event.transform.rescaleX(xScaleRef.current!);
-            updatePeriods(newX);
-            updateEvents(newX);
-          },
-        );
-      svgSelection.call(zoomBehavior);
-      svgSelection
-        .transition()
-        .duration(zoomToEventDuration)
-        .call(zoomBehavior.transform, targetTransform);
-    },
-  }));
+  //#endregion
 
   return (
     <>
@@ -496,15 +593,18 @@ export const TimelineComponent = forwardRef<
                 fill="white"
               />
               {/* Hide domain line in the wave region (local y=0 is the axis) */}
-              {isHoveringTimeline && !loading && hoverX != null && controls.hoverLineEnabled && (
-                <rect
-                  x={hoverX - WAVE_HALF_WIDTH}
-                  y={-(MAX_AMPLITUDE + 3)}
-                  width={WAVE_HALF_WIDTH * 2}
-                  height={MAX_AMPLITUDE * 2 + 6}
-                  fill="black"
-                />
-              )}
+              {isHoveringTimeline &&
+                !loading &&
+                hoverX != null &&
+                controls.hoverLineEnabled && (
+                  <rect
+                    x={hoverX - WAVE_HALF_WIDTH}
+                    y={-(MAX_AMPLITUDE + 3)}
+                    width={WAVE_HALF_WIDTH * 2}
+                    height={MAX_AMPLITUDE * 2 + 6}
+                    fill="black"
+                  />
+                )}
             </mask>
 
             {/* Mask that applies edge fade to periods */}
@@ -521,7 +621,9 @@ export const TimelineComponent = forwardRef<
           <g mask={`url(#${periodMaskId})`}>
             <TimelineAxisWave
               hoverX={hoverX}
-              isActive={isHoveringTimeline && !loading && controls.hoverLineEnabled}
+              isActive={
+                isHoveringTimeline && !loading && controls.hoverLineEnabled
+              }
               waveParamsRef={waveParamsRef}
             />
           </g>
@@ -531,7 +633,7 @@ export const TimelineComponent = forwardRef<
               <TimelinePeriodMarker
                 key={period.label + period.startDate.toISOString()}
                 period={period}
-                x={getTransformedXScale() ?? (() => 0)}
+                x={transformedXScale ?? (() => 0)}
               />
             ))}
           </g>
@@ -540,7 +642,7 @@ export const TimelineComponent = forwardRef<
               <EventComponent
                 key={getEventKey(item.event)}
                 event={item.event}
-                x={getTransformedXScale() ?? (() => 0)}
+                x={transformedXScale ?? (() => 0)}
                 onSelect={onEventSelect}
                 fadeState={item.fade}
                 isHighlighted={
@@ -558,14 +660,6 @@ export const TimelineComponent = forwardRef<
               />
             ))}
           </g>
-          {controls.hoverLineEnabled && (
-            <TimelineHoverLine
-              xScale={getTransformedXScale()}
-              hoverX={hoverX}
-              hoverY={hoverY}
-              isActive={isHoveringTimeline && !loading}
-            />
-          )}
           <g ref={axisRef} transform={`translate(0,${timelineHeight / 2})`} />
           {/* Loading animation - white line moving across the axis */}
           {loading && (
@@ -578,6 +672,14 @@ export const TimelineComponent = forwardRef<
               fill="url(#axis-loading-gradient)"
             />
           )}
+          <TimelineHoverLine
+            xScale={transformedXScale}
+            hoverX={hoverX}
+            hoverY={hoverY}
+            isActive={
+              controls.hoverLineEnabled && isHoveringTimeline && !loading
+            }
+          />
         </svg>
         <PeriodTooltip />
       </div>

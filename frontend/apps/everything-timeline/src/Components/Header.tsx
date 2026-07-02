@@ -120,7 +120,8 @@ export const Header = ({
                   <TextField
                     {...params}
                     label="Select a dataset"
-                    size="small"
+                    size="medium"
+                    variant="standard"
                   />
                 )}
               />
