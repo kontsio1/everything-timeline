@@ -17,6 +17,7 @@ interface HeaderProps {
   databaseOptions: string[];
   onDatabaseChange: (event: React.SyntheticEvent, value: string | null) => void;
   selectedDatabase: string | null;
+  onMenuClick: () => void;
   children?: React.ReactNode;
 }
 
@@ -24,6 +25,7 @@ export const Header = ({
   databaseOptions,
   onDatabaseChange,
   selectedDatabase,
+  onMenuClick,
   children,
 }: HeaderProps) => {
   const { mode, toggleTheme } = useThemeContext();
@@ -70,6 +72,7 @@ export const Header = ({
               edge="start"
               color="inherit"
               aria-label="menu"
+              onClick={onMenuClick}
               sx={{ mr: 2 }}
             >
               <MenuIcon />

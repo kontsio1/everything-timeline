@@ -15,6 +15,7 @@ import {
 import { Header } from './Header';
 import { SearchEventHero } from './SearchEventHero';
 import { SettingsPanel } from './SettingsPanel';
+import { SideMenuDrawer } from './SideMenuDrawer';
 import { IEventAddRequest } from '../api/Interfaces';
 import { useDatasetContext } from '../context/DatasetContext';
 import { EventDetailsPanel } from './EventDetailsPanel';
@@ -57,6 +58,7 @@ export const TimelinePage = () => {
   } | null>(null);
   const [scrollDetailsOnOpen, setScrollDetailsOnOpen] = React.useState(false);
   const [isSettingsPanelOpen, setIsSettingsPanelOpen] = React.useState(false);
+  const [isMenuDrawerOpen, setIsMenuDrawerOpen] = React.useState(false);
   const [events, setEvents] = React.useState<TimelineEvent[]>([]);
   const [loading, setLoading] = React.useState(false);
   const periods = seedPeriods;
@@ -334,6 +336,7 @@ export const TimelinePage = () => {
         databaseOptions={datasets.map((s) => s.Name)}
         onDatabaseChange={handleDatabaseChange}
         selectedDatabase={selectedDataset?.Name ?? null}
+        onMenuClick={() => setIsMenuDrawerOpen(true)}
       />
       <SearchEventHero
         events={events}
@@ -379,6 +382,10 @@ export const TimelinePage = () => {
       <SettingsPanel
         open={isSettingsPanelOpen}
         onClose={() => setIsSettingsPanelOpen(false)}
+      />
+      <SideMenuDrawer
+        open={isMenuDrawerOpen}
+        onClose={() => setIsMenuDrawerOpen(false)}
       />
     </>
   );
