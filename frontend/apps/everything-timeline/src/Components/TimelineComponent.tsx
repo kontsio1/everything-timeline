@@ -21,6 +21,7 @@ import { TimelinePeriod } from '../Entities/TimelinePeriod';
 import { TimelineEvent } from '../Entities/TimelineEvent';
 import {
   computeEventPositionByLaneStrategy,
+  computePeriodLabelPositionByLaneStrategy,
   computeRelativePeriodOverlaps,
   getYearLabel,
 } from '../Helpers/GenericHelperFunctions';
@@ -178,6 +179,26 @@ export const TimelineComponent = forwardRef<
     });
   };
 
+  const recalculatePeriodLabelBoxes = (
+    periods: TimelinePeriod[],
+    xScale: d3.ScaleTime<number, number, never>,
+  ) => {
+    const fontSize = 12;
+
+    periods.forEach((period) => {
+      const rectX = xScale(period.startDate);
+      const rectWidth = xScale(period.endDate) - rectX;
+      const shouldShowLabel = rectWidth > timelineWidth * 0.04;
+
+      period.labelX = rectX + rectWidth / 2;
+      period.labelWidth = shouldShowLabel ? period.label.length * fontSize * 0.6 : 0;
+      period.labelHeight = fontSize;
+      period.labelVisible = shouldShowLabel;
+      period.labelYoffset = 0;
+      period.updateLabelY();
+    });
+  };
+
   const updateEvents = (newX: d3.ScaleTime<number, number, never>) => {
     recalculateEventBoxes(events, newX);
     const [domainStart, domainEnd] = newX.domain();
@@ -208,6 +229,8 @@ export const TimelineComponent = forwardRef<
     const periodsByStartDate = topPriorityPeriods.sort(
       (a, b) => a.startDate.getTime() - b.startDate.getTime(),
     );
+    recalculatePeriodLabelBoxes(periodsByStartDate, newX);
+    computePeriodLabelPositionByLaneStrategy(periodsByStartDate);
     setVisiblePeriods(periodsByStartDate);
   };
 
@@ -634,6 +657,7 @@ export const TimelineComponent = forwardRef<
                 key={period.label + period.startDate.toISOString()}
                 period={period}
                 x={transformedXScale ?? (() => 0)}
+                loading={loading}
               />
             ))}
           </g>

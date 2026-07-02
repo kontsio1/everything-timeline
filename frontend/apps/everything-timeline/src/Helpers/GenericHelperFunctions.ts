@@ -80,12 +80,12 @@ export function computeEventPositionByLaneStrategy(
     const noOfLanes =  Math.floor(Math.abs(lane1start - topEventHeightLimit)/laneHeight);
     const lanesHeights: number[] = [];
     events.forEach(e => e.stemHeight = -1);
-    
+
     for (let i = 0; i < noOfLanes; i++) {
         lanesHeights.push(lane1start + i * laneHeight);
     }
     let timelineEnd = timelineWidth;
-    
+
     lanesHeights.forEach((laneH) => {
         let cursorX = 0;
         const eventsInLane = events.filter(e => e.stemHeight == -1);
@@ -98,6 +98,58 @@ export function computeEventPositionByLaneStrategy(
             }
         });
     })
+}
+
+export function computePeriodLabelPositionByLaneStrategy(
+    periods: TimelinePeriod[],
+): void {
+    const labelMargin = eventBoxMargin;
+    const minLabelTop = timelineHeight / 2 + 6;
+
+    const labelsToPlace = periods
+        .filter(period => period.labelVisible && period.labelWidth > 0)
+        .sort((a, b) => a.labelX - b.labelX);
+
+    const placedLabelBoxes: { left: number; right: number; top: number; bottom: number }[] = [];
+
+    labelsToPlace.forEach(period => {
+        const laneStep = period.labelHeight + labelMargin;
+        const baseLabelY = period.labelY;
+        let laneAssigned = false;
+
+        for (let laneIndex = 0; ; laneIndex++) {
+            const candidateOffset = -laneIndex * laneStep;
+            const candidateY = baseLabelY + candidateOffset;
+            const candidateTop = candidateY - period.labelHeight;
+
+            if (candidateTop < minLabelTop) break;
+
+            const candidateBox = {
+                left: period.labelX - period.labelWidth / 2,
+                right: period.labelX + period.labelWidth / 2,
+                top: candidateTop,
+                bottom: candidateTop + period.labelHeight,
+            };
+
+            const overlapsExistingLabel = placedLabelBoxes.some((placedBox) => {
+                const overlapsHorizontally = candidateBox.left < placedBox.right && candidateBox.right > placedBox.left;
+                const overlapsVertically = candidateBox.top < placedBox.bottom && candidateBox.bottom > placedBox.top;
+                return overlapsHorizontally && overlapsVertically;
+            });
+
+            if (overlapsExistingLabel) continue;
+
+            period.labelYoffset = candidateOffset;
+            period.updateLabelY();
+            placedLabelBoxes.push(candidateBox);
+            laneAssigned = true;
+            break;
+        }
+
+        if (!laneAssigned) {
+            period.labelVisible = false;
+        }
+    });
 }
 
 export function getYearLabel(year: number): string {

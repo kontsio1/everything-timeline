@@ -1,4 +1,4 @@
-import {LogarithmicScaleHelper, numberToUnique01, stringToUnique01} from "../Helpers/LogarithmicScaleHelper";
+import {LogarithmicScaleHelper, stringToUnique01} from "../Helpers/LogarithmicScaleHelper";
 import {priorityOverlapBonuses, timelineHeight, timelineInitialDomain} from "../Constants/GlobalConfigConstants";
 import {BaseEvent} from "./BaseEvent";
 export class TimelinePeriod extends BaseEvent {
@@ -7,6 +7,10 @@ export class TimelinePeriod extends BaseEvent {
     colour: string;
     duration: number; //ms
     labelY: number
+    labelX: number = 0;
+    labelWidth: number = 0;
+    labelHeight: number = 12;
+    labelVisible: boolean = true;
     opacity: number;
     minDuration: number = (1000 * 60 * 60 * 24) * 365 /12; // 1 year in milliseconds
     maxDuration: number = timelineInitialDomain[1].getTime()-timelineInitialDomain[0].getTime()
@@ -41,13 +45,15 @@ export class TimelinePeriod extends BaseEvent {
         return normalizeForDuration.logScale(this.duration);
     }
     private getLabelY(): number {
-        let distFromAxis = this.height - 5 + this.labelYoffset
-        return timelineHeight/2 + distFromAxis + this.addDistanceIfTooCloseToAxis();
+        return timelineHeight / 2 + this.getBaseLabelDistanceFromAxis() + this.labelYoffset;
     }
-    public addDistanceIfTooCloseToAxis(correctionApplied: number = 0): number {
-        let distFromAxis = this.height - 5 + this.labelYoffset + correctionApplied;
-        if( distFromAxis < 40 ) return 20
-        else return 0
+    private getBaseLabelDistanceFromAxis(): number {
+        const distFromAxis = this.height - 5;
+        return distFromAxis + this.addDistanceIfTooCloseToAxis(distFromAxis);
+    }
+    public addDistanceIfTooCloseToAxis(distFromAxis: number): number {
+        if (distFromAxis < 40) return 20
+        return 0
     }
     private getPriority(): number {
         const minPriority = 1, maxPriority = 10;
