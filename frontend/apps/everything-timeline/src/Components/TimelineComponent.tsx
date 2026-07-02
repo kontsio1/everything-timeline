@@ -215,7 +215,9 @@ export const TimelineComponent = forwardRef<
       const shouldShowLabel = rectWidth > timelineWidth * 0.04;
 
       period.labelX = rectX + rectWidth / 2;
-      period.labelWidth = shouldShowLabel ? period.label.length * fontSize * 0.6 : 0;
+      period.labelWidth = shouldShowLabel
+        ? period.label.length * fontSize * 0.6
+        : 0;
       period.labelHeight = fontSize;
       period.labelVisible = shouldShowLabel;
       period.labelYoffset = 0;
@@ -730,7 +732,16 @@ export const TimelineComponent = forwardRef<
               width={120}
               height={4}
               fill="url(#axis-loading-gradient)"
-            />
+              opacity={0.4}
+            >
+              <animate
+                attributeName="x"
+                from={String(horizontalPaddingOfTimeline)}
+                to={String(timelineWidth - horizontalPaddingOfTimeline - 120)}
+                dur="1.8s"
+                repeatCount="indefinite"
+              />
+            </rect>
           )}
           <TimelineHoverLine
             xScale={transformedXScale}
