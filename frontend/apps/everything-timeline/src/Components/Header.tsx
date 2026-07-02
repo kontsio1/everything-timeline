@@ -90,6 +90,12 @@ export const Header = ({
               Timeline of Everything
             </Typography>
           </Box>
+          <Box
+            component="img"
+            src="/hourglass-transparent.png"
+            alt="Everything Timeline logo"
+            sx={{ width: 40, height: 40, objectFit: 'contain' }}
+          />
 
           {/* Center: spacer */}
           <Box sx={{ flex: 1 }} />
