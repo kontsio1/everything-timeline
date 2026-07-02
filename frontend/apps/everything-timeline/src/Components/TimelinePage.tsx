@@ -18,6 +18,7 @@ import { SettingsPanel } from './SettingsPanel';
 import { IEventAddRequest } from '../api/Interfaces';
 import { useDatasetContext } from '../context/DatasetContext';
 import { EventDetailsPanel } from './EventDetailsPanel';
+import { ScrollFAB } from './ScrollFAB';
 import {
   pulseEventDuration,
   zoomToEventDuration,
@@ -38,6 +39,8 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 export const TimelinePage = () => {
   const navigate = useNavigate();
   const timelineRef = useRef<TimelineComponentHandle>(null);
+  const timelineSectionRef = useRef<HTMLDivElement>(null);
+  const detailsPanelRef = useRef<HTMLDivElement>(null);
 
   const redirectToWelcome = useCallback(() => {
     sessionStorage.removeItem('everythingTimeline_initialized');
@@ -101,7 +104,9 @@ export const TimelinePage = () => {
     };
 
     fetchDatasets();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isInitialized, datasets.length]);
 
   // Auto-select first dataset when datasets become available and no valid selection exists
@@ -336,28 +341,32 @@ export const TimelinePage = () => {
         onPanRight={() => timelineRef.current?.panRight()}
         onToggleSettings={() => setIsSettingsPanelOpen((prev) => !prev)}
       />
-      <TimelineComponent
-        ref={timelineRef}
-        events={events}
-        periods={periods}
-        domain={activeDomain}
-        selectedDatabase={selectedDataset?.Name ?? null}
-        highlightedEventKey={
-          highlightedEvent ? getEventKey(highlightedEvent) : null
-        }
-        pulseEventKey={pulseEventKey}
-        onDatabaseChange={handleDatabaseChange}
-        onEventSearch={handleEventSearch}
-        onEventSelect={handleEventSelect}
-        loading={loading}
-      />
+      <div ref={timelineSectionRef}>
+        <TimelineComponent
+          ref={timelineRef}
+          events={events}
+          periods={periods}
+          domain={activeDomain}
+          selectedDatabase={selectedDataset?.Name ?? null}
+          highlightedEventKey={
+            highlightedEvent ? getEventKey(highlightedEvent) : null
+          }
+          pulseEventKey={pulseEventKey}
+          onDatabaseChange={handleDatabaseChange}
+          onEventSearch={handleEventSearch}
+          onEventSelect={handleEventSelect}
+          loading={loading}
+        />
+      </div>
       <EventDetailsPanel
+        ref={detailsPanelRef}
         event={detailsEvent}
         onClose={handleCloseDetails}
         scrollOnOpen={scrollDetailsOnOpen}
         onSave={handleSaveEventInfo}
         onDelete={handleDeleteEvent}
       />
+      <ScrollFAB isVisible={detailsEvent !== null} panelRef={detailsPanelRef} />
       <SettingsPanel
         open={isSettingsPanelOpen}
         onClose={() => setIsSettingsPanelOpen(false)}

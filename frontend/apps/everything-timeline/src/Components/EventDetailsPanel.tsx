@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef } from 'react';
 import { useIsAuthenticated } from '@azure/msal-react';
 import { TimelineEvent } from '../Entities/TimelineEvent';
 import Box from '@mui/material/Box';
@@ -26,13 +26,13 @@ interface EventDetailsPanelProps {
   onDelete: () => Promise<void>;
 }
 
-export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
+export const EventDetailsPanel = forwardRef<HTMLDivElement, EventDetailsPanelProps>(({
   event,
   onClose,
   scrollOnOpen,
   onSave,
   onDelete,
-}) => {
+}, forwardedRef) => {
   const isVisible = event !== null;
   const isAuthenticated = useIsAuthenticated();
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -52,6 +52,16 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
       panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [event, scrollOnOpen]);
+
+  // Sync forwarded ref with internal panelRef
+  useEffect(() => {
+    if (!forwardedRef) return;
+    if (typeof forwardedRef === 'function') {
+      forwardedRef(panelRef.current);
+    } else {
+      (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current = panelRef.current;
+    }
+  });
 
   const handleEditToggle = () => {
     if (!isEditing) setEditedInfo(event?.info ?? '');
@@ -320,4 +330,6 @@ export const EventDetailsPanel: React.FC<EventDetailsPanelProps> = ({
       </Box>
     </Box>
   );
-};
+});
+
+EventDetailsPanel.displayName = 'EventDetailsPanel';
