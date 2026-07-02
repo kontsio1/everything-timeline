@@ -118,6 +118,23 @@ export const TimelineComponent = forwardRef<
    */
   const transformRef = useRef<{ x: number; k: number }>({ x: 0, k: 1 });
 
+  /**
+   * Refs for events and periods kept in sync on every render.
+   *
+   * D3 zoom behavior is registered ONCE in the [domain] effect. Its handleZoom
+   * callback therefore closes over the `events` and `periods` arrays from THAT
+   * render — which is typically [] (events haven't loaded yet). Any subsequent
+   * zoom action would call updateEvents([]), wiping the timeline.
+   *
+   * By reading from a ref instead of the closure, even the stale D3 callback
+   * always operates on the latest data.
+   */
+  const eventsRef = useRef<TimelineEvent[]>(events);
+  eventsRef.current = events; // updated synchronously every render
+
+  const periodsRef = useRef<TimelinePeriod[]>(periods);
+  periodsRef.current = periods; // updated synchronously every render
+
   //#endregion
 
   //#region State
@@ -207,9 +224,10 @@ export const TimelineComponent = forwardRef<
   };
 
   const updateEvents = (newX: d3.ScaleTime<number, number, never>) => {
-    recalculateEventBoxes(events, newX);
+    const currentEvents = eventsRef.current;
+    recalculateEventBoxes(currentEvents, newX);
     const [domainStart, domainEnd] = newX.domain();
-    const eventsInDomain = events.filter(
+    const eventsInDomain = currentEvents.filter(
       (p) => p.date >= domainStart && p.date <= domainEnd,
     );
     computeEventPositionByLaneStrategy(
@@ -222,8 +240,9 @@ export const TimelineComponent = forwardRef<
   };
 
   const updatePeriods = (newX: d3.ScaleTime<number, number, never>) => {
+    const currentPeriods = periodsRef.current;
     const [domainStart, domainEnd] = newX.domain();
-    const periodsInDomain = periods.filter(
+    const periodsInDomain = currentPeriods.filter(
       (p) => p.endDate >= domainStart && p.startDate <= domainEnd,
     );
     periodsInDomain.forEach((period) => {
@@ -342,12 +361,12 @@ export const TimelineComponent = forwardRef<
     return () => window.cancelAnimationFrame(rafId);
   }, [renderEvents]);
 
-  computeRelativePeriodOverlaps(periods);
+  computeRelativePeriodOverlaps(periodsRef.current);
 
   useEffect(() => {
     laneHeightPaddingRef.current = controls.visibleEventsLaneHeightPadding;
     defaultEventStemHeightRef.current = controls.defaultEventStemHeight;
-    events.forEach((event) => {
+    eventsRef.current.forEach((event) => {
       event.defaultHeight = defaultEventStemHeightRef.current;
     });
     const xScale = getTransformedXScale();
