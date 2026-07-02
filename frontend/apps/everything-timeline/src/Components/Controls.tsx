@@ -15,10 +15,8 @@ export const Controls = () => {
     setTicksNo,
   } = useControlsContext();
 
-  //TODO: remove bellow line to renable controls
-  return <></>;
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
       <FormControlLabel
         control={
           <Switch
@@ -37,10 +35,9 @@ export const Controls = () => {
       />
       <Box
         sx={{
-          width: 120,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
+          alignItems: 'stretch',
         }}
       >
         <Typography variant="caption" color="text.secondary">
@@ -59,10 +56,9 @@ export const Controls = () => {
       </Box>
       <Box
         sx={{
-          width: 120,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
+          alignItems: 'stretch',
         }}
       >
         <Typography variant="caption" color="text.secondary">

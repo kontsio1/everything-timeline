@@ -2,7 +2,7 @@ import {
   TimelineComponent,
   TimelineComponentHandle,
 } from './TimelineComponent';
-import React, { useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { TimelineEvent } from '../Entities/TimelineEvent';
 import { seedPeriods } from '../Seed/DefaultEvents';
 import {
@@ -14,6 +14,7 @@ import {
 } from '../api/api';
 import { Header } from './Header';
 import { SearchEventHero } from './SearchEventHero';
+import { SettingsPanel } from './SettingsPanel';
 import { IEventAddRequest } from '../api/Interfaces';
 import { useDatasetContext } from '../context/DatasetContext';
 import { EventDetailsPanel } from './EventDetailsPanel';
@@ -49,6 +50,7 @@ export const TimelinePage = () => {
   );
   const [pulseEventKey, setPulseEventKey] = React.useState<string | null>(null);
   const [scrollDetailsOnOpen, setScrollDetailsOnOpen] = React.useState(false);
+  const [isSettingsPanelOpen, setIsSettingsPanelOpen] = React.useState(false);
   const [events, setEvents] = React.useState<TimelineEvent[]>([]);
   const [loading, setLoading] = React.useState(false);
   const periods = seedPeriods;
@@ -72,28 +74,35 @@ export const TimelinePage = () => {
   const getEventKey = (event: TimelineEvent) =>
     `${event.label}-${event.date.toISOString()}`;
 
-  useMemo(() => {
-    // Only fetch datasets if not already initialized via welcome page
-    if (isInitialized && datasets.length > 0) {
-      return;
-    }
+  // Fetch datasets once after mount if not already initialized via the welcome page.
+  // useEffect (not useMemo) is required: useMemo runs during render and calling setState
+  // there is an anti-pattern that causes intermittent race conditions in React 18.
+  useEffect(() => {
+    if (isInitialized && datasets.length > 0) return;
 
+    let cancelled = false;
     setLoading(true);
+
     const fetchDatasets = async () => {
       try {
-        var fetchedDatasets = await withTimeout(
+        const fetchedDatasets = await withTimeout(
           getDatasets(),
           REQUEST_TIMEOUT_MS,
         );
+        if (cancelled) return;
         setDatasets(fetchedDatasets);
         setIsInitialized(true);
         sessionStorage.setItem('everythingTimeline_initialized', 'true');
       } catch {
-        redirectToWelcome();
+        if (!cancelled) redirectToWelcome();
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
-    fetchDatasets().then((r) => setLoading(false));
-  }, [isInitialized, datasets.length, setDatasets, setIsInitialized]);
+
+    fetchDatasets();
+    return () => { cancelled = true; };
+  }, [isInitialized, datasets.length]);
 
   // Auto-select first dataset when datasets become available and no valid selection exists
   useEffect(() => {
@@ -313,7 +322,6 @@ export const TimelinePage = () => {
         databaseOptions={datasets.map((s) => s.Name)}
         onDatabaseChange={handleDatabaseChange}
         selectedDatabase={selectedDataset?.Name ?? null}
-        loading={loading}
       />
       <SearchEventHero
         events={events}
@@ -326,6 +334,7 @@ export const TimelinePage = () => {
         onZoomOut={() => timelineRef.current?.zoomOut()}
         onPanLeft={() => timelineRef.current?.panLeft()}
         onPanRight={() => timelineRef.current?.panRight()}
+        onToggleSettings={() => setIsSettingsPanelOpen((prev) => !prev)}
       />
       <TimelineComponent
         ref={timelineRef}
@@ -348,6 +357,10 @@ export const TimelinePage = () => {
         scrollOnOpen={scrollDetailsOnOpen}
         onSave={handleSaveEventInfo}
         onDelete={handleDeleteEvent}
+      />
+      <SettingsPanel
+        open={isSettingsPanelOpen}
+        onClose={() => setIsSettingsPanelOpen(false)}
       />
     </>
   );

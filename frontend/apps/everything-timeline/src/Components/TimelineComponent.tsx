@@ -110,6 +110,13 @@ export const TimelineComponent = forwardRef<
   /** Live DOM refs to every rendered event group, keyed by event key */
   const eventGroupRefsMap = useRef<Map<string, SVGGElement>>(new Map());
   const circleWaveFrameRef = useRef<number | null>(null);
+  /**
+   * Ref copy of transform kept in sync with both setTransform (via handleZoom)
+   * and the domain-init effect reset. Used by the [events, periods] effect so it
+   * always reads the latest transform and never suffers from a stale closure when
+   * domain and events change in the same React render batch.
+   */
+  const transformRef = useRef<{ x: number; k: number }>({ x: 0, k: 1 });
 
   //#endregion
 
@@ -250,6 +257,7 @@ export const TimelineComponent = forwardRef<
       ])
       .clamp(true);
     xScaleRef.current = x;
+    transformRef.current = { x: 0, k: 1 }; // reset ref immediately so subsequent effects see the fresh value
     setTransform({ x: 0, k: 1 });
     updatePeriods(x);
     updateEvents(x);
@@ -262,9 +270,16 @@ export const TimelineComponent = forwardRef<
   }, [domain]);
 
   // Keep visible items in sync when event/period collections change.
+  // Uses transformRef (not transform state) to avoid a stale-closure bug where
+  // domain change and events arrival land in the same render batch: the domain
+  // effect resets transformRef synchronously before this effect runs, so the
+  // correct (reset) transform is always used here regardless of render order.
   useEffect(() => {
-    const xScale = getTransformedXScale();
-    if (!xScale) return;
+    const baseScale = xScaleRef.current;
+    if (!baseScale) return;
+    const { x, k } = transformRef.current;
+    const d3Transform = d3.zoomIdentity.translate(x, 0).scale(k);
+    const xScale = d3Transform.rescaleX(baseScale);
     updatePeriods(xScale);
     updateEvents(xScale);
   }, [events, periods]);
@@ -367,7 +382,9 @@ export const TimelineComponent = forwardRef<
   //#region Zoom behavior
 
   const handleZoom = (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
-    setTransform({ x: event.transform.x, k: event.transform.k });
+    const { x, k } = event.transform;
+    setTransform({ x, k });
+    transformRef.current = { x, k };
     const newX = event.transform.rescaleX(xScaleRef.current!);
     updatePeriods(newX);
     updateEvents(newX);

@@ -10,7 +10,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import React from 'react';
-import { Controls } from './Controls';
 import { Login } from './Login';
 import { useThemeContext } from '../context/ThemeContext';
 
@@ -19,7 +18,6 @@ interface HeaderProps {
   onDatabaseChange: (event: React.SyntheticEvent, value: string | null) => void;
   selectedDatabase: string | null;
   children?: React.ReactNode;
-  loading: boolean;
 }
 
 export const Header = ({
@@ -27,7 +25,6 @@ export const Header = ({
   onDatabaseChange,
   selectedDatabase,
   children,
-  loading,
 }: HeaderProps) => {
   const { mode, toggleTheme } = useThemeContext();
 
@@ -106,7 +103,7 @@ export const Header = ({
               alignItems: 'center',
               gap: 1.5,
               flex: '0 0 auto',
-              minWidth: 500,
+              minWidth: 380,
             }}
           >
             <Box sx={autocompleteWrapperSx}>
@@ -146,7 +143,6 @@ export const Header = ({
               </IconButton>
             </Tooltip>
             <Login />
-            <Controls />
           </Box>
 
           {children}

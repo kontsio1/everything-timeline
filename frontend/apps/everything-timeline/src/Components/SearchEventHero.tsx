@@ -44,6 +44,7 @@ interface SearchEventHeroProps {
   onZoomOut: () => void;
   onPanLeft: () => void;
   onPanRight: () => void;
+  onToggleSettings: () => void;
 }
 
 export const SearchEventHero = ({
@@ -57,6 +58,7 @@ export const SearchEventHero = ({
   onZoomOut,
   onPanLeft,
   onPanRight,
+  onToggleSettings,
 }: SearchEventHeroProps) => {
   const [localSelectedEvent, setLocalSelectedEvent] =
     useState<TimelineEvent | null>(selectedEvent);
@@ -125,7 +127,7 @@ export const SearchEventHero = ({
     {
       icon: <TuneIcon />,
       name: 'Timeline settings',
-      onClick: () => undefined,
+      onClick: () => onToggleSettings(),
       disabled: false,
     },
   ];
