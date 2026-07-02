@@ -61,6 +61,7 @@ export interface TimelineComponentProps {
     newValue: TimelineEvent | null,
   ) => void;
   onEventSelect?: (event: TimelineEvent) => void;
+  onTimelineAxisDoubleClick?: (date: Date) => void;
   loading: boolean;
 }
 
@@ -156,6 +157,7 @@ export const TimelineComponent = forwardRef<
   //#region Constants
 
   const timelineControlAnimationDuration = 500;
+  const axisDoubleClickTolerancePx = 16;
   const axisGradientId = 'axis-bar-gradient';
   const periodMaskId = 'period-edge-fade-mask';
   const periodMaskGradientId = 'period-mask-gradient';
@@ -288,6 +290,8 @@ export const TimelineComponent = forwardRef<
     svgSelectionRef.current = svgSelection;
     zoomBehaviorRef.current = zoomBehavior;
     svgSelection.call(zoomBehavior);
+    // We handle double-click ourselves to open the add-event modal.
+    svgSelection.on('dblclick.zoom', null);
   }, [domain]);
 
   // Keep visible items in sync when event/period collections change.
@@ -392,6 +396,28 @@ export const TimelineComponent = forwardRef<
 
   const handleTimelineMouseLeave = () => {
     setIsHoveringTimeline(false);
+  };
+
+  const handleTimelineDoubleClick = (
+    event: React.MouseEvent<SVGSVGElement>,
+  ) => {
+    const xScale = getTransformedXScale();
+    if (!svgRef.current || !xScale || !props.onTimelineAxisDoubleClick) return;
+
+    const rect = svgRef.current.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+    const axisY = timelineHeight / 2;
+
+    // Only trigger when the user double-clicks near the axis line.
+    if (Math.abs(clickY - axisY) > axisDoubleClickTolerancePx) return;
+
+    const clampedX = Math.max(
+      horizontalPaddingOfTimeline,
+      Math.min(timelineWidth - horizontalPaddingOfTimeline, clickX),
+    );
+    const dateAtClick = xScale.invert(clampedX);
+    props.onTimelineAxisDoubleClick(dateAtClick);
   };
   //#endregion
 
@@ -592,6 +618,7 @@ export const TimelineComponent = forwardRef<
           style={{ background: bgColor }}
           onMouseMove={handleTimelineMouseMove}
           onMouseLeave={handleTimelineMouseLeave}
+          onDoubleClick={handleTimelineDoubleClick}
         >
           {/* Gradient definitions for tick stems and axis line */}
           <defs>

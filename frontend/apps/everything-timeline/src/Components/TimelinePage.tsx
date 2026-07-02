@@ -52,6 +52,9 @@ export const TimelinePage = () => {
     null,
   );
   const [pulseEventKey, setPulseEventKey] = React.useState<string | null>(null);
+  const [addEventRequest, setAddEventRequest] = React.useState<{
+    year: number;
+  } | null>(null);
   const [scrollDetailsOnOpen, setScrollDetailsOnOpen] = React.useState(false);
   const [isSettingsPanelOpen, setIsSettingsPanelOpen] = React.useState(false);
   const [events, setEvents] = React.useState<TimelineEvent[]>([]);
@@ -187,6 +190,10 @@ export const TimelinePage = () => {
   ) => {
     const dataset = datasets.find((d) => d.Name === name) || null;
     setSelectedDatasetId(dataset?.Id ?? null);
+  };
+
+  const handleTimelineAxisDoubleClick = (date: Date) => {
+    setAddEventRequest({ year: date.getUTCFullYear() });
   };
 
   const handleAddEvent = async (eventData: {
@@ -333,6 +340,7 @@ export const TimelinePage = () => {
         selectedEvent={detailsEvent}
         selectedDatabase={selectedDataset?.Name ?? null}
         loading={loading}
+        addEventRequest={addEventRequest}
         onEventSearch={handleEventSearch}
         onSubmitEvent={handleAddEvent}
         onZoomIn={() => timelineRef.current?.zoomIn()}
@@ -355,6 +363,7 @@ export const TimelinePage = () => {
           onDatabaseChange={handleDatabaseChange}
           onEventSearch={handleEventSearch}
           onEventSelect={handleEventSelect}
+          onTimelineAxisDoubleClick={handleTimelineAxisDoubleClick}
           loading={loading}
         />
       </div>

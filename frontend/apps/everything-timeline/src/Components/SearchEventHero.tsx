@@ -30,6 +30,7 @@ interface SearchEventHeroProps {
   selectedEvent: TimelineEvent | null;
   selectedDatabase: string | null;
   loading: boolean;
+  addEventRequest: { year: number } | null;
   onEventSearch: (
     event: React.SyntheticEvent,
     value: TimelineEvent | null,
@@ -52,6 +53,7 @@ export const SearchEventHero = ({
   selectedEvent,
   selectedDatabase,
   loading,
+  addEventRequest,
   onEventSearch,
   onSubmitEvent,
   onZoomIn,
@@ -63,12 +65,19 @@ export const SearchEventHero = ({
   const [localSelectedEvent, setLocalSelectedEvent] =
     useState<TimelineEvent | null>(selectedEvent);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [eventPrefillYear, setEventPrefillYear] = useState<number | null>(null);
   const [isDatasetModalOpen, setIsDatasetModalOpen] = useState(false);
   const { setDatasets, setSelectedDatasetId } = useDatasetContext();
 
   useEffect(() => {
     setLocalSelectedEvent(selectedEvent);
   }, [selectedEvent]);
+
+  useEffect(() => {
+    if (!addEventRequest) return;
+    setEventPrefillYear(addEventRequest.year);
+    setIsEventModalOpen(true);
+  }, [addEventRequest]);
 
   const handleSelectEvent = (
     event: React.SyntheticEvent,
@@ -86,6 +95,17 @@ export const SearchEventHero = ({
   }) => {
     await onSubmitEvent(eventData);
     setIsEventModalOpen(false);
+    setEventPrefillYear(null);
+  };
+
+  const handleOpenAddEventModal = () => {
+    setEventPrefillYear(null);
+    setIsEventModalOpen(true);
+  };
+
+  const handleCloseAddEventModal = () => {
+    setIsEventModalOpen(false);
+    setEventPrefillYear(null);
   };
 
   const handleSubmitDataset = async (data: {
@@ -115,7 +135,7 @@ export const SearchEventHero = ({
     {
       icon: <TodayIcon />,
       name: 'New event',
-      onClick: () => setIsEventModalOpen(true),
+      onClick: handleOpenAddEventModal,
       disabled: !isDbSelected || loading,
     },
     {
@@ -274,8 +294,9 @@ export const SearchEventHero = ({
 
       <AddEventModal
         open={isEventModalOpen}
-        onClose={() => setIsEventModalOpen(false)}
+        onClose={handleCloseAddEventModal}
         selectedDatabase={selectedDatabase}
+        prefillYear={eventPrefillYear}
         onSubmit={handleSubmitEvent}
       />
       <AddDatasetModal

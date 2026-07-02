@@ -27,6 +27,7 @@ interface AddEventModalProps {
   open: boolean;
   onClose: () => void;
   selectedDatabase: string | null;
+  prefillYear?: number | null;
   onSubmit: (eventData: {
     name: string;
     year: number;
@@ -39,6 +40,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   open,
   onClose,
   selectedDatabase,
+  prefillYear,
   onSubmit,
 }) => {
   const [eventName, setEventName] = useState('');
@@ -69,6 +71,11 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       setEventInfo('');
     }
   }, [selectedWikiTitle, wikiSearchEnabled]);
+
+  useEffect(() => {
+    if (!open) return;
+    setSelectedYear(prefillYear ?? null);
+  }, [open, prefillYear]);
 
   const handleSubmit = async () => {
     if (!eventName || selectedYear === null) return;
