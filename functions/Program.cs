@@ -1,4 +1,3 @@
-using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using everything_timeline;
 using everything_timeline.WikiSearch;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using DbContext = everything_timeline.DbContext;
 
@@ -17,11 +17,12 @@ var authority = Environment.GetEnvironmentVariable("AzureAd__Authority");
 var issuer = Environment.GetEnvironmentVariable("AzureAd__Issuer");
 
 builder.ConfigureFunctionsWebApplication();
+builder.UseFunctionsAuthorization();
+// Use DarkLoop middleware for auth/authorization; custom AuthMiddleware is intentionally disabled.
 
-builder.UseMiddleware<AuthMiddleware>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services.AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtFunctionsBearer(options =>
     {
         options.Authority = authority;
         options.TokenValidationParameters = new TokenValidationParameters
@@ -35,7 +36,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddFunctionsAuthorization(
+    options =>
+    {
+        options.AddPolicy("Admin", builder =>
+        {
+            builder.RequireAuthenticatedUser();
+            builder.RequireRole("Datasets.Edit");
+        });
+    });
 
 builder.Services.AddCors(options =>
 {

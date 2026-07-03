@@ -3,6 +3,7 @@ using everything_timeline.Extensions;
 using everything_timeline.UseCases.Datasets;
 using everything_timeline.UseCases.Events;
 using everything_timeline.WikiSearch;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -13,9 +14,10 @@ namespace everything_timeline
 {
     public class Functions(ILogger<Functions> logger, IRepository repository, IWikiHttpClient wikiHttpClient)
     {
+        [Authorize(Policy = "Admin")]
         [Function("Test")]
         public IActionResult TestFunction(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
+            [HttpTrigger( "get", "post")] HttpRequest req)
         {
             var user = req.HttpContext.User;
             var isAuthenticated = user.Identity?.IsAuthenticated == true;
@@ -39,7 +41,7 @@ namespace everything_timeline
         }
         
         [Function("Options")]
-        public HttpResponseData HandleOptions([HttpTrigger(AuthorizationLevel.Anonymous, "options", Route = "{*any}")] HttpRequestData req)
+        public HttpResponseData HandleOptions([HttpTrigger( "options", Route = "{*any}")] HttpRequestData req)
         {
             var response = req.CreateResponse();
             response.StatusCode = HttpStatusCode.OK;
@@ -52,7 +54,7 @@ namespace everything_timeline
         
         [Function("GetEvents")]
         public async Task<HttpResponseData> GetEvents(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
+            [HttpTrigger( "get")] HttpRequestData req)
         {
             var response = req.CreateResponse();
             response.SetJsonContentType();
@@ -77,11 +79,14 @@ namespace everything_timeline
             }
         }
 
+        [Authorize(Policy = "Admin")]
         [Function("AddEvent")]
         public async Task<HttpResponseData> AddEvents(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post")]
+            [HttpTrigger( "post")]
             HttpRequestData req)
         {
+            // RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (Timeline Admin)
+
             var response = req.CreateResponse();
             response.SetJsonContentType();
             response.SetCorsHeaders();
@@ -114,7 +119,7 @@ namespace everything_timeline
         
         [Function("UpdateEvent")]
         public async Task<HttpResponseData> UpdateEvent(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post")]
+            [HttpTrigger( "post")]
             HttpRequestData req)
         {
             var response = req.CreateResponse();
@@ -152,7 +157,7 @@ namespace everything_timeline
 
         [Function("DeleteEvent")]
         public async Task<HttpResponseData> DeleteEvent(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post")]
+            [HttpTrigger( "post")]
             HttpRequestData req)
         {
             var response = req.CreateResponse();
@@ -193,7 +198,7 @@ namespace everything_timeline
 
         [Function("GetDatasets")]
         public async Task<HttpResponseData> GetDatasets(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
+            [HttpTrigger( "get")] HttpRequestData req)
         {
             var response = req.CreateResponse();
             response.SetJsonContentType();
@@ -217,7 +222,7 @@ namespace everything_timeline
         
         [Function("AddDataset")]
         public async Task<HttpResponseData> AddDataset(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post")]
+            [HttpTrigger( "post")]
             HttpRequestData req)
         {
             var response = req.CreateResponse();
@@ -255,7 +260,7 @@ namespace everything_timeline
         }
         [Function("WikiSearchAutoComplete")]
         public async Task<HttpResponseData> WikiSearchAutoComplete(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
+            [HttpTrigger( "get")] HttpRequestData req)
         {
             var response = req.CreateResponse();
             response.SetJsonContentType();
