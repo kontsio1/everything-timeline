@@ -79,8 +79,7 @@ export const TimelinePage = () => {
     return datasets.find((d) => d.Id === selectedDatasetId) ?? null;
   }, [selectedDatasetId, datasets]);
 
-  const getEventKey = (event: TimelineEvent) =>
-    `${event.label}-${event.date.toISOString()}`;
+  const getEventKey = (event: TimelineEvent) => event.id;
 
   // Fetch datasets once after mount if not already initialized via the welcome page.
   // useEffect (not useMemo) is required: useMemo runs during render and calling setState

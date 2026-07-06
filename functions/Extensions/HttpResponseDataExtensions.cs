@@ -1,5 +1,6 @@
 using System.Net;
 using Microsoft.Azure.Functions.Worker.Http;
+using everything_timeline.UseCases.Common;
 
 namespace everything_timeline.Extensions
 {
@@ -20,35 +21,21 @@ namespace everything_timeline.Extensions
         public static async Task<HttpResponseData> OkJsonAsync<T>(this HttpResponseData response, T value)
         {
             response.StatusCode = HttpStatusCode.OK;
-            await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(value));
+            await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(Result.Ok(value)));
             return response;
         }
 
         public static async Task<HttpResponseData> CreatedJsonAsync<T>(this HttpResponseData response, T value)
         {
-            response.StatusCode = HttpStatusCode.Created;
-            await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(value));
+            response.StatusCode = HttpStatusCode.OK;
+            await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(Result.Ok(value)));
             return response;
         }
 
-        public static async Task<HttpResponseData> BadRequestAsync(this HttpResponseData response, string message)
+        public static async Task<HttpResponseData> Failure(this HttpResponseData response, HttpStatusCode statusCode, string errorMessage)
         {
-            response.StatusCode = HttpStatusCode.BadRequest;
-            await response.WriteStringAsync(message);
-            return response;
-        }
-
-        public static async Task<HttpResponseData> NotFoundAsync(this HttpResponseData response, string message)
-        {
-            response.StatusCode = HttpStatusCode.NotFound;
-            await response.WriteStringAsync(message);
-            return response;
-        }
-
-        public static async Task<HttpResponseData> InternalServerErrorAsync(this HttpResponseData response, string message)
-        {
-            response.StatusCode = HttpStatusCode.InternalServerError;
-            await response.WriteStringAsync(message);
+            response.StatusCode = statusCode;
+            await response.WriteStringAsync(System.Text.Json.JsonSerializer.Serialize(Result.Failure(new Problem(statusCode, errorMessage))));
             return response;
         }
     }

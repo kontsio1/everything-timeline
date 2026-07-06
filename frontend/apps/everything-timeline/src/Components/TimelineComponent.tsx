@@ -166,8 +166,7 @@ export const TimelineComponent = forwardRef<
 
   //#region Pure helpers
 
-  const getEventKey = (event: TimelineEvent) =>
-    `${event.label}-${event.date.toISOString()}`;
+  const getEventKey = (event: TimelineEvent) => event.id;
 
   const formatTicks = (domainValue: any) => {
     const date =
@@ -719,7 +718,7 @@ export const TimelineComponent = forwardRef<
           <g mask={`url(#${periodMaskId})`}>
             {visiblePeriods.map((period) => (
               <TimelinePeriodMarker
-                key={period.label + period.startDate.toISOString()}
+                key={`${period.id}-${period.startDate.toISOString()}`}
                 period={period}
                 x={transformedXScale ?? (() => 0)}
                 loading={loading}

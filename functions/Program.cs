@@ -39,10 +39,14 @@ builder.Services.AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationSche
 builder.Services.AddFunctionsAuthorization(
     options =>
     {
-        options.AddPolicy("Admin", builder =>
+        options.AddPolicy("Admin", policy =>
         {
-            builder.RequireAuthenticatedUser();
-            builder.RequireRole("Datasets.Edit");
+            policy.RequireAuthenticatedUser();
+            policy.RequireRole("Datasets.Edit");
+        });
+        options.AddPolicy("User", policy =>
+        {
+            policy.RequireAuthenticatedUser();
         });
     });
 

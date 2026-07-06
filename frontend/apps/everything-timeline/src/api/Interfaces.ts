@@ -5,6 +5,21 @@ export interface IEventAddRequest {
   DatasetId: string;
   WikiPageTitle?: string;
 }
+
+export interface IApiProblem {
+  ErrorCode: string;
+  Description: string;
+}
+
+export interface IApiResult {
+  Success: boolean;
+  IsFailure: boolean;
+  Error: IApiProblem;
+}
+
+export interface IApiResultData<T> extends IApiResult {
+  Data?: T;
+}
 export interface IEventResponse {
   Id: string;
   DatasetId: string;

@@ -1,5 +1,7 @@
 using System.Net;
+using System.Security.Claims;
 using everything_timeline.Extensions;
+using everything_timeline.UseCases.Common;
 using everything_timeline.UseCases.Datasets;
 using everything_timeline.UseCases.Events;
 using everything_timeline.WikiSearch;
@@ -14,7 +16,6 @@ namespace everything_timeline
 {
     public class Functions(ILogger<Functions> logger, IRepository repository, IWikiHttpClient wikiHttpClient)
     {
-        [Authorize(Policy = "Admin")]
         [Function("Test")]
         public IActionResult TestFunction(
             [HttpTrigger( "get", "post")] HttpRequest req)
@@ -23,7 +24,7 @@ namespace everything_timeline
             var isAuthenticated = user.Identity?.IsAuthenticated == true;
 
             if (!isAuthenticated)
-                return new OkObjectResult(new { isAuthenticated = false });
+                return new OkObjectResult(Result.Ok(new { isAuthenticated = false }));
 
             var userInfo = new
             {
@@ -37,7 +38,7 @@ namespace everything_timeline
                 "Test called. Authenticated: {IsAuthenticated}, User: {UserId} ({Email})",
                 isAuthenticated, userInfo.userId, userInfo.email);
 
-            return new OkObjectResult(userInfo);
+            return new OkObjectResult(Result.Ok(userInfo));
         }
         
         [Function("Options")]
@@ -75,11 +76,11 @@ namespace everything_timeline
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error retrieving events");
-                return await response.InternalServerErrorAsync("An error occurred while retrieving events");
+                return await response.Failure(HttpStatusCode.InternalServerError, "An error occurred while retrieving events. Please try again");
             }
         }
 
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "User")]
         [Function("AddEvent")]
         public async Task<HttpResponseData> AddEvents(
             [HttpTrigger( "post")]
@@ -96,7 +97,7 @@ namespace everything_timeline
                 var (eventsRequest, isEmpty) = await req.ReadBodyAsync<EventCreateRequest>();
 
                 if (isEmpty || eventsRequest is null)
-                    return await response.BadRequestAsync("Request body cannot be empty");
+                    return await response.Failure(HttpStatusCode.BadRequest, "Request body cannot be empty");
                 
                 eventsRequest.SetUser(req.GetUserId());
                 var addedEventsResponse = await repository.AddEvents(eventsRequest);
@@ -108,15 +109,15 @@ namespace everything_timeline
             catch (System.Text.Json.JsonException ex)
             {
                 logger.LogError(ex, "Invalid JSON in request body");
-                return await response.BadRequestAsync("Invalid JSON format");
+                return await response.Failure(HttpStatusCode.BadRequest, "Invalid JSON in request body");
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error adding events");
-                return await response.InternalServerErrorAsync("An error occurred while adding events");
+                return await response.Failure(HttpStatusCode.InternalServerError,"An error occurred while adding events");
             }
         }
-        
+        [Authorize(Policy = "User")]
         [Function("UpdateEvent")]
         public async Task<HttpResponseData> UpdateEvent(
             [HttpTrigger( "post")]
@@ -130,12 +131,13 @@ namespace everything_timeline
             {
                 var (eventUpdateRequest, isEmpty) = await req.ReadBodyAsync<EventUpdateRequest>();
 
+                if (isEmpty || eventUpdateRequest?.Event is null)
+                    return await response.Failure(HttpStatusCode.BadRequest,"Request body cannot be empty");
+
                 var eventDto = eventUpdateRequest.Event;
-                if (isEmpty || eventDto is null)
-                    return await response.BadRequestAsync("Request body cannot be empty");
                 
                 if (eventDto.DatasetId == Guid.Empty)
-                    return await response.BadRequestAsync("DatasetId is required for all events");
+                    return await response.Failure(HttpStatusCode.BadRequest,"DatasetId is required for all events");
 
                 eventUpdateRequest.SetUser(req.GetUserId());
                 var updatedEventResponse = await repository.UpdateEvent(eventUpdateRequest);
@@ -146,15 +148,15 @@ namespace everything_timeline
             catch (System.Text.Json.JsonException ex)
             {
                 logger.LogError(ex, "Invalid JSON in request body");
-                return await response.BadRequestAsync("Invalid JSON format");
+                return await response.Failure(HttpStatusCode.BadRequest, "Invalid JSON in request body");
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error adding events");
-                return await response.InternalServerErrorAsync("An error occurred while adding events");
+                return await response.Failure(HttpStatusCode.InternalServerError,"An error occurred while adding events");
             }
         }
-
+        [Authorize(Policy = "User")]
         [Function("DeleteEvent")]
         public async Task<HttpResponseData> DeleteEvent(
             [HttpTrigger( "post")]
@@ -168,18 +170,19 @@ namespace everything_timeline
             {
                 var (eventDeleteRequest, isEmpty) = await req.ReadBodyAsync<EventDeleteRequest>();
 
-                var eventDto = eventDeleteRequest?.Event;
-                if (isEmpty || eventDto is null)
-                    return await response.BadRequestAsync("Request body cannot be empty");
+                if (isEmpty || eventDeleteRequest?.Event is null)
+                    return await response.Failure(HttpStatusCode.BadRequest,"Request body cannot be empty");
+
+                var eventDto = eventDeleteRequest.Event;
 
                 if (eventDto.DatasetId == Guid.Empty)
-                    return await response.BadRequestAsync("DatasetId is required");
+                    return await response.Failure(HttpStatusCode.BadRequest,"DatasetId is required");
 
                 eventDeleteRequest.SetUser(req.GetUserId());
                 var deleted = await repository.DeleteEvent(eventDeleteRequest);
 
                 if (!deleted)
-                    return await response.NotFoundAsync("Event not found");
+                    return await response.Failure(HttpStatusCode.NotFound,"Event not found");
 
                 logger.LogInformation("Deleted event: {id}", eventDto.Id);
                 return await response.OkJsonAsync(new { deleted = true });
@@ -187,12 +190,12 @@ namespace everything_timeline
             catch (System.Text.Json.JsonException ex)
             {
                 logger.LogError(ex, "Invalid JSON in request body");
-                return await response.BadRequestAsync("Invalid JSON format");
+                return await response.Failure(HttpStatusCode.BadRequest,"Invalid JSON in request body");
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error deleting event");
-                return await response.InternalServerErrorAsync("An error occurred while deleting the event");
+                return await response.Failure(HttpStatusCode.InternalServerError,"An error occurred while deleting the event");
             }
         }
 
@@ -216,10 +219,10 @@ namespace everything_timeline
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error retrieving datasets");
-                return await response.InternalServerErrorAsync("An error occurred while retrieving datasets");
+                return await response.Failure(HttpStatusCode.InternalServerError,"An error occurred while retrieving datasets");
             }
         }
-        
+        [Authorize(Policy = "User")]
         [Function("AddDataset")]
         public async Task<HttpResponseData> AddDataset(
             [HttpTrigger( "post")]
@@ -235,11 +238,11 @@ namespace everything_timeline
                 var (datasetCreateRequest, isEmpty) = await req.ReadBodyAsync<DatasetCreateRequest>(jsonOptions);
 
                 if (isEmpty || datasetCreateRequest is null)
-                    return await response.BadRequestAsync("Request body cannot be empty");
+                    return await response.Failure(HttpStatusCode.BadRequest,"Request body cannot be empty");
 
                 var userId = req.GetUserId();
                 if (userId == Guid.Empty)
-                    return await response.BadRequestAsync("Please login to create a dataset");
+                    return await response.Failure(HttpStatusCode.BadRequest,"Please login to create a dataset");
                 datasetCreateRequest.SetUser(userId);
                 
                 var addedDataset = await repository.AddDataset(datasetCreateRequest);
@@ -250,12 +253,12 @@ namespace everything_timeline
             catch (System.Text.Json.JsonException ex)
             {
                 logger.LogError(ex, "Invalid JSON in request body");
-                return await response.BadRequestAsync("Invalid JSON format");
+                return await response.Failure(HttpStatusCode.BadRequest,"Invalid JSON in request body");
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error adding dataset");
-                return await response.InternalServerErrorAsync("An error occurred while adding dataset");
+                return await response.Failure(HttpStatusCode.InternalServerError,"An error occurred while adding dataset");
             }
         }
         [Function("WikiSearchAutoComplete")]
@@ -271,7 +274,7 @@ namespace everything_timeline
                 var query = req.Query["query"];
                 if (string.IsNullOrWhiteSpace(query))
                 {
-                    return await response.BadRequestAsync("Query is required");
+                    return await response.Failure(HttpStatusCode.NotAcceptable,"Query is required");
                 }
                 
                 var searchResult = await wikiHttpClient.SearchTitlesAsync(query, CancellationToken.None);
@@ -284,7 +287,7 @@ namespace everything_timeline
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error retrieving wiki search results");
-                return await response.InternalServerErrorAsync("An error occurred while retrieving wiki search results");
+                return await response.Failure(HttpStatusCode.NotFound,"An error occurred while retrieving wiki search results");
             }
         }
     }

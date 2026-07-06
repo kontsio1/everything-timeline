@@ -12,6 +12,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import React from 'react';
 import { Login } from './Login';
 import { useThemeContext } from '../context/ThemeContext';
+import { EmitSnack } from './SnackbarEmitter';
 
 interface HeaderProps {
   databaseOptions: string[];
@@ -132,6 +133,7 @@ export const Header = ({
                 )}
               />
             </Box>
+            <EmitSnack />
             <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
               <IconButton
                 size="large"

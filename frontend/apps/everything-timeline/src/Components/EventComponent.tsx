@@ -52,7 +52,7 @@ const EventComponent: React.FC<EventMarkerProps> = ({
     onSelect?.(event);
   };
 
-  const gradientId = `event-stem-gradient-${event.date.getTime()}`;
+  const gradientId = `event-stem-gradient-${event.id}`;
   const stemHeight = Math.abs(stem.bottom - stem.top);
   const strokeWidth = isHighlighted ? 5 : 1;
 
@@ -61,7 +61,7 @@ const EventComponent: React.FC<EventMarkerProps> = ({
       ref={groupRef}
       onClick={handleClick}
       className={`timeline-event event-fade event-fade-${fadeState} ${shouldPulse ? 'event-pulse' : ''}`}
-      data-event-key={`${event.label}-${event.date.toISOString()}`}
+      data-event-key={event.id}
       style={{ cursor: 'pointer' }}
     >
       <defs>
