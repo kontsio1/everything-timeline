@@ -17,6 +17,7 @@ import { alpha } from '@mui/material/styles';
 import { tokens } from '../theme/theme';
 import { formatYear } from '../Helpers/DateHelperFunctions';
 import SaveIcon from '@mui/icons-material/Save';
+import { emitSnack } from './SnackbarEmitter';
 
 interface EventDetailsPanelProps {
   event: TimelineEvent | null;
@@ -26,13 +27,10 @@ interface EventDetailsPanelProps {
   onDelete: () => Promise<void>;
 }
 
-export const EventDetailsPanel = forwardRef<HTMLDivElement, EventDetailsPanelProps>(({
-  event,
-  onClose,
-  scrollOnOpen,
-  onSave,
-  onDelete,
-}, forwardedRef) => {
+export const EventDetailsPanel = forwardRef<
+  HTMLDivElement,
+  EventDetailsPanelProps
+>(({ event, onClose, scrollOnOpen, onSave, onDelete }, forwardedRef) => {
   const isVisible = event !== null;
   const isAuthenticated = useIsAuthenticated();
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -59,7 +57,8 @@ export const EventDetailsPanel = forwardRef<HTMLDivElement, EventDetailsPanelPro
     if (typeof forwardedRef === 'function') {
       forwardedRef(panelRef.current);
     } else {
-      (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current = panelRef.current;
+      (forwardedRef as React.MutableRefObject<HTMLDivElement | null>).current =
+        panelRef.current;
     }
   });
 
@@ -82,7 +81,11 @@ export const EventDetailsPanel = forwardRef<HTMLDivElement, EventDetailsPanelPro
     try {
       await onSave(editedInfo);
       setIsEditing(false);
+    } catch (e) {
+      console.error('Error creating event', e);
+      emitSnack('Error saving event details', 'error');
     } finally {
+      emitSnack('Saved changes on event details', 'success');
       setIsSaving(false);
     }
   };
@@ -97,7 +100,11 @@ export const EventDetailsPanel = forwardRef<HTMLDivElement, EventDetailsPanelPro
     setIsDeleting(true);
     try {
       await onDelete();
+    } catch (e) {
+      console.error('Error deleting event', e);
+      emitSnack('Error deleting event', 'error');
     } finally {
+      emitSnack('Deleted event', 'success');
       setIsDeleting(false);
     }
   };

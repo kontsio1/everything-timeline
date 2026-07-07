@@ -22,6 +22,7 @@ import {
 import { useDatasetContext } from '../context/DatasetContext';
 import { wikiSearchAutoComplete } from '../api/api';
 import { IWikiSearchPage } from '../api/Interfaces';
+import { emitSnack } from './SnackbarEmitter';
 
 interface AddEventModalProps {
   open: boolean;
@@ -92,8 +93,10 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       setEventInfo('');
     } catch (error) {
       console.error('Error submitting event:', error);
+      emitSnack('Error creating event. Please try again', 'error');
     } finally {
       setIsSubmitting(false);
+      emitSnack('New event created succesfully', 'success');
     }
   };
 

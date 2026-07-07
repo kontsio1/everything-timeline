@@ -1,70 +1,60 @@
 import * as React from 'react';
-import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
 import Slide, { SlideProps } from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
-import { Fade } from '@mui/material';
+import { AlertColor } from '@mui/material';
 import Alert from '@mui/material/Alert';
 
-export const EmitSnack = () => {
-  const [state, setState] = React.useState<{
-    open: boolean;
-    Transition: React.ComponentType<
-      TransitionProps & {
-        children: React.ReactElement<any, any>;
-      }
-    >;
-  }>({
+export interface Snack {
+  message: string;
+  severity: AlertColor;
+}
+
+const SNACK_EVENT = 'app:emitSnack';
+
+export const emitSnack = (message: string, severity: AlertColor = 'info') => {
+  window.dispatchEvent(
+    new CustomEvent<Snack>(SNACK_EVENT, { detail: { message, severity } }),
+  );
+};
+
+function SlideTransition(props: SlideProps) {
+  return <Slide {...props} direction="up" />;
+}
+
+export const SnackbarEmitter: React.FC = () => {
+  const [snack, setSnack] = React.useState<Snack & { open: boolean }>({
     open: false,
-    Transition: Fade,
+    message: '',
+    severity: 'info',
   });
 
-  function SlideTransition(props: SlideProps) {
-    return <Slide {...props} direction="up" />;
-  }
-
-  const handleClick =
-    (
-      Transition: React.ComponentType<
-        TransitionProps & {
-          children: React.ReactElement<any, any>;
-        }
-      >,
-    ) =>
-    () => {
-      setState({
-        open: true,
-        Transition,
-      });
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const { message, severity } = (e as CustomEvent<Snack>).detail;
+      setSnack({ open: true, message, severity });
     };
+    window.addEventListener(SNACK_EVENT, handler);
+    return () => window.removeEventListener(SNACK_EVENT, handler);
+  }, []);
 
-  const handleClose = () => {
-    setState({
-      ...state,
-      open: false,
-    });
-  };
+  const handleClose = () => setSnack((prev) => ({ ...prev, open: false }));
 
   return (
-    <div>
-      <Button onClick={handleClick(SlideTransition)}>Snack</Button>
-      <Snackbar
-        open={state.open}
+    <Snackbar
+      open={snack.open}
+      onClose={handleClose}
+      slots={{ transition: SlideTransition }}
+      // autoHideDuration={1500}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    >
+      <Alert
         onClose={handleClose}
-        slots={{ transition: state.Transition }}
-        message="I love snacks"
-        key={state.Transition.name}
-        // autoHideDuration={1500}
+        severity={snack.severity}
+        variant="filled"
+        sx={{ width: '100%', opacity: 0.8, borderRadius: '10px' }}
       >
-        <Alert
-          onClose={handleClose}
-          severity="error"
-          variant="filled"
-          sx={{ width: '100%', opacity: '0.8', borderRadius: '10px' }}
-        >
-          This is a success Alert inside a Snackbar!
-        </Alert>
-      </Snackbar>
-    </div>
+        {snack.message}
+      </Alert>
+    </Snackbar>
   );
 };

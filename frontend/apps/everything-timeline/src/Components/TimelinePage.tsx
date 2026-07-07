@@ -25,6 +25,7 @@ import {
   zoomToEventDuration,
 } from '../Constants/GlobalConfigConstants';
 import { useNavigate } from 'react-router-dom';
+import { SnackbarEmitter } from './SnackbarEmitter';
 
 const REQUEST_TIMEOUT_MS = 5000;
 
@@ -386,6 +387,7 @@ export const TimelinePage = () => {
         open={isMenuDrawerOpen}
         onClose={() => setIsMenuDrawerOpen(false)}
       />
+      <SnackbarEmitter />
     </>
   );
 };
