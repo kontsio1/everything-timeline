@@ -62,6 +62,7 @@ export const TimelinePage = () => {
   const [isMenuDrawerOpen, setIsMenuDrawerOpen] = React.useState(false);
   const [events, setEvents] = React.useState<TimelineEvent[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [isFullyZoomedOut, setIsFullyZoomedOut] = React.useState(true);
   const periods = seedPeriods;
 
   const {
@@ -112,7 +113,7 @@ export const TimelinePage = () => {
     return () => {
       cancelled = true;
     };
-  }, [isInitialized, datasets.length]);
+  }, [isInitialized, datasets.length, selectedDatasetId]);
 
   // Auto-select first dataset when datasets become available and no valid selection exists
   useEffect(() => {
@@ -149,7 +150,7 @@ export const TimelinePage = () => {
         redirectToWelcome();
       }
     };
-    fetchEvents().then((r) => setLoading(false));
+    fetchEvents().then(() => setLoading(false));
   }, [selectedDataset]);
 
   useEffect(() => {
@@ -343,6 +344,7 @@ export const TimelinePage = () => {
         selectedEvent={detailsEvent}
         selectedDatabase={selectedDataset?.Name ?? null}
         loading={loading}
+        isFullyZoomedOut={isFullyZoomedOut}
         addEventRequest={addEventRequest}
         onEventSearch={handleEventSearch}
         onSubmitEvent={handleAddEvent}
@@ -367,6 +369,7 @@ export const TimelinePage = () => {
           onEventSearch={handleEventSearch}
           onEventSelect={handleEventSelect}
           onTimelineAxisDoubleClick={handleTimelineAxisDoubleClick}
+          onZoomStateChange={setIsFullyZoomedOut}
           loading={loading}
         />
       </div>

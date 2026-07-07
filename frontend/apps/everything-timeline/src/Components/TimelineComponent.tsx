@@ -62,6 +62,7 @@ export interface TimelineComponentProps {
   ) => void;
   onEventSelect?: (event: TimelineEvent) => void;
   onTimelineAxisDoubleClick?: (date: Date) => void;
+  onZoomStateChange?: (isFullyZoomedOut: boolean) => void;
   loading: boolean;
 }
 
@@ -309,6 +310,10 @@ export const TimelineComponent = forwardRef<
   }, [events, periods]);
 
   // Update axis ticks on transform/scale change
+  useEffect(() => {
+    props.onZoomStateChange?.(transform.k <= 1.0001);
+  }, [transform.k, props.onZoomStateChange]);
+
   useEffect(() => {
     const xScale = getTransformedXScale();
     if (axisRef.current && xScale) {

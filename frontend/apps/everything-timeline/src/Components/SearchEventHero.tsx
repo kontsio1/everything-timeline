@@ -30,6 +30,7 @@ interface SearchEventHeroProps {
   selectedEvent: TimelineEvent | null;
   selectedDatabase: string | null;
   loading: boolean;
+  isFullyZoomedOut: boolean;
   addEventRequest: { year: number } | null;
   onEventSearch: (
     event: React.SyntheticEvent,
@@ -53,6 +54,7 @@ export const SearchEventHero = ({
   selectedEvent,
   selectedDatabase,
   loading,
+  isFullyZoomedOut,
   addEventRequest,
   onEventSearch,
   onSubmitEvent,
@@ -174,7 +176,6 @@ export const SearchEventHero = ({
               marginTop: 5,
             }}
           >
-            {/* Search field */}
             <Stack direction="row" spacing={0.5}>
               <Tooltip title="Zoom in">
                 <span>
@@ -193,7 +194,7 @@ export const SearchEventHero = ({
                   <IconButton
                     size="small"
                     onClick={onZoomOut}
-                    disabled={areTimelineControlsDisabled}
+                    disabled={areTimelineControlsDisabled || isFullyZoomedOut}
                     aria-label="Zoom out timeline"
                   >
                     <ZoomOutIcon fontSize="small" />
@@ -205,7 +206,7 @@ export const SearchEventHero = ({
                   <IconButton
                     size="small"
                     onClick={onPanLeft}
-                    disabled={areTimelineControlsDisabled}
+                    disabled={areTimelineControlsDisabled || isFullyZoomedOut}
                     aria-label="Pan timeline left"
                   >
                     <KeyboardArrowLeftIcon fontSize="small" />
@@ -217,7 +218,7 @@ export const SearchEventHero = ({
                   <IconButton
                     size="small"
                     onClick={onPanRight}
-                    disabled={areTimelineControlsDisabled}
+                    disabled={areTimelineControlsDisabled || isFullyZoomedOut}
                     aria-label="Pan timeline right"
                   >
                     <KeyboardArrowRightIcon fontSize="small" />

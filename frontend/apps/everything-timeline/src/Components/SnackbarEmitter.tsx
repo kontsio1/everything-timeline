@@ -44,7 +44,7 @@ export const SnackbarEmitter: React.FC = () => {
       open={snack.open}
       onClose={handleClose}
       slots={{ transition: SlideTransition }}
-      // autoHideDuration={1500}
+      autoHideDuration={1500}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
     >
       <Alert
